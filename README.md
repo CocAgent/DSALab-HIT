@@ -303,7 +303,20 @@ Neu nop bang Pull Request, dat tieu de theo mau:
 - ghi commit message rõ ràng, dễ hiểu
 - không đẩy lên các file không cần thiết như file `.exe`, thư mục `build/`, `bin/`, `obj/`
 - kiểm tra kỹ bài trước khi push lên GitHub
+### 11. Hướng dẫn sinh viên tạo Pull Request sau khi fork
+Sau khi fork repo `DSALab` và làm bài xong trên repo cá nhân, sinh viên cần tạo **Pull Request** để giảng viên dễ xem và nhận xét bài làm.
+Các bước thực hiện:
+1. Vào repo fork của mình trên GitHub
+2. Chọn tab **Code**
+3. Nhấn **Contribute**
+4. Chọn **Open pull request**
+5. Kiểm tra đúng nơi gửi về là:
+   - **base repository**: `CocAgent/DSALab`
+   - **base branch**: `main`
+6. Đặt tiêu đề Pull Request theo mẫu:
 
+```text
+[MSSV] - [Ho ten] - Bai tap tuan X
 **Ví dụ `.gitignore` cơ bản:**
 
 ```gitignore
