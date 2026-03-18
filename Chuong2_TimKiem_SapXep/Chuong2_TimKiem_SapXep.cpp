@@ -136,9 +136,11 @@ void SaoChepMang(const int src[], int dst[], int n) {
 // ============================================================
 void DemoTimKiem() {
     cout << "\n=== DEMO TIM KIEM ===\n";
-    int a[] = {11, 22, 33, 44, 55, 66, 77, 88, 99};
+    // Thay doi du lieu: Mang tang dan co so am va so lon
+    int a[] = {-50, -20, 0, 15, 30, 45, 100, 255, 999};
     int n = 9;
-    int aUnsorted[] = {64, 25, 12, 22, 11, 90, 45, 33};
+    // Thay doi du lieu: Mang hon loan
+    int aUnsorted[] = {7, -15, 100, 42, 0, 88, -5, 33};
     int nu = 8;
 
     XuatMang(a, n, "Mang da sap xep");
@@ -164,8 +166,9 @@ void DemoTimKiem() {
 // ============================================================
 void DemoSapXep() {
     cout << "\n=== DEMO SAP XEP ===\n";
-    const int n = 8;
-    int goc[] = {64, 25, 12, 22, 11, 90, 45, 33};
+    const int n = 10;
+    // Thay doi du lieu: Mang nguoc hoan toan va co so trung lap
+    int goc[] = {90, 80, 70, 60, 50, 40, 30, 20, 10, 10};
     int a[n];
 
     cout << "  Mang goc: ";
@@ -260,7 +263,8 @@ void BT6_PhanTuXuatHienNhieuNhat(int a[], int n) {
 
 void DemoBaiTap() {
     cout << "\n=== BAI TAP CHUONG 2 ===\n";
-    int a[] = {5, 3, 8, 3, 1, 9, 3, 7, 2, 5};
+    // Thay doi du lieu: Mang co nhieu so am va cac so giong nhau tan mac
+    int a[] = {-5, 12, -5, 7, -5, 9, 12, 100, -5, 0};
     int n = 10;
     int b[10]; SaoChepMang(a, b, n);
 
@@ -271,11 +275,11 @@ void DemoBaiTap() {
     cout << "  [BT2] Vi tri phan tu lon nhat: " << BT2_TimMax(a, n) << "\n";
 
     // BT3
-    cout << "  [BT3] So lan xuat hien cua 3: " << BT3_DemXuatHien(a, n, 3) << "\n";
+    cout << "  [BT3] So lan xuat hien cua -5: " << BT3_DemXuatHien(a, n, -5) << "\n";
 
     // BT4
-    cout << "  [BT4] Sap xep tang, tim x=8:\n  ";
-    BT4_SapXepTimNhiPhan(b, n, 8);
+    cout << "  [BT4] Sap xep tang, tim x=100:\n  ";
+    BT4_SapXepTimNhiPhan(b, n, 100);
 
     // BT5
     SaoChepMang(a, b, n);
