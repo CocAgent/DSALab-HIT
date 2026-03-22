@@ -1,0 +1,34 @@
+# ================================================================
+#  .gitignore — DSALab
+# ================================================================
+
+# Compiled binaries
+bin/
+*.exe
+*.out
+*.o
+*.a
+*.so
+
+# IDE files
+.vscode/
+.idea/
+*.code-workspace
+*.cbp
+*.dev
+*.layout
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.d
+*.obj
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
