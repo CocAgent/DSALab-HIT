@@ -2,7 +2,6 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
-
 using namespace std;
 
 // 1. Giải thuật Tìm kiếm Tuyến tính (Linear Search - Không lính canh)
