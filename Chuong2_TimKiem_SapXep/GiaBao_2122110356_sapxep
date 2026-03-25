@@ -1,0 +1,142 @@
+#include <iostream>
+using namespace std;
+
+// ===== Selection Sort =====
+void selectionSort(int a[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int min = i;
+        for (int j = i + 1; j < n; j++) {
+            if (a[j] < a[min])
+                min = j;
+        }
+        swap(a[i], a[min]);
+    }
+}
+    
+// ===== Insertion Sort =====
+void insertionSort(int a[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = a[i];
+        int j = i - 1;
+        while (j >= 0 && a[j] > key) {
+            a[j + 1] = a[j];
+            j--;
+        }
+        a[j + 1] = key;
+    }
+}
+
+// ===== Bubble Sort =====
+void bubbleSort(int a[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (a[j] > a[j + 1])
+                swap(a[j], a[j + 1]);
+        }
+    }
+}
+
+// ===== Quick Sort =====
+int partition(int a[], int l, int r) {
+    int pivot = a[r];
+    int i = l - 1;
+    for (int j = l; j < r; j++) {
+        if (a[j] < pivot) {
+            i++;
+            swap(a[i], a[j]);
+        }
+    }
+    swap(a[i + 1], a[r]);
+    return i + 1;
+}
+
+void quickSort(int a[], int l, int r) {
+    if (l < r) {
+        int p = partition(a, l, r);
+        quickSort(a, l, p - 1);
+        quickSort(a, p + 1, r);
+    }
+}
+
+// ===== Heap Sort =====
+void heapify(int a[], int n, int i) {
+    int max = i;
+    int l = 2 * i + 1;
+    int r = 2 * i + 2;
+
+    if (l < n && a[l] > a[max]) max = l;
+    if (r < n && a[r] > a[max]) max = r;
+
+    if (max != i) {
+        swap(a[i], a[max]);
+        heapify(a, n, max);
+    }
+}
+
+void heapSort(int a[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(a, n, i);
+
+    for (int i = n - 1; i > 0; i--) {
+        swap(a[0], a[i]);
+        heapify(a, i, 0);
+    }
+}
+
+// ===== In mảng =====
+void printArray(int a[], int n) {
+    for (int i = 0; i < n; i++)
+        cout << a[i] << " ";
+    cout << endl;
+}
+
+// ===== Main =====
+int main() {
+    int a[] = { 3, -12, 14, 9, 11, -50, -100 };
+    int n = 7;
+    int b[100]; // mảng phụ để không làm thay đổi mảng gốc
+
+    int choice;
+
+    do {
+        cout << "\n===== MENU =====\n";
+        cout << "1. Selection Sort\n";
+        cout << "2. Insertion Sort\n";
+        cout << "3. Bubble Sort\n";
+        cout << "4. Quick Sort\n";
+        cout << "5. Heap Sort\n";
+        cout << "0. Thoat\n";
+        cout << "Chon: ";
+        cin >> choice;
+
+        // copy mảng gốc sang b
+        for (int i = 0; i < n; i++)
+            b[i] = a[i];
+
+        switch (choice) {
+        case 1:
+            selectionSort(b, n);
+            printArray(b, n);
+            break;
+        case 2:
+            insertionSort(b, n);
+            printArray(b, n);
+            break;
+        case 3:
+            bubbleSort(b, n);
+            printArray(b, n);
+            break;
+        case 4:
+            quickSort(b, 0, n - 1);
+            printArray(b, n);
+            break;
+        case 5:
+            heapSort(b, n);
+            printArray(b, n);
+            break;
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}   
