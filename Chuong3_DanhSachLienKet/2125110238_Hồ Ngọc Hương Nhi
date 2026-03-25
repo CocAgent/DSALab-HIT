@@ -1,0 +1,93 @@
+CON TRỎ CƠ BẢN:
++Con trỏ là biến dùng để lưu địa chỉ của một biến khác.
+  - p → chứa địa chỉ
+  - *p → lấy giá trị tại địa chỉ đó
+  - &a → lấy địa chỉ của biến a
+  VD:
+  #include <iostream>
+using namespace std;
+
+int main() {
+    int a = 10;
+    int *p = &a;
+
+    cout << "Gia tri a: " << a << endl;
+    cout << "Gia tri qua con tro: " << *p << endl;
+
+    *p = 20; // thay đổi giá trị a qua con trỏ
+
+    cout << "Sau khi doi: a = " << a << endl;
+
+    return 0;
+}
+KẾT QUẢ:
+Gia tri a: 10
+Gia tri qua con tro: 10
+Sau khi doi: a = 20
+
+CON TRỎ CAO CẤP(MẢNG)
++Con trỏ dùng để duyệt và truy cập các phần tử của mảng
++Tên mảng chính là địa chỉ phần tử đầu tiên:
+     int arr[] = {1, 2, 3};
+     int *p = arr;
+  - p trỏ tới arr[0]
+  - Có thể dùng con trỏ để duyệt mảng
+  VD:
+  #include <iostream>
+using namespace std;
+
+int main() {
+    int arr[5] = {1, 2, 3, 4, 5};
+    int *p = arr;
+
+    cout << "Duyet mang bang con tro:" << endl;
+
+    for (int i = 0; i < 5; i++) {
+        cout << *(p + i) << " ";
+    }
+
+    return 0;
+}
+KẾT QUẢ:
+Duyet mang bang con tro:
+1 2 3 4 5
+
+CON TRỎ ĐỘNG
++Con trỏ dùng để cấp phát bộ nhớ trong lúc chương trình đang chạy
++Khi bạn chưa biết trước số lượng phần tử → dùng con trỏ động
+  - new int[n] → tạo mảng trong bộ nhớ động
+  - p → trỏ tới vùng nhớ đó
+  - delete[] p → trả lại bộ nhớ
+  VD:
+  #include <iostream>
+using namespace std;
+
+int main() {
+    int n;
+    cout << "Nhap so phan tu: ";
+    cin >> n;
+
+    int *p = new int[n]; // cấp phát động
+
+    // nhập
+    for (int i = 0; i < n; i++) {
+        cout << "p[" << i << "] = ";
+        cin >> p[i];
+    }
+
+    // in
+    cout << "Mang vua nhap: ";
+    for (int i = 0; i < n; i++) {
+        cout << *(p + i) << " ";
+    }
+
+    delete[] p; // giải phóng bộ nhớ
+
+    return 0;
+}
+KẾT QUẢ:
+Nhap so phan tu: 3
+p[0] = 1
+p[1] = 2
+p[2] = 3
+Mang vua nhap: 1 2 3
