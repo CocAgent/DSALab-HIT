@@ -1,0 +1,66 @@
+#include <iostream>
+using namespace std;
+
+// Ham nhan con tro va thay doi gia tri
+void increase(int* p) {
+    *p = *p + 10;  // tang gia tri cua bien tro toi
+}
+
+int main() {
+    cout << "=== Vi du 1: Con tro tro toi bien ===" << endl;
+    int a = 5;
+    int* p = &a;  // p tro toi a
+
+    cout << "Dia chi cua a: " << &a << endl;
+    cout << "Dia chi luu trong p: " << p << endl;
+    cout << "Gia tri a thong qua con tro: " << *p << endl;
+
+    *p = 20;  // thay doi gia tri a thong qua con tro
+    cout << "Gia tri a sau khi thay doi qua con tro: " << a << endl;
+
+    cout << "\n=== Vi du 2: Con tro tro toi mang ===" << endl;
+    int arr[5] = { 1,2,3,4,5 };
+    int* ptrArr = arr;  // ptrArr tro toi arr[0]
+
+    cout << "Mang qua con tro: ";
+    for (int i = 0; i < 5; i++) {
+        cout << *(ptrArr + i) << " ";  // truy xuat tung phan tu qua con tro
+    }
+    cout << endl;
+
+    cout << "\n=== Vi du 3: Con tro truyen vao ham ===" << endl;
+    int b = 30;
+    cout << "Truoc khi goi ham, b = " << b << endl;
+    increase(&b);  // truyen dia chi cua b
+    cout << "Sau khi goi ham, b = " << b << endl;
+
+    return 0;
+}
+// xuất ra  : 00000088B179F9A4
+//Dia chi luu trong p : 00000088B179F9A4
+//Gia tri a thong qua con tro : 5
+//Gia tri a sau khi thay doi qua con tro : 20
+//
+//== = Vi du 2 : Con tro tro toi mang == =
+//Mang qua con tro : 1 2 3 4 5
+//
+//== = Vi du 3 : Con tro truyen vao ham == =
+//Truoc khi goi ham, b = 30
+//Sau khi goi ham, b = 40
+//
+
+
+== = Vi du 1: Con tro tro toi bien == =
+Bien a o dia chi : 0x7ffee1b2c9ec voi gia tri : 5
+Con tro p luu dia chi : 0x7ffee1b2c9ec va truy xuat gia tri : 5
+Gia tri a sau khi thay doi qua con tro : 20
+
+== = Vi du 2 : Con tro tro toi mang == =
+Mang qua con tro : 1 2 3 4 5
+
+== = Vi du 3 : Con tro truyen vao ham == =
+Truoc khi goi ham, b = 30
+Trong ham increase : con tro p tro toi dia chi 0x7ffee1b2c9f0 voi gia tri 30
+Sau khi goi ham, b = 40
+Địa chỉ trong RAM(0x7ffee1b2c9ec) là ví dụ, trên máy bạn sẽ khác.
+Các giá trị(a = 20, b = 40) chính xác với logic code
