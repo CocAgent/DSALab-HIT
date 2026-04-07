@@ -2,6 +2,11 @@
 //  Chuong3_DanhSachLienKet.cpp
 //  Noi dung: Con tro, DSLK don, Stack, Queue
 //  Giao trinh: Cau truc du lieu & Giai thuat - CDCTTP.HCM
+
+// Thử nộp bài cho thầy kiểm tra
+struct Tree {
+    Node *head;
+    Node *tail;
 // ============================================================
 #include <iostream>
 #include <cmath>
