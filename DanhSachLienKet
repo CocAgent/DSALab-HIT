@@ -1,0 +1,181 @@
+// ============================================================
+//  UngDung_QuanLyDonHang.cpp
+//  Noi dung: Quan ly don hang bang DSLK don
+// ============================================================
+#include <iostream>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+// ============================================================
+//  1. CAU TRUC DU LIEU DON HANG & NODE
+// ============================================================
+struct DonHang {
+    string maDon;
+    string tenKhachHang;
+    double tongTien;
+};
+
+struct Node {
+    DonHang data;
+    Node *next;
+};
+
+struct List {
+    Node *head;
+    Node *tail;
+};
+
+// ============================================================
+//  2. KHOI TAO VA TIEN ICH
+// ============================================================
+void KhoiTaoDS(List &L) {
+    L.head = L.tail = nullptr;
+}
+
+Node* TaoNode(DonHang dh) {
+    Node *p = new Node;
+    p->data = dh;
+    p->next = nullptr;
+    return p;
+}
+
+bool DanhSachRong(const List &L) {
+    return L.head == nullptr;
+}
+
+// ============================================================
+//  3. CAC THAO TAC TREN DANH SACH DON HANG
+// ============================================================
+
+// Nhập thông tin 1 đơn hàng mới
+DonHang NhapDonHang() {
+    DonHang dh;
+    cout << "  Nhap Ma Don Hang: ";
+    cin >> ws;
+    getline(cin, dh.maDon);
+    cout << "  Nhap Ten Khach Hang: ";
+    getline(cin, dh.tenKhachHang);
+    cout << "  Nhap Tong Gia Tri (VND): ";
+    cin >> dh.tongTien;
+    return dh;
+}
+
+// Thêm đơn hàng mới vào cuối danh sách (Theo thứ tự thời gian)
+void ThemDonHang(List &L) {
+    DonHang dh = NhapDonHang();
+    Node *p = TaoNode(dh);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    } else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+    cout << "  -> Da them don hang vao he thong!\n";
+}
+
+// Xuất danh sách đơn hàng
+void InDanhSachDonHang(const List &L) {
+    if (DanhSachRong(L)) {
+        cout << "  [He thong chua co don hang nao]\n";
+        return;
+    }
+    cout << string(65, '=') << "\n";
+    cout << left << setw(15) << "Ma Don" << setw(30) << "Khach Hang" << setw(15) << "Tong Tien" << "\n";
+    cout << string(65, '-') << "\n";
+    
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        cout << left << setw(15) << cur->data.maDon 
+             << setw(30) << cur->data.tenKhachHang 
+             << setw(15) << fixed << setprecision(0) << cur->data.tongTien << " VND\n";
+        cur = cur->next;
+    }
+    cout << string(65, '=') << "\n";
+}
+
+// Thống kê: Tính tổng doanh thu
+double TinhTongDoanhThu(const List &L) {
+    double total = 0;
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        total += cur->data.tongTien;
+        cur = cur->next;
+    }
+    return total;
+}
+
+// Hủy đơn hàng theo mã (Xóa Node)
+bool HuyDonHang(List &L, string maHuy) {
+    if (DanhSachRong(L)) return false;
+    
+    Node *cur = L.head, *prev = nullptr;
+    while (cur != nullptr && cur->data.maDon != maHuy) {
+        prev = cur; 
+        cur = cur->next;
+    }
+    
+    if (cur == nullptr) return false; 
+    
+    if (prev == nullptr) {
+        L.head = L.head->next;
+        if (L.head == nullptr) L.tail = nullptr;
+    } else {
+        prev->next = cur->next;
+        if (cur == L.tail) L.tail = prev;
+    }
+    
+    delete cur;
+    return true;
+}
+
+// ============================================================
+//  4. MAIN & MENU
+// ============================================================
+int main() {
+    List L; 
+    KhoiTaoDS(L);
+    int luaChon;
+
+    do {
+        cout << "\n******* HE THONG QUAN LY DON HANG *******\n";
+        cout << "1. Tao don hang moi\n";
+        cout << "2. Xem tat ca don hang\n";
+        cout << "3. Tinh tong doanh thu\n";
+        cout << "4. Huy don hang (Xoa)\n";
+        cout << "0. Thoat\n";
+        cout << "*****************************************\n";
+        cout << "Chon chuc nang: ";
+        cin >> luaChon;
+
+        switch (luaChon) {
+            case 1:
+                ThemDonHang(L);
+                break;
+            case 2:
+                InDanhSachDonHang(L);
+                break;
+            case 3:
+                cout << "\n  >>> TONG DOANH THU: " << fixed << setprecision(0) << TinhTongDoanhThu(L) << " VND\n";
+                break;
+            case 4: {
+                string ma;
+                cout << "  Nhap Ma Don Hang can huy: ";
+                cin >> ws; getline(cin, ma);
+                if (HuyDonHang(L, ma)) cout << "  -> Huy don hang " << ma << " thanh cong!\n";
+                else cout << "  -> Sai ma don hang!\n";
+                break;
+            }
+        }
+    } while (luaChon != 0);
+
+    // Giai phong bo nho
+    while (L.head != nullptr) {
+        Node *temp = L.head;
+        L.head = L.head->next;
+        delete temp;
+    }
+
+    return 0;
+}
