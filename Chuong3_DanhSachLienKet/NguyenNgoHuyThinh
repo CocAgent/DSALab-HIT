@@ -1,0 +1,401 @@
+#include <iostream>
+#include <cmath>
+#include <string>
+using namespace std;
+
+// ================= NODE =================
+struct Node {
+    int data;
+    Node* next;
+    Node(int x) : data(x), next(nullptr) {}
+};
+
+// ================= LINKED LIST =================
+class LinkedList {
+private:
+    Node* head;
+    Node* tail;
+
+public:
+    LinkedList() : head(nullptr), tail(nullptr) {}
+    ~LinkedList() { clear(); }
+
+    bool isEmpty() const { return head == nullptr; }
+
+    // ===== THEM =====
+    void themDau(int x) {
+        Node* p = new Node(x);
+        if (isEmpty()) head = tail = p;
+        else {
+            p->next = head;
+            head = p;
+        }
+    }
+
+    void themCuoi(int x) {
+        Node* p = new Node(x);
+        if (isEmpty()) head = tail = p;
+        else {
+            tail->next = p;
+            tail = p;
+        }
+    }
+
+    void themSau(Node* q, int x) {
+        if (!q) return;
+        Node* p = new Node(x);
+        p->next = q->next;
+        q->next = p;
+        if (q == tail) tail = p;
+    }
+
+    void themTruoc(Node* q, int x) {
+        if (!q) return;
+        if (q == head) {
+            themDau(x);
+            return;
+        }
+
+        Node* cur = head;
+        while (cur && cur->next != q) cur = cur->next;
+
+        if (cur) {
+            Node* p = new Node(x);
+            p->next = q;
+            cur->next = p;
+        }
+    }
+
+    // ===== XOA =====
+    void xoaDau() {
+        if (isEmpty()) return;
+        Node* p = head;
+        head = head->next;
+        delete p;
+        if (!head) tail = nullptr;
+    }
+
+    void xoaCuoi() {
+        if (isEmpty()) return;
+
+        if (head == tail) {
+            delete head;
+            head = tail = nullptr;
+            return;
+        }
+
+        Node* cur = head;
+        while (cur->next != tail) cur = cur->next;
+
+        delete tail;
+        tail = cur;
+        tail->next = nullptr;
+    }
+
+    bool xoaGiaTri(int x) {
+        Node* cur = head;
+        Node* prev = nullptr;
+
+        while (cur && cur->data != x) {
+            prev = cur;
+            cur = cur->next;
+        }
+
+        if (!cur) return false;
+
+        if (!prev) xoaDau();
+        else {
+            prev->next = cur->next;
+            if (cur == tail) tail = prev;
+            delete cur;
+        }
+        return true;
+    }
+
+    void clear() {
+        while (!isEmpty()) xoaDau();
+    }
+
+    // ===== DUYET =====
+    void inDanhSach() const {
+        if (isEmpty()) {
+            cout << "  [Danh sach rong]\n";
+            return;
+        }
+
+        cout << "  HEAD -> ";
+        Node* cur = head;
+        while (cur) {
+            cout << cur->data;
+            if (cur->next) cout << " -> ";
+            cur = cur->next;
+        }
+        cout << " -> NULL\n";
+    }
+
+    // ===== TIM KIEM =====
+    Node* timX(int x) const {
+        Node* cur = head;
+        while (cur) {
+            if (cur->data == x) return cur;
+            cur = cur->next;
+        }
+        return nullptr;
+    }
+
+    int timMax() const {
+        if (isEmpty()) return -1;
+        int mx = head->data;
+        for (Node* cur = head; cur; cur = cur->next)
+            if (cur->data > mx) mx = cur->data;
+        return mx;
+    }
+
+    int timChanDau() const {
+        for (Node* cur = head; cur; cur = cur->next)
+            if (cur->data % 2 == 0) return cur->data;
+        return -1;
+    }
+
+    int timChanCuoi() const {
+        int kq = -1;
+        for (Node* cur = head; cur; cur = cur->next)
+            if (cur->data % 2 == 0) kq = cur->data;
+        return kq;
+    }
+
+    void lietKeAm() const {
+        cout << "  Cac phan tu am: ";
+        bool co = false;
+        for (Node* cur = head; cur; cur = cur->next) {
+            if (cur->data < 0) {
+                cout << cur->data << " ";
+                co = true;
+            }
+        }
+        if (!co) cout << "(khong co)";
+        cout << "\n";
+    }
+
+    long long tongDuong() const {
+        long long s = 0;
+        for (Node* cur = head; cur; cur = cur->next)
+            if (cur->data > 0) s += cur->data;
+        return s;
+    }
+
+    int demAm() const {
+        int dem = 0;
+        for (Node* cur = head; cur; cur = cur->next)
+            if (cur->data < 0) dem++;
+        return dem;
+    }
+
+    bool laChinhPhuong(int n) const {
+        if (n < 0) return false;
+        int s = sqrt(n);
+        return s * s == n;
+    }
+
+    bool coSoChinhPhuong() const {
+        for (Node* cur = head; cur; cur = cur->next)
+            if (laChinhPhuong(cur->data)) return true;
+        return false;
+    }
+
+    int demCucDai() const {
+        int mx = timMax();
+        if (mx == -1) return 0;
+        int dem = 0;
+        for (Node* cur = head; cur; cur = cur->next)
+            if (cur->data == mx) dem++;
+        return dem;
+    }
+
+    // ===== SAP XEP =====
+    void sapXep() {
+        for (Node* i = head; i && i->next; i = i->next)
+            for (Node* j = i->next; j; j = j->next)
+                if (i->data > j->data)
+                    swap(i->data, j->data);
+    }
+
+    // ===== NOI =====
+    void noiDanhSach(LinkedList &L2) {
+        if (L2.isEmpty()) return;
+        if (isEmpty()) {
+            head = L2.head;
+            tail = L2.tail;
+        } else {
+            tail->next = L2.head;
+            tail = L2.tail;
+        }
+        L2.head = L2.tail = nullptr;
+    }
+
+    // ===== TACH =====
+    void tachChanLe(LinkedList &chan, LinkedList &le) {
+        for (Node* cur = head; cur; cur = cur->next) {
+            if (cur->data % 2 == 0) chan.themCuoi(cur->data);
+            else le.themCuoi(cur->data);
+        }
+    }
+};
+
+// ================= STACK =================
+class Stack {
+private:
+    Node* top;
+
+public:
+    Stack() : top(nullptr) {}
+
+    bool isEmpty() const { return top == nullptr; }
+
+    void push(int x) {
+        Node* p = new Node(x);
+        p->next = top;
+        top = p;
+    }
+
+    int pop() {
+        if (isEmpty()) {
+            cout << "  Stack rong!\n";
+            return -1;
+        }
+        int val = top->data;
+        Node* tmp = top;
+        top = top->next;
+        delete tmp;
+        return val;
+    }
+
+    int peek() const {
+        if (isEmpty()) return -1;
+        return top->data;
+    }
+
+    void inStack() const {
+        cout << "  Stack (TOP->BOT): ";
+        for (Node* cur = top; cur; cur = cur->next)
+            cout << cur->data << " ";
+        cout << "\n";
+    }
+
+    // Kiem tra ngoac
+    bool kiemTraNgoac(const string &s) {
+        Stack S;
+        for (char c : s) {
+            if (c == '(' || c == '[' || c == '{') S.push(c);
+            else if (c == ')' || c == ']' || c == '}') {
+                if (S.isEmpty()) return false;
+                char t = S.pop();
+                if ((c == ')' && t != '(') ||
+                    (c == ']' && t != '[') ||
+                    (c == '}' && t != '{')) return false;
+            }
+        }
+        return S.isEmpty();
+    }
+
+    string dec2bin(int n) {
+        if (n == 0) return "0";
+        Stack S;
+        while (n > 0) {
+            S.push(n % 2);
+            n /= 2;
+        }
+        string kq = "";
+        while (!S.isEmpty())
+            kq += to_string(S.pop());
+        return kq;
+    }
+};
+
+// ================= QUEUE =================
+class Queue {
+private:
+    Node* front;
+    Node* rear;
+
+public:
+    Queue() : front(nullptr), rear(nullptr) {}
+
+    bool isEmpty() const { return front == nullptr; }
+
+    void enqueue(int x) {
+        Node* p = new Node(x);
+        if (isEmpty()) front = rear = p;
+        else {
+            rear->next = p;
+            rear = p;
+        }
+    }
+
+    int dequeue() {
+        if (isEmpty()) {
+            cout << "  Queue rong!\n";
+            return -1;
+        }
+        int val = front->data;
+        Node* tmp = front;
+        front = front->next;
+        delete tmp;
+        if (!front) rear = nullptr;
+        return val;
+    }
+
+    void inQueue() const {
+        cout << "  Queue (FRONT->REAR): ";
+        for (Node* cur = front; cur; cur = cur->next)
+            cout << cur->data << " ";
+        cout << "\n";
+    }
+};
+
+// ================= MAIN DEMO =================
+int main() {
+    cout << "=== DEMO DAY DU ===\n";
+
+    LinkedList L;
+    for (int x : {7, 2, -3, 15, 4, -1, 9, 0, 25, -6})
+        L.themCuoi(x);
+
+    L.inDanhSach();
+
+    cout << "  Max: " << L.timMax() << "\n";
+    cout << "  Chan dau: " << L.timChanDau() << "\n";
+    cout << "  Chan cuoi: " << L.timChanCuoi() << "\n";
+
+    L.lietKeAm();
+    cout << "  Tong duong: " << L.tongDuong() << "\n";
+    cout << "  Dem am: " << L.demAm() << "\n";
+    cout << "  Co so chinh phuong: " << (L.coSoChinhPhuong() ? "Co" : "Khong") << "\n";
+
+    L.sapXep();
+    cout << "  Sau sap xep:\n";
+    L.inDanhSach();
+
+    LinkedList chan, le;
+    L.tachChanLe(chan, le);
+    cout << "  Chan: "; chan.inDanhSach();
+    cout << "  Le: "; le.inDanhSach();
+
+    // Stack
+    Stack S;
+    S.push(10); S.push(20); S.push(30);
+    S.inStack();
+    cout << "  Pop: " << S.pop() << "\n";
+
+    cout << "  Kiem tra ngoac: " << (S.kiemTraNgoac("{[()]}") ? "Hop le" : "Khong") << "\n";
+    cout << "  10 -> " << S.dec2bin(10) << "\n";
+
+    // Queue
+    Queue Q;
+    Q.enqueue(1); Q.enqueue(2); Q.enqueue(3);
+    Q.inQueue();
+    cout << "  Dequeue: " << Q.dequeue() << "\n";
+    Q.inQueue();
+
+    return 0;
+}
