@@ -108,7 +108,7 @@ void TaoCay(BIN_TREE& t) // Bỏ mảng a và n đi nếu muốn nhập từ ph�
             t.nCount++;
     }
 }
-//----------------------------------------------
+//-----------------------------------------------
 void LNR(BT_NODE* pRoot)
 {
     if (pRoot != NULL)
