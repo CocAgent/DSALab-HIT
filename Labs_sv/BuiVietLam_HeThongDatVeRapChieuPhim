@@ -1,0 +1,137 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stack>
+#include <queue>
+
+using namespace std;
+
+// 1. Cấu trúc Khách hàng
+struct Customer {
+    string id;
+    string name;
+    int priority; // 3: VIP, 2: Cao tuổi, 1: Thường
+
+    bool operator<(const Customer& other) const {
+        return priority < other.priority;
+    }
+};
+
+// 2. Cấu trúc Cây nhị phân tìm kiếm (BST) để quản lý khách hàng
+struct Node {
+    Customer data;
+    Node* left, * right;
+    Node(Customer c) : data(c), left(NULL), right(NULL) {}
+};
+
+Node* insertBST(Node* root, Customer c) {
+    if (!root) return new Node(c);
+    if (c.id < root->data.id) root->left = insertBST(root->left, c);
+    else if (c.id > root->data.id) root->right = insertBST(root->right, c);
+    return root;
+}
+
+void searchBST(Node* root, string id) {
+    if (!root) { cout << "Khong tim thay khach hang!\n"; return; }
+    if (root->data.id == id) {
+        cout << "Tim thay: " << root->data.name << " (Uu tien: " << root->data.priority << ")\n";
+        return;
+    }
+    if (id < root->data.id) searchBST(root->left, id);
+    else searchBST(root->right, id);
+}
+
+// 3. Cấu trúc Ghế ngồi
+struct Seat {
+    string code;
+    bool isBooked = false;
+    string customerID = "";
+};
+
+// Dữ liệu hệ thống
+const int ROWS = 5, COLS = 5;
+Seat map[ROWS][COLS];
+priority_queue<Customer> waitingList;
+stack<string> history;
+Node* customerRoot = NULL;
+long long revenue = 0;
+
+void initMap() {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            map[i][j].code = (char)('A' + i) + to_string(j + 1);
+        }
+    }
+}
+
+void displayMap() {
+    cout << "\n--- SO DO GHE NGOI ([X]: Da dat) ---\n";
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (map[i][j].isBooked) cout << "[ X ] ";
+            else cout << "[" << map[i][j].code << "] ";
+        }
+        cout << endl;
+    }
+}
+
+void bookTicket() {
+    Customer c;
+    cout << "Nhap ID khach hang: "; cin >> c.id;
+    cout << "Nhap ten khach hang: "; cin.ignore(); getline(cin, c.name);
+    cout << "Muc uu tien (3:VIP, 2:Cao tuoi, 1:Thuong): "; cin >> c.priority;
+
+    displayMap();
+    string seatCode;
+    cout << "Chon ma ghe (vd: A1): "; cin >> seatCode;
+
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (map[i][j].code == seatCode) {
+                if (!map[i][j].isBooked) {
+                    map[i][j].isBooked = true;
+                    map[i][j].customerID = c.id;
+                    customerRoot = insertBST(customerRoot, c);
+                    history.push(seatCode);
+                    revenue += 50000; // Gia ve mac dinh 50k
+                    cout << "==> DAT VE THANH CONG!\n";
+                }
+                else {
+                    cout << "Ghe da het. Ban vao danh sach cho uu tien.\n";
+                    waitingList.push(c);
+                }
+                return;
+            }
+        }
+    }
+}
+
+int main() {
+    initMap();
+    int choice;
+    while (true) {
+        cout << "\n========== MENU DAT VE ==========\n";
+        cout << "1. Xem so do ghe\n";
+        cout << "2. Dat ve \n";
+        cout << "3. Tim kiem khach hang (BST)\n";
+        cout << "4. Thong ke doanh thu\n";
+        cout << "0. Thoat\n";
+        cout << "Chon chuc nang: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: displayMap(); break;
+        case 2: bookTicket(); break;
+        case 3: {
+            string id; cout << "Nhap ID can tim: "; cin >> id;
+            searchBST(customerRoot, id);
+            break;
+        }
+        case 4:
+            cout << "Tong doanh thu: " << revenue << " VND\n";
+            break;
+        case 0: return 0;
+        default: cout << "Lua chon khong hop le!\n";
+        }
+    }
+}
