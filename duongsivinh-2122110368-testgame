@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Game Collect Item</title>
+
+<style>
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial;
+}
+
+canvas {
+  border: 3px solid white;
+  background: #222;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game" width="500" height="500"></canvas>
+
+<script>
+// ======================
+// CANVAS
+// ======================
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// ======================
+// GAME STATE
+// ======================
+const gameState = {
+  gridSize: 10,
+  tileSize: 50,
+  score: 0,
+  running: true
+};
+
+// ======================
+// MAP
+// ======================
+const map = [
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,1,1,0,0,0,1,1,0,0],
+  [0,0,0,0,1,0,0,0,0,0],
+  [0,1,0,0,1,0,0,1,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,1,1,0,1,1,0,0,0],
+  [0,0,0,0,0,0,0,0,1,0],
+  [0,1,1,0,0,0,1,0,0,0],
+  [0,0,0,0,1,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+];
+
+// ======================
+// PLAYER
+// ======================
+const player = {
+  x: 0,
+  y: 0
+};
+
+// ======================
+// ITEMS
+// ======================
+let items = [
+  { x: 3, y: 3 },
+  { x: 7, y: 1 },
+  { x: 5, y: 6 }
+];
+
+// ======================
+// INPUT
+// ======================
+document.addEventListener("keydown", (e) => {
+  if (!gameState.running) return;
+
+  let nx = player.x;
+  let ny = player.y;
+
+  if (e.key === "ArrowUp") ny--;
+  if (e.key === "ArrowDown") ny++;
+  if (e.key === "ArrowLeft") nx--;
+  if (e.key === "ArrowRight") nx++;
+
+  // check wall
+  if (map[ny] && map[ny][nx] === 0) {
+    player.x = nx;
+    player.y = ny;
+  }
+
+  checkItem();
+});
+
+// ======================
+// CHECK ITEM
+// ======================
+function checkItem() {
+  items = items.filter(item => {
+    if (item.x === player.x && item.y === player.y) {
+      gameState.score++;
+      return false;
+    }
+    return true;
+  });
+
+  if (items.length === 0) {
+    gameState.running = false;
+  }
+}
+
+// ======================
+// DRAW MAP
+// ======================
+function drawMap() {
+  for (let y = 0; y < gameState.gridSize; y++) {
+    for (let x = 0; x < gameState.gridSize; x++) {
+
+      ctx.fillStyle = map[y][x] === 1 ? "gray" : "#333";
+
+      ctx.fillRect(
+        x * gameState.tileSize,
+        y * gameState.tileSize,
+        gameState.tileSize,
+        gameState.tileSize
+      );
+    }
+  }
+}
+
+// ======================
+// DRAW PLAYER
+// ======================
+function drawPlayer() {
+  ctx.fillStyle = "lime";
+  ctx.fillRect(
+    player.x * gameState.tileSize,
+    player.y * gameState.tileSize,
+    gameState.tileSize,
+    gameState.tileSize
+  );
+}
+
+// ======================
+// DRAW ITEMS
+// ======================
+function drawItems() {
+  ctx.fillStyle = "gold";
+
+  items.forEach(item => {
+    ctx.fillRect(
+      item.x * gameState.tileSize + 15,
+      item.y * gameState.tileSize + 15,
+      20,
+      20
+    );
+  });
+}
+
+// ======================
+// UI
+// ======================
+function drawUI() {
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.fillText("Score: " + gameState.score, 10, 25);
+
+  if (!gameState.running) {
+    ctx.fillStyle = "yellow";
+    ctx.font = "30px Arial";
+    ctx.fillText("YOU WIN!", 150, 250);
+  }
+}
+
+// ======================
+// LOOP
+// ======================
+function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawMap();
+  drawItems();
+  drawPlayer();
+  drawUI();
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
+</body>
+</html>
