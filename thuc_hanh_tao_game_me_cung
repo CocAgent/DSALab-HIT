@@ -1,0 +1,83 @@
+#include <iostream>
+#include <vector>
+#include <conio.h> // Thư viện để sử dụng hàm _getch()
+#include <cstdlib>
+
+using namespace std;
+
+// Kích thước mê cung
+const int WIDTH = 20;
+const int HEIGHT = 15;
+
+// Bản đồ mê cung: # là tường, ' ' là đường đi, 'P' là người, 'E' là đích
+char maze[HEIGHT][WIDTH + 1] = {
+    "####################", // Đủ 20 dấu #
+    "#P#                #",
+    "# # ############## #",
+    "# # #            # #",
+    "# # # ####  ###  # #",
+    "# #     #   ##   # #",
+    "# #   # ###### # # #",
+    "# #   # #    # # # #",
+    "#       #  E   ### #",
+    "#  ## # # #### # # #",
+    "#       #          #",
+    "# ###   ##  #### # #",
+    "#       #        # #",
+    "# ####     ####### #",
+    "####################"
+};
+
+int playerX = 1; // Vị trí người chơi ban đầu
+int playerY = 1;
+
+// Hàm hiển thị mê cung
+void drawMaze() {
+    system("cls"); // Xóa màn hình
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            if (i == playerY && j == playerX)
+                cout << 'P'; // In người chơi
+            else
+                cout << maze[i][j]; // In tường/đường
+        }
+        cout << endl;
+    }
+    cout << "Dung W, A, S, D de di chuyen. Tim den 'E'!" << endl;
+}
+
+// Hàm xử lý di chuyển
+void movePlayer(char direction) {
+    int nextX = playerX;
+    int nextY = playerY;
+
+    if (direction == 'w' || direction == 'W') nextY--; // Lên
+    if (direction == 's' || direction == 'S') nextY++; // Xuống
+    if (direction == 'a' || direction == 'A') nextX--; // Trái
+    if (direction == 'd' || direction == 'D') nextX++; // Phải
+
+    // Kiểm tra va chạm với tường
+    if (maze[nextY][nextX] != '#') {
+        playerX = nextX;
+        playerY = nextY;
+    }
+}
+
+int main() {
+    char input;
+    maze[1][1] = ' '; // biến ô xuất phát thành đường đi trống
+    while (true) {
+        
+
+            // Kiểm tra điều kiện thắng
+            if (maze[playerY][playerX] == 'E') {
+                cout << "Chuc mung! Ban da thoat khoi me cung!" << endl;
+                break;
+            }
+        drawMaze(); //vẽ lại màn hình
+        char input = _getch(); // Nhận phím từ bàn phím
+        if (input == 'q' || input == 'Q') break; // Nhấn Q để thoát
+        movePlayer(input); //cập nhật tọa độ playerX, playerY
+    }
+    return 0;
+}
