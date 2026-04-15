@@ -1,0 +1,40 @@
+# 🧩 Maze Game CLI (C++)
+
+Dự án mô phỏng trò chơi mê cung trên giao diện dòng lệnh, tập trung vào việc vận dụng các cấu trúc dữ liệu và giải thuật cơ bản trong lập trình C++.
+
+## 🏗️ Cấu trúc dữ liệu sử dụng
+
+Theo yêu cầu bổ sung, dưới đây là các cấu trúc dữ liệu chính được vận dụng trong dự án:
+
+1. **Mảng 2 chiều (2D Array/Vector):**
+   - **Vai trò:** Lưu trữ bản đồ mê cung vật lý.
+   - **Chi tiết:** Sử dụng `char maze[HEIGHT][WIDTH]` để định nghĩa tường (`#`), đường đi (` `), người chơi (`P`) và đích đến (`E`).
+
+2. **Ngăn xếp (Stack):**
+   - **Vai trò:** Hỗ trợ giải thuật **DFS (Depth-First Search)** và **Backtracking**.
+   - **Chi tiết:** Lưu trữ các tọa độ đã đi qua để có thể "quay lui" khi gặp ngõ cụt trong quá trình tạo mê cung ngẫu nhiên hoặc tìm đường.
+
+3. **Hàng đợi (Queue):**
+   - **Vai trò:** Hiện thực hóa giải thuật **BFS (Breadth-First Search)**.
+   - **Chi tiết:** Dùng để tìm đường đi ngắn nhất từ điểm xuất phát đến đích bằng cơ chế loang từng lớp.
+
+4. **Cấu trúc tọa độ (Struct/Pair):**
+   - **Vai trò:** Đóng gói cặp giá trị `(x, y)`.
+   - **Chi tiết:** Sử dụng `std::pair<int, int>` hoặc `struct Point` để quản lý vị trí của nhân vật và các nút trên đồ thị.
+
+## 🕹️ Cách chơi
+- **W, A, S, D**: Di chuyển nhân vật `P`.
+- **Mục tiêu**: Tìm đường đến vị trí đích `E`.
+- **Q**: Thoát trò chơi.
+
+## 🛠️ Yêu cầu & Cài đặt
+- **Hệ điều hành**: Windows (Yêu cầu thư viện `<conio.h>` cho hàm `_getch()`).
+- **Trình biên dịch**: Microsoft Visual Studio (MSVC).
+
+## 🚀 Hướng dẫn chạy
+1. Mở file `maze.cpp` trong Visual Studio.
+2. Đảm bảo file nằm trong mục **Source Files** của Solution Explorer.
+3. Nhấn `Ctrl + F5` để bắt đầu trải nghiệm.
+
+---
+*Dự án thực hiện bởi Phạm Minh Thành
