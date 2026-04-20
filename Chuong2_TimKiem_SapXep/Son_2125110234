@@ -1,0 +1,319 @@
+#include <iostream>
+#include <windows.h>
+using namespace std;
+
+int DELAY = 300;
+#define MAX_N 20
+
+void clear() { system("cls"); }
+void HoanVi(int& a, int& b) { int t = a; a = b; b = t; }
+
+void printArray(int a[], int n, int x = -1, int y = -1) {
+    cout << "\n Chi so: ";
+    for (int i = 0; i < n; i++) cout << "[" << i << "] ";
+    cout << "\n Gia tri: ";
+    for (int i = 0; i < n; i++) {
+        if (i == x || i == y) cout << "*" << a[i] << "* ";
+        else cout << a[i] << "  ";
+    }
+    cout << "\n";
+}
+
+void inBuoc(int buoc, const char* algo, const char* gt) {
+    clear();
+    cout << "=== " << algo << " ===\n";
+    cout << "Buoc #" << buoc << ": " << gt << "\n";
+    cout << "-------------------\n";
+}
+
+void inKetQua(const char* algo, int ss, int hv) {
+    clear();
+    cout << "=== " << algo << " - HOAN THANH ===\n";
+    cout << "Tong so sanh : " << ss << "\n";
+    cout << "Tong hoan vi : " << hv << "\n";
+}
+
+// ================= BUBBLE SORT =================
+void bubbleSort(int a[], int n) {
+    int ss = 0, hv = 0, buoc = 0;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = n - 1; j > i; j--) {
+            ss++; buoc++;
+            char gt[200];
+            sprintf_s(gt, "Vong %d: So sanh a[%d]=%d voi a[%d]=%d", i + 1, j - 1, a[j - 1], j, a[j]);
+            inBuoc(buoc, "BUBBLE SORT", gt);
+            printArray(a, n, j - 1, j);
+            Sleep(DELAY);
+            if (a[j] < a[j - 1]) {
+                HoanVi(a[j], a[j - 1]); hv++; buoc++;
+                char gt2[200];
+                sprintf_s(gt2, "a[%d] < a[%d] -> HOAN VI %d va %d", j, j - 1, a[j - 1], a[j]);
+                inBuoc(buoc, "BUBBLE SORT", gt2);
+                printArray(a, n, j - 1, j);
+                Sleep(DELAY);
+            }
+            else {
+                cout << " => Dung thu tu, giu nguyen\n";
+                Sleep(DELAY / 2);
+            }
+        }
+        cout << "\n => " << a[n - 1 - i] << " da ve dung vi tri cuoi!\n";
+        Sleep(DELAY);
+    }
+    inKetQua("BUBBLE SORT", ss, hv);
+    printArray(a, n);
+}
+
+// ================= SELECTION SORT =================
+void selectionSort(int a[], int n) {
+    int ss = 0, hv = 0, buoc = 0;
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        buoc++;
+        char gt[200];
+        sprintf_s(gt, "Vong %d: Tim phan tu nho nhat tu [%d] den [%d]", i + 1, i, n - 1);
+        inBuoc(buoc, "SELECTION SORT", gt);
+        printArray(a, n, minIdx, -1);
+        Sleep(DELAY);
+        for (int j = i + 1; j < n; j++) {
+            ss++; buoc++;
+            char gt2[200];
+            sprintf_s(gt2, "So sanh a[%d]=%d voi min a[%d]=%d", j, a[j], minIdx, a[minIdx]);
+            inBuoc(buoc, "SELECTION SORT", gt2);
+            printArray(a, n, minIdx, j);
+            Sleep(DELAY);
+            if (a[j] < a[minIdx]) {
+                minIdx = j; buoc++;
+                char gt3[200];
+                sprintf_s(gt3, "Min moi: a[%d]=%d", minIdx, a[minIdx]);
+                inBuoc(buoc, "SELECTION SORT", gt3);
+                printArray(a, n, minIdx, -1);
+                Sleep(DELAY);
+            }
+        }
+        if (minIdx != i) {
+            HoanVi(a[i], a[minIdx]); hv++; buoc++;
+            char gt4[200];
+            sprintf_s(gt4, "Dua min=%d ve vi tri [%d]", a[i], i);
+            inBuoc(buoc, "SELECTION SORT", gt4);
+            printArray(a, n, i, minIdx);
+            Sleep(DELAY);
+        }
+        else {
+            cout << " => Da o dung vi tri, khong hoan vi\n";
+            Sleep(DELAY / 2);
+        }
+        cout << "\n => a[" << i << "]=" << a[i] << " da ve dung vi tri!\n";
+        Sleep(DELAY);
+    }
+    inKetQua("SELECTION SORT", ss, hv);
+    printArray(a, n);
+}
+
+// ================= INSERTION SORT =================
+void insertionSort(int a[], int n) {
+    int ss = 0, hv = 0, buoc = 0;
+    buoc++;
+    inBuoc(buoc, "INSERTION SORT", "a[0] la phan tu dau, coi nhu da sap xep");
+    printArray(a, n, 0, -1);
+    Sleep(DELAY);
+    for (int i = 1; i < n; i++) {
+        int key = a[i], pos = i;
+        buoc++;
+        char gt[200];
+        sprintf_s(gt, "Lay key=a[%d]=%d, chen vao doan [0..%d]", i, key, i - 1);
+        inBuoc(buoc, "INSERTION SORT", gt);
+        printArray(a, n, i, -1);
+        Sleep(DELAY);
+        while (pos > 0 && a[pos - 1] > key) {
+            ss++; hv++; buoc++;
+            a[pos] = a[pos - 1];
+            char gt2[200];
+            sprintf_s(gt2, "a[%d]=%d > key=%d -> Dich sang phai", pos - 1, a[pos], key);
+            inBuoc(buoc, "INSERTION SORT", gt2);
+            printArray(a, n, pos, pos - 1);
+            Sleep(DELAY);
+            pos--;
+        }
+        a[pos] = key; buoc++;
+        char gt3[200];
+        sprintf_s(gt3, "Chen key=%d vao vi tri [%d]", key, pos);
+        inBuoc(buoc, "INSERTION SORT", gt3);
+        printArray(a, n, pos, -1);
+        cout << "\n => Doan [0.." << i << "] da sap xep!\n";
+        Sleep(DELAY);
+    }
+    inKetQua("INSERTION SORT", ss, hv);
+    printArray(a, n);
+}
+
+// ================= QUICK SORT =================
+int qSS = 0, qHV = 0, qBuoc = 0;
+void quickSortDemo(int a[], int l, int r, int n) {
+    int i = l, j = r;
+    int pivotVal = a[(l + r) / 2];
+    int pivotIdx = (l + r) / 2;
+    qBuoc++;
+    char gt[200];
+    sprintf_s(gt, "Phan vung [%d..%d] | PIVOT = a[%d] = %d", l, r, pivotIdx, pivotVal);
+    inBuoc(qBuoc, "QUICK SORT", gt);
+    printArray(a, n, l, r);
+    Sleep(DELAY);
+    while (i <= j) {
+        while (a[i] < pivotVal) {
+            qBuoc++;
+            char gt2[200];
+            sprintf_s(gt2, "a[%d]=%d < pivot=%d -> i tien phai", i, a[i], pivotVal);
+            inBuoc(qBuoc, "QUICK SORT", gt2);
+            printArray(a, n, i, j);
+            Sleep(DELAY / 2); i++;
+        }
+        while (a[j] > pivotVal) {
+            qBuoc++;
+            char gt3[200];
+            sprintf_s(gt3, "a[%d]=%d > pivot=%d -> j lui trai", j, a[j], pivotVal);
+            inBuoc(qBuoc, "QUICK SORT", gt3);
+            printArray(a, n, i, j);
+            Sleep(DELAY / 2); j--;
+        }
+        if (i <= j) {
+            qSS++; qBuoc++;
+            char gt4[200];
+            sprintf_s(gt4, "HOAN VI a[%d]=%d <-> a[%d]=%d", i, a[i], j, a[j]);
+            inBuoc(qBuoc, "QUICK SORT", gt4);
+            printArray(a, n, i, j);
+            Sleep(DELAY);
+            HoanVi(a[i], a[j]); qHV++;
+            i++; j--;
+        }
+    }
+    cout << "\n => Chia xong: trai [" << l << ".." << j << "] | phai [" << i << ".." << r << "]\n";
+    Sleep(DELAY);
+    if (l < j) quickSortDemo(a, l, j, n);
+    if (i < r) quickSortDemo(a, i, r, n);
+}
+void runQuickSort(int a[], int n) {
+    qSS = 0; qHV = 0; qBuoc = 0;
+    quickSortDemo(a, 0, n - 1, n);
+    inKetQua("QUICK SORT", qSS, qHV);
+    printArray(a, n);
+}
+
+// ================= HEAP SORT =================
+int hSS = 0, hHV = 0, hBuoc = 0;
+void shift(int a[], int l, int r) {
+    int i = l, j = 2 * l + 1, x = a[l];
+    while (j <= r) {
+        if (j < r && a[j] < a[j + 1]) j++;
+        hSS++;
+        if (x >= a[j]) break;
+        a[i] = a[j]; i = j; j = 2 * i + 1; hHV++;
+    }
+    a[i] = x;
+}
+void heapSort(int a[], int n) {
+    hSS = 0; hHV = 0; hBuoc = 0;
+    hBuoc++;
+    inBuoc(hBuoc, "HEAP SORT", "Buoc 1: Xay dung MAX-HEAP");
+    printArray(a, n);
+    Sleep(DELAY);
+    for (int k = n / 2 - 1; k >= 0; k--) {
+        shift(a, k, n - 1); hBuoc++;
+        char gt[200];
+        sprintf_s(gt, "Vun heap tai [%d], dinh = %d", k, a[0]);
+        inBuoc(hBuoc, "HEAP SORT", gt);
+        printArray(a, n, k, -1);
+        Sleep(DELAY);
+    }
+    cout << "\n => MAX-HEAP xong! Lon nhat = " << a[0] << "\n";
+    Sleep(DELAY * 2);
+    for (int r = n - 1; r > 0; r--) {
+        HoanVi(a[0], a[r]); hHV++; hBuoc++;
+        char gt[200];
+        sprintf_s(gt, "Buoc 2: Dua lon nhat %d ve cuoi [%d]", a[r], r);
+        inBuoc(hBuoc, "HEAP SORT", gt);
+        printArray(a, n, 0, r);
+        Sleep(DELAY);
+        shift(a, 0, r - 1); hBuoc++;
+        inBuoc(hBuoc, "HEAP SORT", "Vun lai heap");
+        printArray(a, n);
+        cout << "\n => a[" << r << "]=" << a[r] << " ve dung vi tri!\n";
+        Sleep(DELAY);
+    }
+    inKetQua("HEAP SORT", hSS, hHV);
+    printArray(a, n);
+}
+
+// ================= NHAP MANG =================
+int nhapMang(int a[]) {
+    int n; clear();
+    cout << "=== NHAP MANG ===\n";
+    cout << "So phan tu (1-" << MAX_N << "): "; cin >> n;
+    if (n < 1) n = 1; if (n > MAX_N) n = MAX_N;
+    for (int i = 0; i < n; i++) {
+        cout << "a[" << i << "] = "; cin >> a[i];
+        if (a[i] < 1) a[i] = 1; if (a[i] > 99) a[i] = 99;
+    }
+    return n;
+}
+
+int taoNgauNhien(int a[]) {
+    int n; clear();
+    cout << "=== MANG NGAU NHIEN ===\n";
+    cout << "So phan tu (1-" << MAX_N << "): "; cin >> n;
+    if (n < 1) n = 1; if (n > MAX_N) n = MAX_N;
+    srand((unsigned)time(NULL));
+    for (int i = 0; i < n; i++) a[i] = rand() % 90 + 10;
+    cout << "Mang: ";
+    for (int i = 0; i < n; i++) cout << a[i] << " ";
+    cout << "\n"; Sleep(1000);
+    return n;
+}
+
+// ================= MENU =================
+void menu(int a[], int n) {
+    clear();
+    cout << "=== MO PHONG THUAT TOAN SAP XEP ===\n";
+    cout << "Mang (" << n << " phan tu): ";
+    for (int i = 0; i < n; i++) cout << a[i] << " ";
+    cout << "\n\n";
+    cout << "1. Nhap mang\n";
+    cout << "2. Mang ngau nhien\n";
+    cout << "3. Bubble Sort\n";
+    cout << "4. Selection Sort\n";
+    cout << "5. Insertion Sort\n";
+    cout << "6. Quick Sort\n";
+    cout << "7. Heap Sort\n";
+    cout << "8. Doi toc do (" << DELAY << "ms)\n";
+    cout << "0. Thoat\n";
+    cout << "Chon: ";
+}
+
+// ================= MAIN =================
+int main() {
+    int goc[MAX_N] = { 5, 1, 4, 2, 8 };
+    int n = 5, b[MAX_N], choice;
+    do {
+        menu(goc, n);
+        cin >> choice;
+        for (int i = 0; i < n; i++) b[i] = goc[i];
+        switch (choice) {
+        case 1: n = nhapMang(goc); break;
+        case 2: n = taoNgauNhien(goc); break;
+        case 3: bubbleSort(b, n);    cout << "\nNhan Enter..."; cin.ignore(); cin.get(); break;
+        case 4: selectionSort(b, n); cout << "\nNhan Enter..."; cin.ignore(); cin.get(); break;
+        case 5: insertionSort(b, n); cout << "\nNhan Enter..."; cin.ignore(); cin.get(); break;
+        case 6: runQuickSort(b, n);  cout << "\nNhan Enter..."; cin.ignore(); cin.get(); break;
+        case 7: heapSort(b, n);      cout << "\nNhan Enter..."; cin.ignore(); cin.get(); break;
+        case 8:
+            cout << "1.Cham 2.Vua 3.Nhanh: ";
+            int c; cin >> c;
+            if (c == 1) DELAY = 500; else if (c == 3) DELAY = 100; else DELAY = 300;
+            break;
+        case 0: break;
+        default: cout << "Sai!\n"; Sleep(700);
+        }
+    } while (choice != 0);
+    cout << "\nTam biet!\n";
+    return 0;
+}
