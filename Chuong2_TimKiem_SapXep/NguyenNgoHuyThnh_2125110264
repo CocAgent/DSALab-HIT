@@ -1,0 +1,269 @@
+#include <iostream>
+using namespace std;
+
+void HoanVi(int& a, int& b) {
+    int t = a;
+    a = b;
+    b = t;
+}
+
+void InMang(int a[], int n) {
+    for (int i = 0; i < n; i++)
+        cout << a[i] << " ";
+    cout << endl;
+}
+
+// ================= SELECTION SORT =================
+void SelectionSort(int a[], int n) {
+    cout << "\nSelection Sort:\n";
+    for (int i = 0; i < n - 1; i++) {
+        int vt = i;
+        for (int j = i + 1; j < n; j++)
+            if (a[j] < a[vt]) vt = j;
+
+        HoanVi(a[i], a[vt]);
+
+        cout << "Buoc " << i + 1 << ": ";
+        InMang(a, n);
+    }
+}
+
+// ================= INSERTION SORT =================
+void InsertionSort(int a[], int n) {
+    cout << "\nInsertion Sort:\n";
+    for (int i = 1; i < n; i++) {
+        int x = a[i];
+        int pos = i;
+
+        while (pos > 0 && a[pos - 1] > x) {
+            a[pos] = a[pos - 1];
+            pos--;
+        }
+        a[pos] = x;
+
+        cout << "Buoc " << i << ": ";
+        InMang(a, n);
+    }
+}
+
+// ================= BUBBLE SORT =================
+void BubbleSort(int a[], int n) {
+    cout << "\nBubble Sort:\n";
+    int buoc = 1;
+
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = n - 1; j > i; j--) {
+            if (a[j] < a[j - 1])
+                HoanVi(a[j], a[j - 1]);
+        }
+        cout << "Buoc " << buoc++ << ": ";
+        InMang(a, n);
+    }
+}
+
+// ================= QUICK SORT =================
+void QuickSortStep(int a[], int l, int r, int n) {
+    int i = l, j = r;
+    int x = a[(l + r) / 2];
+
+    while (i <= j) {
+        while (a[i] < x) i++;
+        while (a[j] > x) j--;
+
+        if (i <= j) {
+            HoanVi(a[i], a[j]);
+            i++; j--;
+        }
+    }
+
+    InMang(a, n);
+
+    if (l < j) QuickSortStep(a, l, j, n);
+    if (i < r) QuickSortStep(a, i, r, n);
+}
+
+void QuickSort(int a[], int n) {
+    cout << "\nQuick Sort:\n";
+    QuickSortStep(a, 0, n - 1, n);
+}
+
+// ================= HEAP SORT =================
+void Shift(int a[], int i, int n) {
+    int x = a[i];
+    int j = 2 * i + 1;
+
+    while (j < n) {
+        if (j + 1 < n && a[j] < a[j + 1]) j++;
+        if (a[j] <= x) break;
+
+        a[i] = a[j];
+        i = j;
+        j = 2 * i + 1;
+    }
+    a[i] = x;
+}
+
+void HeapSort(int a[], int n) {
+    cout << "\nHeap Sort:\n";
+
+    // build heap
+    for (int i = n / 2 - 1; i >= 0; i--)
+        Shift(a, i, n);
+
+    cout << "Sau khi tao heap: ";
+    InMang(a, n);
+
+    int buoc = 1;
+
+    for (int i = n - 1; i > 0; i--) {
+        HoanVi(a[0], a[i]);
+        Shift(a, 0, i);
+
+        cout << "Buoc " << buoc++ << ": ";
+        InMang(a, n);
+    }
+}
+
+// ================= MAIN =================
+int main() {
+    int goc[] = { 3, -12, 14, 9, 11, -50, -100 };
+    int n = 7;
+
+    int a[100];
+
+    // Selection
+    copy(goc, goc + n, a);
+    SelectionSort(a, n);
+
+    // Insertion
+    copy(goc, goc + n, a);
+    InsertionSort(a, n);
+
+    // Bubble
+    copy(goc, goc + n, a);
+    BubbleSort(a, n);
+
+    // Quick
+    copy(goc, goc + n, a);
+    QuickSort(a, n);
+
+    // Heap
+    copy(goc, goc + n, a);
+    HeapSort(a, n);
+
+    return 0;
+}
+1. SELECTION SORT (Chọn min)
+Bước chạy:
+i=0: min = -100 → swap với 3
+→ [-100, -12, 14, 9, 11, -50, 3]
+i=1: min = -50
+→ [-100, -50, 14, 9, 11, -12, 3]
+i=2: min = -12
+→ [-100, -50, -12, 9, 11, 14, 3]
+i=3: min = 3
+→ [-100, -50, -12, 3, 11, 14, 9]
+i=4: min = 9
+→ [-100, -50, -12, 3, 9, 14, 11]
+i=5: min = 11
+→ [-100, -50, -12, 3, 9, 11, 14]
+Tốt nhất: O(n²)
+Xấu nhất: O(n²)
+
+Giải thích:
+
+Luôn duyệt toàn bộ phần chưa sắp xếp để tìm min.
+Số lần so sánh không đổi:
+(n-1) + (n-2) + ... + 1 ≈ n²/2
+Không phụ thuộc vào trạng thái ban đầu của mảng.
+2. INSERTION SORT (Chèn)
+Bước chạy:
+i=1: chèn -12 vào [3]
+→ [-12, 3, 14, 9, 11, -50, -100]
+i=2: 14 đúng chỗ
+→ [-12, 3, 14, 9, 11, -50, -100]
+i=3: chèn 9
+→ [-12, 3, 9, 14, 11, -50, -100]
+i=4: chèn 11
+→ [-12, 3, 9, 11, 14, -50, -100]
+i=5: chèn -50
+→ [-50, -12, 3, 9, 11, 14, -100]
+i=6: chèn -100
+→ [-100, -50, -12, 3, 9, 11, 14]
+Tốt nhất: O(n)
+Xấu nhất: O(n²)
+
+Giải thích:
+
+Tốt nhất: mảng đã tăng dần → mỗi phần tử chỉ cần so sánh 1 lần → O(n).
+Xấu nhất: mảng giảm dần → mỗi phần tử phải dời qua toàn bộ phần đã sắp → tổng ≈ n²/2.
+Phụ thuộc mạnh vào mức độ “gần sắp xếp”.
+3. BUBBLE SORT
+Lần 1:
+[3, -12] → swap
+[-12, 3, 14, 9, 11, -50, -100]
+[14,9] → swap → ...
+→ [-12, 3, 9, 11, -50, -100, 14]
+Lần 2:
+→ [-12, 3, 9, -50, -100, 11, 14]
+Lần 3:
+ 3, -50, -100, 9, 11, 14]
+Lần 4:
+→ [-12, -50, -100, 3, 9, 11, 14]
+Lần 5:
+→ [-50, -100, -12, 3, 9, 11, 14]
+Lần 6:
+→ [-100, -50, -12, 3, 9, 11, 14]
+Tốt nhất: O(n) (nếu có kiểm tra dừng sớm)
+Xấu nhất: O(n²)
+
+Giải thích:
+
+Tốt nhất: mảng đã sắp → không cần đổi → dừng sớm sau 1 lần duyệt.
+Xấu nhất: mảng ngược → phải so sánh và đổi gần như mọi cặp → n².
+Nếu không tối ưu (không có cờ dừng) thì luôn O(n²).
+4. QUICK SORT 
+Pivot = phần tử giữa = 9
+Bước 1: chia
+Nhỏ hơn 9: [3, -12, -50, -100]
+Lớn hơn 9: [14, 11]
+Bước 2: xử lý bên trái (pivot = -50)
+[-100, -50, -12, 3]
+Bước 3: xử lý bên phải
+[11, 14]
+Gộp:
+[-100, -50, -12, 3] + [9] + [11, 14]
+Tốt nhất: O(n log n)
+Xấu nhất: O(n²)
+
+Giải thích:
+
+Tốt nhất: pivot chia mảng thành 2 phần gần bằng nhau →
+số tầng đệ quy ≈ log n → mỗi tầng xử lý n → O(n log n).
+Xấu nhất: pivot luôn là nhỏ nhất/lớn nhất →
+chia lệch (1 và n-1) → giống duyệt tuyến tính lồng nhau → O(n²).
+Phụ thuộc cách chọn pivot.
+5. HEAP SORT 
+Bước 1: build heap
+[14, 11, 3, 9, -12, -50, -100]
+Bước 2: đổi max ra cuối
+swap 14 ↔ -100
+→ [11, 9, 3, -100, -12, -50, 14]
+swap 11 ↔ -50
+→ [9, -12, 3, -100, -50, 11, 14]
+swap 9 ↔ -50
+→ [3, -12, -50, -100, 9, 11, 14]
+swap 3 ↔ -100
+→ [-12, -100, -50, 3, 9, 11, 14]
+swap -12 ↔ -100
+→ [-100, -12, -50, 3, 9, 11, 14]
+swap -12 ↔ -50
+→ [-100, -50, -12, 3, 9, 11, 14]
+Tốt nhất: O(n log n)
+Xấu nhất: O(n log n)
+
+Giải thích:
+
+Xây heap: O(n)
+Mỗi lần lấy max/min: O(log n), thực hiện n lần → O(n log n).
+Không phụ thuộc thứ tự ban đầu → luôn ổn định về độ phức tạp.
