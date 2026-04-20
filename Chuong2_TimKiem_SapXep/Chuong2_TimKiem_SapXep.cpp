@@ -28,16 +28,16 @@ void XuatMang(const int a[], int n, const string &ten = "") {
 // 1.1 Tim kiem tuyen tinh - O(N)
 int TimTuyenTinh(const int a[], int n, int x) {
     int i = 0;
-    while (a[i] != x && i < n) i++;
+    while (i < n && a[i] != x) i++;
     if (i < n) return i;
     return -1;
 }
 
 // 1.2 Tim kiem nhi phan - O(log2 N) - yeu cau mang sap xep tang
 int TimNhiPhan(const int a[], int n, int x) {
-    int l = 0, r = n - 1, m;
+    int l = 0, r = n - 1;
     while (l <= r) {
-        m = (l + r) / 2;
+        int m = l + (r - l) / 2;
         if (a[m] == x)  return m;
         else if (a[m] > x) r = m - 1;
         else l = m + 1;
@@ -85,7 +85,7 @@ void BubbleSort(int a[], int n) {
 // 2.4 Quick Sort (Sap xep nhanh) - O(N log N) trung binh
 void QuickSort(int a[], int l, int r) {
     int i = l, j = r, x;
-    x = a[(l + r) / 2];
+    x = a[l + rand() % (r - l + 1)];
     do {
         while (a[i] < x) i++;
         while (a[j] > x) j--;
@@ -138,7 +138,7 @@ void DemoTimKiem() {
     cout << "\n=== DEMO TIM KIEM ===\n";
     int a[] = {11, 22, 33, 44, 55, 66, 77, 88, 99};
     int n = 9;
-    int aUnsorted[] = {64, 25, 12, 22, 11, 90, 45, 33};
+    XuatMang(aUnsorted, nu, "Mang chua sap xep");
     int nu = 8;
 
     XuatMang(a, n, "Mang da sap xep");
