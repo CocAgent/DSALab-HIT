@@ -1,86 +1,100 @@
-# Bài tập ứng dụng
+# 🎯 Bài Tập Ứng Dụng — 5 Dự Án Mini Thực Tế
 
-Thư mục này dùng để lưu các bài tập ứng dụng, giúp sinh viên luyện tập thêm kỹ năng lập trình, tổ chức chương trình, xử lý dữ liệu và thực hành các bài toán nâng cao ngoài phần ví dụ cơ bản trên lớp.
+> Kết hợp kiến thức toàn khóa học vào các dự án có thật ngoài đời
 
-## Mục tiêu
+---
 
-Thông qua các bài tập trong thư mục này, sinh viên cần rèn luyện:
+## Dự Án 1: Quản Lý Sinh Viên 📋
+**Cấu trúc:** Mảng động + Selection Sort + Linear/Binary Search
+**Độ khó:** ⭐⭐
 
-- kỹ năng đọc hiểu đề bài và tổ chức lời giải;
-- kỹ năng chia nhỏ bài toán thành các phần xử lý hợp lý;
-- kỹ năng viết chương trình rõ ràng, dễ kiểm tra;
-- kỹ năng sử dụng tệp dữ liệu vào/ra khi cần;
-- kỹ năng luyện tập với các bài toán nâng cao hơn mức cơ bản.
+Hệ thống quản lý danh sách sinh viên và điểm số:
+- CRUD sinh viên (thêm/sửa/xóa)
+- Sắp xếp theo tên, MSSV, hoặc điểm
+- Tìm kiếm theo tên hoặc MSSV
+- Xuất danh sách ra file `diem_sinhvien.txt`
+- Thống kê: điểm cao nhất, thấp nhất, trung bình, phân loại học lực
 
-## Danh sách bài tập
+📁 File: `DuAn1_QuanLySinhVien.cpp`
 
-### 1. Bài tập sắp xếp nâng cao
-Thư mục/bài này dùng để luyện tập các kỹ thuật sắp xếp và xử lý dữ liệu liên quan đến sắp xếp.
+---
 
-**Gợi ý học tập:**
-- xác định dữ liệu đầu vào;
-- chọn tiêu chí sắp xếp phù hợp;
-- so sánh các cách cài đặt khác nhau;
-- kiểm tra kết quả với nhiều trường hợp dữ liệu.
+## Dự Án 2: Lịch Sử Trình Duyệt 🌐
+**Cấu trúc:** Singly Linked List + Stack
+**Độ khó:** ⭐⭐
 
-### 2. Bài tập Chương 2 nâng cao
-Bài này thuộc nhóm bài tập nâng cao của Chương 2, nhằm giúp sinh viên củng cố kiến thức đã học và vận dụng vào chương trình hoàn chỉnh hơn.
+Mô phỏng lịch sử duyệt web:
+- Lưu lịch sử tối đa 50 trang (Linked List)
+- Back / Forward bằng 2 Stack (trang đã qua / trang đã tiến)
+- Hiển thị breadcrumb: `google.com > youtube.com > [hiện tại]`
+- Xóa toàn bộ lịch sử
+- Lưu lịch sử ra file và khôi phục
 
-**Gợi ý học tập:**
-- đọc kỹ yêu cầu từng bài;
-- xác định rõ input, output;
-- chia bài toán thành từng hàm hoặc từng lớp xử lý nếu cần;
-- kiểm thử chương trình bằng nhiều bộ dữ liệu mẫu.
+📁 File: `DuAn2_LichSuTrinhDuyet.cpp`
 
-## Cấu trúc thư mục đề nghị
+---
 
-Sinh viên nên sắp xếp bài làm rõ ràng theo từng bài. Ví dụ:
+## Dự Án 3: Máy Tính Biểu Thức 🧮
+**Cấu trúc:** Stack (2 stack: toán tử + toán hạng)
+**Độ khó:** ⭐⭐⭐
+> Cảm hứng: [Pilha_Expressão_A — DanielSantDev](https://github.com/DanielSantDev/Projects-with-Cpp)
 
-```text
-BaiTapUngDung/
-├── README.md
-├── Sapxap_Nangcao/
-│   ├── bai1.cpp
-│   └── ...
-└── Bai2_Chuong2_Nangcao/
-    ├── main.cpp
-    ├── Bai1_Lop1.cpp
-    ├── Bai2_Lop2.cpp
-    ├── Bai3_Lop3.cpp
-    ├── Bai4_Lop4.cpp
-    └── ...
-```
+Máy tính tính biểu thức toán học phức tạp:
+- Hỗ trợ: +, -, *, /, ^, %, ngoặc đơn, số thập phân
+- Hiển thị từng bước chuyển đổi Infix → Postfix
+- Hiển thị từng bước tính toán trên Stack
+- Phát hiện lỗi: chia cho 0, ngoặc không khớp, ký tự lạ
+- Lưu lịch sử 10 phép tính gần nhất
 
-## Hướng dẫn thực hiện
+📁 File: `DuAn3_MayTinhBieuThuc.cpp`
 
-Khi làm bài, sinh viên nên:
+---
 
-1. tạo đúng thư mục bài tập theo hướng dẫn;
-2. đặt tên file rõ ràng, dễ hiểu;
-3. viết chương trình có chú thích ngắn gọn nếu cần;
-4. kiểm tra chương trình trước khi nộp;
-5. chỉ đưa lên GitHub các file cần thiết.
+## Dự Án 4: Hàng Chờ Bệnh Viện 🏥
+**Cấu trúc:** Priority Queue + Queue thường
+**Độ khó:** ⭐⭐⭐
+> Cảm hứng: [Fila de Hospital — DanielSantDev](https://github.com/DanielSantDev/Projects-with-Cpp)
 
-## Yêu cầu khi nộp bài
+Hệ thống hàng chờ bệnh viện với phân cấp ưu tiên:
+- 3 mức ưu tiên: 🔴 Cấp cứu > 🟡 Khẩn cấp > 🟢 Thông thường
+- Cấp cứu luôn được chen lên đầu hàng
+- Theo dõi thời gian chờ của từng bệnh nhân
+- Báo cáo cuối ca: tổng bệnh nhân, thời gian chờ trung bình theo từng mức
+- Mô phỏng 1 ca làm việc 8 tiếng (dùng random)
 
-- đặt bài làm đúng thư mục quy định;
-- mã nguồn phải biên dịch và chạy được;
-- không đưa lên các file rác như `.exe`, `build/`, `obj/`, `.vs/`, `.vscode/` nếu không cần;
-- commit message cần rõ ràng, ví dụ:
+📁 File: `DuAn4_HangChoBeinhVien.cpp`
 
-```text
-Hoan thanh bai tap sap xep nang cao
-Bo sung bai tap Chuong 2 nang cao
-Sua loi doc du lieu vao
-```
+---
 
-## Gợi ý cho sinh viên
+## Dự Án 5: Hệ Thống Rạp Chiếu Phim 🎭
+**Cấu trúc:** BST + Queue + Stack + 2D Array
+**Độ khó:** ⭐⭐⭐
+> Cảm hứng: [Teatro — DanielSantDev](https://github.com/DanielSantDev/Projects-with-Cpp)
 
-- Đọc kỹ đề trước khi lập trình.
-- Làm bài theo từng bước, không nên viết toàn bộ chương trình trong một lần.
-- Sau khi hoàn thành, nên tự kiểm tra lại với dữ liệu nhỏ trước.
-- Nếu bài có nhiều phần, nên tách hàm để chương trình dễ đọc và dễ sửa lỗi.
+Hệ thống quản lý rạp chiếu phim hoàn chỉnh:
+- Quản lý phim: thêm/xóa/tìm kiếm bằng BST (O log n)
+- Sơ đồ ghế ngồi dạng 2D: đặt vé, hủy vé, đổi ghế
+- Hàng chờ hoàn vé bằng Queue (FIFO)
+- Undo thao tác đặt vé bằng Stack (tối đa 5 lần undo)
+- Thống kê doanh thu theo ngày, theo phim
+- Xuất báo cáo ra file
 
-## Ghi chú
+📁 File: `DuAn5_RapChieuPhim.cpp`
 
-Thư mục này là phần mở rộng để sinh viên luyện tập thêm ngoài các ví dụ cơ bản trong học phần. Sinh viên nên hoàn thành các bài cơ bản trước, sau đó tiếp tục thực hiện các bài ứng dụng và bài nâng cao để củng cố kiến thức.
+---
+
+## 📊 Tổng Hợp Cấu Trúc Dữ Liệu Đã Học
+
+| Cấu trúc | Tuần | Ứng dụng thực tế |
+|----------|------|-----------------|
+| Mảng động | 2 | Quản lý sinh viên |
+| Linked List đơn | 6 | Lịch sử trình duyệt |
+| Linked List đôi/vòng | 7 | Music playlist |
+| Stack | 8 | Máy tính biểu thức |
+| Queue | 9 | Hàng chờ bệnh viện |
+| Binary Tree | 10 | Visualizer |
+| BST | 11 | Từ điển Anh-Việt |
+| Backtracking | 12 | N-Queens |
+| Graph + BFS | 13 | Tìm đường mê cung |
+| Dynamic Programming | 14 | Knapsack |
+| Kết hợp tất cả | 15 | Rạp chiếu phim |
