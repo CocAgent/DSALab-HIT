@@ -1,577 +1,587 @@
 #include "structures.h"
 
 #include <algorithm>
-#include <cmath>
-#include <queue>
-#include <unordered_set>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <stdexcept>
 
 namespace {
-struct RankedCandidate {
-    double score;
-    std::string itemId;
-
-    bool operator<(const RankedCandidate& other) const {
-        return score < other.score;
-    }
-};
+std::string normalizeName(const std::string& value) {
+    std::string result = value;
+    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char ch) {
+        return static_cast<char>(std::tolower(ch));
+    });
+    return result;
+}
 }  // namespace
 
-double Item::averageRating() const {
-    if (ratingCount == 0) {
-        return 0.0;
+bool Cell::operator==(const Cell& other) const {
+    return row == other.row && col == other.col;
+}
+
+AliveCellList::AliveCellList() : head(nullptr), tail(nullptr), count(0) {}
+
+AliveCellList::~AliveCellList() {
+    clear();
+}
+
+void AliveCellList::clear() {
+    Node* current = head;
+    while (current != nullptr) {
+        Node* next = current->next;
+        delete current;
+        current = next;
     }
-    return static_cast<double>(ratingSum) / static_cast<double>(ratingCount);
+    head = nullptr;
+    tail = nullptr;
+    count = 0;
 }
 
-double Item::popularityScore() const {
-    return static_cast<double>(totalViews) + (static_cast<double>(totalLikes) * 3.0) + (averageRating() * 2.0);
+void AliveCellList::append(const Cell& cell) {
+    Node* node = new Node{cell, nullptr};
+    if (head == nullptr) {
+        head = node;
+        tail = node;
+    } else {
+        tail->next = node;
+        tail = node;
+    }
+    ++count;
 }
 
-double Interaction::averageRating() const {
-    if (ratings.empty()) {
-        return 0.0;
+int AliveCellList::size() const {
+    return count;
+}
+
+std::vector<Cell> AliveCellList::toVector() const {
+    std::vector<Cell> cells;
+    cells.reserve(count);
+
+    Node* current = head;
+    while (current != nullptr) {
+        cells.push_back(current->cell);
+        current = current->next;
+    }
+    return cells;
+}
+
+HistoryQueue::HistoryQueue(std::size_t maxEntriesValue)
+    : frontNode(nullptr), backNode(nullptr), maxEntries(maxEntriesValue), entryCount(0) {}
+
+HistoryQueue::~HistoryQueue() {
+    clear();
+}
+
+void HistoryQueue::clear() {
+    Node* current = frontNode;
+    while (current != nullptr) {
+        Node* next = current->next;
+        delete current;
+        current = next;
     }
 
-    int total = 0;
-    for (int rating : ratings) {
-        total += rating;
+    frontNode = nullptr;
+    backNode = nullptr;
+    entryCount = 0;
+}
+
+void HistoryQueue::enqueue(const GenerationStat& stat) {
+    if (maxEntries == 0) {
+        return;
     }
-    return static_cast<double>(total) / static_cast<double>(ratings.size());
+
+    if (static_cast<std::size_t>(entryCount) == maxEntries) {
+        GenerationStat discarded;
+        dequeue(discarded);
+    }
+
+    Node* node = new Node{stat, nullptr};
+    if (frontNode == nullptr) {
+        frontNode = node;
+        backNode = node;
+    } else {
+        backNode->next = node;
+        backNode = node;
+    }
+    ++entryCount;
 }
 
-double Interaction::preferenceScore() const {
-    return static_cast<double>(views) + (liked ? 3.0 : 0.0) + (averageRating() * 2.0);
-}
-
-BSTNode::BSTNode(const Item& value) : item(value) {}
-
-RecommendationEngine::RecommendationEngine() : root(nullptr), itemCount(0) {}
-
-RecommendationEngine::~RecommendationEngine() {
-    destroy(root);
-}
-
-bool RecommendationEngine::addUser(const std::string& userId, const std::string& name) {
-    if (userId.empty() || name.empty() || hasUser(userId)) {
+bool HistoryQueue::dequeue(GenerationStat& stat) {
+    if (frontNode == nullptr) {
         return false;
     }
 
-    users[userId] = User{userId, name};
-    userHistory[userId];
-    graph[userId];
+    Node* node = frontNode;
+    stat = node->stat;
+    frontNode = node->next;
+    if (frontNode == nullptr) {
+        backNode = nullptr;
+    }
+
+    delete node;
+    --entryCount;
     return true;
 }
 
-bool RecommendationEngine::addItem(const Item& item) {
-    if (item.id.empty() || item.name.empty() || hasItem(item.id)) {
+std::vector<GenerationStat> HistoryQueue::toVector() const {
+    std::vector<GenerationStat> stats;
+    stats.reserve(entryCount);
+
+    Node* current = frontNode;
+    while (current != nullptr) {
+        stats.push_back(current->stat);
+        current = current->next;
+    }
+    return stats;
+}
+
+int HistoryQueue::size() const {
+    return entryCount;
+}
+
+SnapshotStack::SnapshotStack() : topNode(nullptr) {}
+
+SnapshotStack::~SnapshotStack() {
+    clear();
+}
+
+void SnapshotStack::clear() {
+    Node* current = topNode;
+    while (current != nullptr) {
+        Node* next = current->next;
+        delete current;
+        current = next;
+    }
+    topNode = nullptr;
+}
+
+void SnapshotStack::push(const std::vector<std::vector<int>>& board, int generation) {
+    topNode = new Node{board, generation, topNode};
+}
+
+bool SnapshotStack::pop(std::vector<std::vector<int>>& board, int& generation) {
+    if (topNode == nullptr) {
         return false;
     }
 
+    Node* node = topNode;
+    board = node->board;
+    generation = node->generation;
+    topNode = node->next;
+    delete node;
+    return true;
+}
+
+bool SnapshotStack::empty() const {
+    return topNode == nullptr;
+}
+
+PatternBST::PatternBST() : root(nullptr) {}
+
+PatternBST::~PatternBST() {
+    clear();
+}
+
+void PatternBST::clear() {
+    clearRecursive(root);
+    root = nullptr;
+}
+
+bool PatternBST::insert(const Pattern& pattern) {
     bool inserted = false;
-    root = insertNode(root, item, inserted);
-    if (inserted) {
-        ++itemCount;
-    }
+    root = insertRecursive(root, pattern, inserted);
     return inserted;
 }
 
-Item* RecommendationEngine::findItem(const std::string& itemId) {
-    BSTNode* node = findNode(root, itemId);
-    return node == nullptr ? nullptr : &node->item;
+const Pattern* PatternBST::find(const std::string& name) const {
+    return findRecursive(root, normalizeName(name));
 }
 
-const Item* RecommendationEngine::findItemConst(const std::string& itemId) const {
-    BSTNode* node = findNode(root, itemId);
-    return node == nullptr ? nullptr : &node->item;
+std::vector<Pattern> PatternBST::listPatterns() const {
+    std::vector<Pattern> patternsOut;
+    inOrderRecursive(root, patternsOut);
+    return patternsOut;
 }
 
-bool RecommendationEngine::hasUser(const std::string& userId) const {
-    return users.find(userId) != users.end();
-}
-
-bool RecommendationEngine::hasItem(const std::string& itemId) const {
-    return findItemConst(itemId) != nullptr;
-}
-
-bool RecommendationEngine::recordView(const std::string& userId, const std::string& itemId) {
-    Item* item = findItem(itemId);
-    if (!hasUser(userId) || item == nullptr) {
-        return false;
-    }
-
-    Interaction& interaction = userHistory[userId][itemId];
-    ++interaction.views;
-    ++item->totalViews;
-    attachUserToItemIndex(userId, itemId);
-    rebuildGraphEdge(userId, itemId);
-    return true;
-}
-
-bool RecommendationEngine::recordLike(const std::string& userId, const std::string& itemId) {
-    Item* item = findItem(itemId);
-    if (!hasUser(userId) || item == nullptr) {
-        return false;
-    }
-
-    Interaction& interaction = userHistory[userId][itemId];
-    if (!interaction.liked) {
-        interaction.liked = true;
-        ++item->totalLikes;
-    }
-    attachUserToItemIndex(userId, itemId);
-    rebuildGraphEdge(userId, itemId);
-    return true;
-}
-
-bool RecommendationEngine::recordRating(const std::string& userId, const std::string& itemId, int rating) {
-    Item* item = findItem(itemId);
-    if (!hasUser(userId) || item == nullptr || rating < 1 || rating > 5) {
-        return false;
-    }
-
-    Interaction& interaction = userHistory[userId][itemId];
-    interaction.ratings.push_back(rating);
-    item->ratingSum += rating;
-    ++item->ratingCount;
-    attachUserToItemIndex(userId, itemId);
-    rebuildGraphEdge(userId, itemId);
-    return true;
-}
-
-std::vector<Item> RecommendationEngine::listCatalog() const {
-    std::vector<Item> result;
-    result.reserve(itemCount);
-    inorder(root, result);
-    return result;
-}
-
-std::vector<User> RecommendationEngine::listUsers() const {
-    std::vector<User> result;
-    result.reserve(users.size());
-    for (const auto& entry : users) {
-        result.push_back(entry.second);
-    }
-    std::sort(result.begin(), result.end(), [](const User& left, const User& right) {
-        return left.id < right.id;
-    });
-    return result;
-}
-
-std::vector<std::pair<std::string, Interaction>> RecommendationEngine::getUserHistory(const std::string& userId) const {
-    std::vector<std::pair<std::string, Interaction>> result;
-    auto historyIt = userHistory.find(userId);
-    if (historyIt == userHistory.end()) {
-        return result;
-    }
-
-    for (const auto& entry : historyIt->second) {
-        result.push_back(entry);
-    }
-
-    std::sort(result.begin(), result.end(), [](const auto& left, const auto& right) {
-        return left.first < right.first;
-    });
-    return result;
-}
-
-std::vector<std::pair<Item, double>> RecommendationEngine::recommendBySimilarUsers(
-    const std::string& userId,
-    std::size_t topN) const {
-    std::vector<std::pair<Item, double>> result;
-    if (!hasUser(userId)) {
-        return result;
-    }
-
-    std::unordered_map<std::string, double> candidateScores;
-    for (const auto& entry : users) {
-        const std::string& otherUserId = entry.first;
-        if (otherUserId == userId) {
-            continue;
-        }
-
-        double similarity = userSimilarity(userId, otherUserId);
-        if (similarity <= 0.0) {
-            continue;
-        }
-
-        const auto& otherHistory = userHistory.at(otherUserId);
-        for (const auto& itemEntry : otherHistory) {
-            const std::string& candidateItemId = itemEntry.first;
-            if (userHasItem(userId, candidateItemId)) {
-                continue;
-            }
-
-            candidateScores[candidateItemId] += similarity * itemEntry.second.preferenceScore();
-        }
-    }
-
-    std::priority_queue<RankedCandidate> ranking;
-    for (const auto& entry : candidateScores) {
-        const Item* item = findItemConst(entry.first);
-        if (item == nullptr) {
-            continue;
-        }
-
-        double finalScore = entry.second + (item->popularityScore() * 0.05);
-        ranking.push(RankedCandidate{finalScore, entry.first});
-    }
-
-    while (!ranking.empty() && result.size() < topN) {
-        RankedCandidate candidate = ranking.top();
-        ranking.pop();
-        const Item* item = findItemConst(candidate.itemId);
-        if (item != nullptr) {
-            result.push_back({*item, candidate.score});
-        }
-    }
-
-    return result;
-}
-
-std::vector<std::pair<Item, double>> RecommendationEngine::recommendBySimilarItems(
-    const std::string& userId,
-    std::size_t topN) const {
-    std::vector<std::pair<Item, double>> result;
-    if (!hasUser(userId)) {
-        return result;
-    }
-
-    auto historyIt = userHistory.find(userId);
-    if (historyIt == userHistory.end()) {
-        return result;
-    }
-
-    std::unordered_map<std::string, double> candidateScores;
-    const auto& currentHistory = historyIt->second;
-    for (const auto& seedEntry : currentHistory) {
-        const std::string& seedItemId = seedEntry.first;
-        const auto seedUsersIt = itemUsers.find(seedItemId);
-        if (seedUsersIt == itemUsers.end()) {
-            continue;
-        }
-
-        for (const std::string& relatedUserId : seedUsersIt->second) {
-            const auto& relatedHistory = userHistory.at(relatedUserId);
-            for (const auto& candidateEntry : relatedHistory) {
-                const std::string& candidateItemId = candidateEntry.first;
-                if (candidateItemId == seedItemId || userHasItem(userId, candidateItemId)) {
-                    continue;
-                }
-
-                double similarity = itemSimilarity(seedItemId, candidateItemId);
-                if (similarity <= 0.0) {
-                    continue;
-                }
-
-                candidateScores[candidateItemId] += seedEntry.second.preferenceScore() * similarity;
-            }
-        }
-    }
-
-    std::priority_queue<RankedCandidate> ranking;
-    for (const auto& entry : candidateScores) {
-        const Item* item = findItemConst(entry.first);
-        if (item == nullptr) {
-            continue;
-        }
-        double finalScore = entry.second + (item->averageRating() * 0.1);
-        ranking.push(RankedCandidate{finalScore, entry.first});
-    }
-
-    while (!ranking.empty() && result.size() < topN) {
-        RankedCandidate candidate = ranking.top();
-        ranking.pop();
-        const Item* item = findItemConst(candidate.itemId);
-        if (item != nullptr) {
-            result.push_back({*item, candidate.score});
-        }
-    }
-
-    return result;
-}
-
-std::vector<std::pair<Item, double>> RecommendationEngine::recommendTopN(
-    const std::string& userId,
-    std::size_t topN) const {
-    std::vector<std::pair<Item, double>> result;
-    if (!hasUser(userId)) {
-        return result;
-    }
-
-    std::unordered_map<std::string, double> combinedScores;
-    const auto userBased = recommendBySimilarUsers(userId, itemCount);
-    const auto itemBased = recommendBySimilarItems(userId, itemCount);
-
-    for (const auto& entry : userBased) {
-        combinedScores[entry.first.id] += entry.second * 0.6;
-    }
-    for (const auto& entry : itemBased) {
-        combinedScores[entry.first.id] += entry.second * 0.4;
-    }
-
-    std::priority_queue<RankedCandidate> ranking;
-    for (const auto& entry : combinedScores) {
-        const Item* item = findItemConst(entry.first);
-        if (item == nullptr) {
-            continue;
-        }
-        ranking.push(RankedCandidate{entry.second + (item->popularityScore() * 0.03), entry.first});
-    }
-
-    while (!ranking.empty() && result.size() < topN) {
-        RankedCandidate candidate = ranking.top();
-        ranking.pop();
-        const Item* item = findItemConst(candidate.itemId);
-        if (item != nullptr) {
-            result.push_back({*item, candidate.score});
-        }
-    }
-
-    return result;
-}
-
-Item RecommendationEngine::reportMostPopularItem() const {
-    std::vector<Item> items = listCatalog();
-    if (items.empty()) {
-        return Item{};
-    }
-
-    return *std::max_element(items.begin(), items.end(), [](const Item& left, const Item& right) {
-        return left.popularityScore() < right.popularityScore();
-    });
-}
-
-User RecommendationEngine::reportMostActiveUser() const {
-    if (users.empty()) {
-        return User{};
-    }
-
-    auto best = std::max_element(users.begin(), users.end(), [this](const auto& left, const auto& right) {
-        return userActivityScore(left.first) < userActivityScore(right.first);
-    });
-    return best->second;
-}
-
-void RecommendationEngine::loadSampleData() {
-    clear();
-
-    addUser("U01", "An");
-    addUser("U02", "Binh");
-    addUser("U03", "Chi");
-    addUser("U04", "Dung");
-
-    addItem({"M01", "Interstellar", "Movie", "Sci-fi du hanh khong gian"});
-    addItem({"M02", "Inception", "Movie", "Giac mo va thao tung tam tri"});
-    addItem({"M03", "The Dark Knight", "Movie", "Batman doi dau Joker"});
-    addItem({"M04", "Coco", "Movie", "Animated am nhac gia dinh"});
-    addItem({"M05", "La La Land", "Movie", "Nhac kich lang man"});
-    addItem({"M06", "Soul", "Movie", "Hanh trinh tim y nghia song"});
-
-    recordView("U01", "M01");
-    recordLike("U01", "M01");
-    recordRating("U01", "M01", 5);
-    recordView("U01", "M02");
-    recordLike("U01", "M02");
-    recordRating("U01", "M02", 4);
-
-    recordView("U02", "M01");
-    recordLike("U02", "M01");
-    recordRating("U02", "M01", 5);
-    recordView("U02", "M03");
-    recordLike("U02", "M03");
-    recordRating("U02", "M03", 5);
-    recordView("U02", "M06");
-    recordRating("U02", "M06", 4);
-
-    recordView("U03", "M02");
-    recordLike("U03", "M02");
-    recordRating("U03", "M02", 4);
-    recordView("U03", "M05");
-    recordLike("U03", "M05");
-    recordRating("U03", "M05", 5);
-    recordView("U03", "M04");
-    recordRating("U03", "M04", 4);
-
-    recordView("U04", "M01");
-    recordRating("U04", "M01", 4);
-    recordView("U04", "M02");
-    recordLike("U04", "M02");
-    recordRating("U04", "M02", 5);
-    recordView("U04", "M05");
-    recordRating("U04", "M05", 5);
-}
-
-void RecommendationEngine::clear() {
-    destroy(root);
-    root = nullptr;
-    itemCount = 0;
-    users.clear();
-    userHistory.clear();
-    graph.clear();
-    itemUsers.clear();
-}
-
-BSTNode* RecommendationEngine::insertNode(BSTNode* node, const Item& item, bool& inserted) {
+PatternBST::Node* PatternBST::insertRecursive(Node* node, const Pattern& pattern, bool& inserted) {
     if (node == nullptr) {
         inserted = true;
-        return new BSTNode(item);
+        return new Node{pattern, nullptr, nullptr};
     }
 
-    if (item.id < node->item.id) {
-        node->left = insertNode(node->left, item, inserted);
-    } else if (item.id > node->item.id) {
-        node->right = insertNode(node->right, item, inserted);
-    } else {
-        inserted = false;
+    if (pattern.name < node->pattern.name) {
+        node->left = insertRecursive(node->left, pattern, inserted);
+    } else if (pattern.name > node->pattern.name) {
+        node->right = insertRecursive(node->right, pattern, inserted);
     }
+
     return node;
 }
 
-BSTNode* RecommendationEngine::findNode(BSTNode* node, const std::string& itemId) const {
-    BSTNode* current = node;
-    while (current != nullptr) {
-        if (itemId < current->item.id) {
-            current = current->left;
-        } else if (itemId > current->item.id) {
-            current = current->right;
-        } else {
-            return current;
-        }
+const Pattern* PatternBST::findRecursive(Node* node, const std::string& name) const {
+    if (node == nullptr) {
+        return nullptr;
     }
-    return nullptr;
+
+    if (name < node->pattern.name) {
+        return findRecursive(node->left, name);
+    }
+
+    if (name > node->pattern.name) {
+        return findRecursive(node->right, name);
+    }
+
+    return &node->pattern;
 }
 
-void RecommendationEngine::inorder(BSTNode* node, std::vector<Item>& result) const {
+void PatternBST::inOrderRecursive(Node* node, std::vector<Pattern>& patternsOut) const {
     if (node == nullptr) {
         return;
     }
-    inorder(node->left, result);
-    result.push_back(node->item);
-    inorder(node->right, result);
+
+    inOrderRecursive(node->left, patternsOut);
+    patternsOut.push_back(node->pattern);
+    inOrderRecursive(node->right, patternsOut);
 }
 
-void RecommendationEngine::destroy(BSTNode* node) {
+void PatternBST::clearRecursive(Node* node) {
     if (node == nullptr) {
         return;
     }
-    destroy(node->left);
-    destroy(node->right);
+
+    clearRecursive(node->left);
+    clearRecursive(node->right);
     delete node;
 }
 
-void RecommendationEngine::rebuildGraphEdge(const std::string& userId, const std::string& itemId) {
-    const Interaction& interaction = userHistory[userId][itemId];
-    const double weight = interaction.preferenceScore();
-    std::vector<UserItemEdge>& edges = graph[userId];
+ConwayGame::ConwayGame(int rowsValue, int colsValue)
+    : rows(rowsValue),
+      cols(colsValue),
+      generation(0),
+      board(rowsValue, std::vector<int>(colsValue, 0)),
+      history(100) {
+    if (rows <= 0 || cols <= 0) {
+        throw std::invalid_argument("Board size must be positive.");
+    }
 
-    for (UserItemEdge& edge : edges) {
-        if (edge.itemId == itemId) {
-            edge.weight = weight;
-            return;
+    loadDefaultPatterns();
+    rebuildAliveCells();
+}
+
+ConwayGame::~ConwayGame() = default;
+
+void ConwayGame::resizeBoard(int rowsValue, int colsValue) {
+    if (rowsValue <= 0 || colsValue <= 0) {
+        throw std::invalid_argument("Board size must be positive.");
+    }
+
+    rows = rowsValue;
+    cols = colsValue;
+    board.assign(rows, std::vector<int>(cols, 0));
+    resetBoardState();
+}
+
+void ConwayGame::clearBoard() {
+    for (int row = 0; row < rows; row += 1) {
+        std::fill(board[row].begin(), board[row].end(), 0);
+    }
+    resetBoardState();
+}
+
+void ConwayGame::seedRandom(double densityPercent) {
+    if (densityPercent < 0.0 || densityPercent > 100.0) {
+        throw std::invalid_argument("Density must be in [0, 100].");
+    }
+
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_real_distribution<double> distribution(0.0, 100.0);
+
+    for (int row = 0; row < rows; row += 1) {
+        for (int col = 0; col < cols; col += 1) {
+            board[row][col] = distribution(generator) < densityPercent ? 1 : 0;
         }
     }
 
-    edges.push_back(UserItemEdge{itemId, weight});
+    resetBoardState();
 }
 
-void RecommendationEngine::attachUserToItemIndex(const std::string& userId, const std::string& itemId) {
-    std::vector<std::string>& bucket = itemUsers[itemId];
-    if (std::find(bucket.begin(), bucket.end(), userId) == bucket.end()) {
-        bucket.push_back(userId);
-    }
-}
-
-bool RecommendationEngine::userHasItem(const std::string& userId, const std::string& itemId) const {
-    auto historyIt = userHistory.find(userId);
-    if (historyIt == userHistory.end()) {
+bool ConwayGame::setCell(int row, int col, bool alive) {
+    if (!inBounds(row, col)) {
         return false;
     }
-    return historyIt->second.find(itemId) != historyIt->second.end();
+
+    board[row][col] = alive ? 1 : 0;
+    rebuildAliveCells();
+    return true;
 }
 
-double RecommendationEngine::userSimilarity(const std::string& userA, const std::string& userB) const {
-    auto historyAIt = userHistory.find(userA);
-    auto historyBIt = userHistory.find(userB);
-    if (historyAIt == userHistory.end() || historyBIt == userHistory.end()) {
-        return 0.0;
+bool ConwayGame::toggleCell(int row, int col) {
+    if (!inBounds(row, col)) {
+        return false;
     }
 
-    const auto& historyA = historyAIt->second;
-    const auto& historyB = historyBIt->second;
+    board[row][col] = board[row][col] == 1 ? 0 : 1;
+    rebuildAliveCells();
+    return true;
+}
 
-    double dot = 0.0;
-    double normA = 0.0;
-    double normB = 0.0;
+bool ConwayGame::loadPattern(const std::string& name) {
+    const Pattern* pattern = patterns.find(name);
+    if (pattern == nullptr) {
+        return false;
+    }
 
-    for (const auto& entry : historyA) {
-        const double scoreA = entry.second.preferenceScore();
-        normA += scoreA * scoreA;
+    int patternHeight = 0;
+    int patternWidth = 0;
+    for (const Cell& cell : pattern->cells) {
+        patternHeight = std::max(patternHeight, cell.row + 1);
+        patternWidth = std::max(patternWidth, cell.col + 1);
+    }
 
-        auto otherIt = historyB.find(entry.first);
-        if (otherIt != historyB.end()) {
-            dot += scoreA * otherIt->second.preferenceScore();
+    const int offsetRow = std::max(0, (rows - patternHeight) / 2);
+    const int offsetCol = std::max(0, (cols - patternWidth) / 2);
+    return loadPatternAt(name, offsetRow, offsetCol);
+}
+
+bool ConwayGame::loadPatternAt(const std::string& name, int topRow, int leftCol) {
+    const Pattern* pattern = patterns.find(name);
+    if (pattern == nullptr) {
+        return false;
+    }
+
+    clearBoard();
+    for (const Cell& cell : pattern->cells) {
+        const int row = topRow + cell.row;
+        const int col = leftCol + cell.col;
+        if (inBounds(row, col)) {
+            board[row][col] = 1;
         }
     }
 
-    for (const auto& entry : historyB) {
-        const double scoreB = entry.second.preferenceScore();
-        normB += scoreB * scoreB;
-    }
-
-    if (dot == 0.0 || normA == 0.0 || normB == 0.0) {
-        return 0.0;
-    }
-
-    return dot / (std::sqrt(normA) * std::sqrt(normB));
+    resetBoardState();
+    return true;
 }
 
-double RecommendationEngine::itemSimilarity(const std::string& itemA, const std::string& itemB) const {
-    auto usersAIt = itemUsers.find(itemA);
-    auto usersBIt = itemUsers.find(itemB);
-    if (usersAIt == itemUsers.end() || usersBIt == itemUsers.end()) {
-        return 0.0;
-    }
+bool ConwayGame::step() {
+    pushUndoState();
 
-    const auto& usersA = usersAIt->second;
-    const auto& usersB = usersBIt->second;
-    if (usersA.empty() || usersB.empty()) {
-        return 0.0;
-    }
+    std::vector<std::vector<int>> nextBoard(rows, std::vector<int>(cols, 0));
+    int born = 0;
+    int died = 0;
 
-    std::unordered_set<std::string> smaller;
-    const std::vector<std::string>* larger = nullptr;
-    if (usersA.size() <= usersB.size()) {
-        smaller.insert(usersA.begin(), usersA.end());
-        larger = &usersB;
-    } else {
-        smaller.insert(usersB.begin(), usersB.end());
-        larger = &usersA;
-    }
+    for (int row = 0; row < rows; row += 1) {
+        for (int col = 0; col < cols; col += 1) {
+            const int neighbors = countAliveNeighbors(row, col);
+            const bool alive = board[row][col] == 1;
+            const bool nextAlive = alive ? (neighbors == 2 || neighbors == 3) : (neighbors == 3);
 
-    std::size_t sharedUsers = 0;
-    for (const std::string& userId : *larger) {
-        if (smaller.find(userId) != smaller.end()) {
-            ++sharedUsers;
+            nextBoard[row][col] = nextAlive ? 1 : 0;
+
+            if (!alive && nextAlive) {
+                ++born;
+            } else if (alive && !nextAlive) {
+                ++died;
+            }
         }
     }
 
-    if (sharedUsers == 0) {
-        return 0.0;
-    }
-
-    return static_cast<double>(sharedUsers) /
-           std::sqrt(static_cast<double>(usersA.size()) * static_cast<double>(usersB.size()));
+    board.swap(nextBoard);
+    ++generation;
+    rebuildAliveCells();
+    recordHistory(born, died);
+    return born > 0 || died > 0;
 }
 
-double RecommendationEngine::userActivityScore(const std::string& userId) const {
-    auto historyIt = userHistory.find(userId);
-    if (historyIt == userHistory.end()) {
-        return 0.0;
+void ConwayGame::runSteps(int steps) {
+    for (int i = 0; i < steps; i += 1) {
+        step();
+    }
+}
+
+bool ConwayGame::undo() {
+    std::vector<std::vector<int>> previousBoard;
+    int previousGeneration = 0;
+    if (!undoHistory.pop(previousBoard, previousGeneration)) {
+        return false;
     }
 
-    double total = 0.0;
-    for (const auto& entry : historyIt->second) {
-        total += entry.second.preferenceScore();
+    board = previousBoard;
+    generation = previousGeneration;
+    rebuildAliveCells();
+
+    std::vector<GenerationStat> stats = history.toVector();
+    history.clear();
+    if (!stats.empty()) {
+        stats.pop_back();
     }
-    return total;
+    for (const GenerationStat& stat : stats) {
+        history.enqueue(stat);
+    }
+
+    return true;
+}
+
+int ConwayGame::getRows() const {
+    return rows;
+}
+
+int ConwayGame::getCols() const {
+    return cols;
+}
+
+int ConwayGame::getGeneration() const {
+    return generation;
+}
+
+int ConwayGame::getAliveCount() const {
+    return aliveCells.size();
+}
+
+bool ConwayGame::isCellAlive(int row, int col) const {
+    return inBounds(row, col) && board[row][col] == 1;
+}
+
+std::vector<std::vector<int>> ConwayGame::getBoard() const {
+    return board;
+}
+
+std::vector<GenerationStat> ConwayGame::getHistoryStats() const {
+    return history.toVector();
+}
+
+std::vector<Pattern> ConwayGame::listPatterns() const {
+    return patterns.listPatterns();
+}
+
+void ConwayGame::printBoard(std::ostream& out) const {
+    out << "\nGeneration: " << generation
+        << " | Alive cells: " << getAliveCount()
+        << " | Size: " << rows << "x" << cols << "\n";
+
+    out << "   ";
+    for (int col = 0; col < cols; col += 1) {
+        out << (col % 10);
+    }
+    out << "\n";
+
+    for (int row = 0; row < rows; row += 1) {
+        out << std::setw(2) << row << " ";
+        for (int col = 0; col < cols; col += 1) {
+            out << (board[row][col] == 1 ? '#' : '.');
+        }
+        out << "\n";
+    }
+}
+
+void ConwayGame::printHistory(std::ostream& out, int limit) const {
+    std::vector<GenerationStat> stats = history.toVector();
+    if (stats.empty()) {
+        out << "Chua co lich su mo phong.\n";
+        return;
+    }
+
+    const int startIndex = std::max(0, static_cast<int>(stats.size()) - limit);
+    for (std::size_t index = static_cast<std::size_t>(startIndex); index < stats.size(); index += 1) {
+        const GenerationStat& stat = stats[index];
+        out << "Gen " << stat.generation
+            << " | alive=" << stat.aliveCells
+            << " | born=" << stat.born
+            << " | died=" << stat.died << "\n";
+    }
+}
+
+void ConwayGame::loadDefaultPatterns() {
+    patterns.insert(Pattern{
+        "beacon",
+        "Oscillator 2x2 block pair.",
+        {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 2}, {2, 3}, {3, 2}, {3, 3}},
+    });
+    patterns.insert(Pattern{
+        "blinker",
+        "Period-2 line oscillator.",
+        {{0, 1}, {1, 1}, {2, 1}},
+    });
+    patterns.insert(Pattern{
+        "block",
+        "Stable 2x2 still life.",
+        {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+    });
+    patterns.insert(Pattern{
+        "glider",
+        "Small spaceship that moves diagonally.",
+        {{0, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}},
+    });
+    patterns.insert(Pattern{
+        "toad",
+        "Period-2 oscillator with six cells.",
+        {{0, 1}, {0, 2}, {0, 3}, {1, 0}, {1, 1}, {1, 2}},
+    });
+    patterns.insert(Pattern{
+        "gosper",
+        "Gosper glider gun.",
+        {
+            {0, 24},
+            {1, 22}, {1, 24},
+            {2, 12}, {2, 13}, {2, 20}, {2, 21}, {2, 34}, {2, 35},
+            {3, 11}, {3, 15}, {3, 20}, {3, 21}, {3, 34}, {3, 35},
+            {4, 0}, {4, 1}, {4, 10}, {4, 16}, {4, 20}, {4, 21},
+            {5, 0}, {5, 1}, {5, 10}, {5, 14}, {5, 16}, {5, 17}, {5, 22}, {5, 24},
+            {6, 10}, {6, 16}, {6, 24},
+            {7, 11}, {7, 15},
+            {8, 12}, {8, 13},
+        },
+    });
+}
+
+void ConwayGame::resetBoardState() {
+    generation = 0;
+    undoHistory.clear();
+    history.clear();
+    rebuildAliveCells();
+    recordHistory(getAliveCount(), 0);
+}
+
+void ConwayGame::rebuildAliveCells() {
+    aliveCells.clear();
+    for (int row = 0; row < rows; row += 1) {
+        for (int col = 0; col < cols; col += 1) {
+            if (board[row][col] == 1) {
+                aliveCells.append(Cell{row, col});
+            }
+        }
+    }
+}
+
+void ConwayGame::recordHistory(int born, int died) {
+    history.enqueue(GenerationStat{generation, getAliveCount(), born, died});
+}
+
+void ConwayGame::pushUndoState() {
+    undoHistory.push(board, generation);
+}
+
+bool ConwayGame::inBounds(int row, int col) const {
+    return row >= 0 && row < rows && col >= 0 && col < cols;
+}
+
+int ConwayGame::countAliveNeighbors(int row, int col) const {
+    int aliveNeighbors = 0;
+
+    for (int deltaRow = -1; deltaRow <= 1; deltaRow += 1) {
+        for (int deltaCol = -1; deltaCol <= 1; deltaCol += 1) {
+            if (deltaRow == 0 && deltaCol == 0) {
+                continue;
+            }
+
+            const int nextRow = row + deltaRow;
+            const int nextCol = col + deltaCol;
+            if (inBounds(nextRow, nextCol) && board[nextRow][nextCol] == 1) {
+                ++aliveNeighbors;
+            }
+        }
+    }
+
+    return aliveNeighbors;
 }

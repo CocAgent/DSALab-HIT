@@ -1,76 +1,91 @@
-# Recommendation Engine
+# Conway: Game of Life
 
-## Thông tin sinh viên
+## Thong tin sinh vien
 
-- Họ tên: Vương Nguyễn Trường Hùng
+- Ho ten: Vuong Nguyen Truong Hung
 - MSSV: 2124110111
-- Đề tài: Recommendation Engine
+- De tai: Conway: Game of Life
 
-Ứng dụng C++ CLI mô phỏng hệ thống gợi ý đơn giản cho phim / bài hát / sản phẩm. Chương trình ghi nhận lịch sử tương tác của người dùng, phân tích độ tương đồng, sau đó đề xuất item phù hợp theo hai hướng:
+Day la ung dung C++ CLI mo phong tro choi te bao Conway's Game of Life tren ma tran 2 chieu. Nguoi dung co the tao ban co, gieo te bao song, nap pattern co san, chay mo phong theo tung the he, hoan tac va xem lich su bien doi.
 
-- Collaborative Filtering: người dùng tương tự cùng thích những item nào.
-- Item-based Recommendation: item giống với những item bạn đã thích.
+## Muc tieu bai toan
 
-## Cấu trúc dữ liệu sử dụng
+- Mo phong luat song chet kinh dien cua Conway:
+  - O song song tiep neu co 2 hoac 3 hang xom song.
+  - O chet se duoc sinh ra neu co dung 3 hang xom song.
+- Cho phep thu nghiem cac pattern kinh dien nhu `block`, `blinker`, `glider`, `beacon`, `toad`, `gosper`.
+- Trinh bay bang menu de phu hop yeu cau bai nop mon hoc.
 
-- `Graph`:
-  Dùng adjacency list để lưu quan hệ user-item. Mỗi cạnh thể hiện mức độ quan tâm của user với item, phù hợp vì bài toán recommendation là bài toán liên kết giữa hai tập đỉnh.
+## Cau truc du lieu su dung
+
+- `Linked List`:
+  Dung trong `AliveCellList` de luu danh sach cac o dang song tren ban co hien tai.
+- `Queue`:
+  Dung trong `HistoryQueue` de luu lich su cac the he gan day, gom so o song, so o moi sinh va so o chet.
+- `Stack`:
+  Dung trong `SnapshotStack` de ho tro thao tac `undo`, quay lai trang thai truoc do cua ban co.
 - `BST`:
-  Dùng để lưu catalog item theo `id`, hỗ trợ tìm kiếm item nhanh hơn danh sách tuyến tính và để duyệt in-order có thứ tự.
-- `Priority Queue (Heap)`:
-  Dùng để xếp hạng gợi ý theo điểm relevance và lấy Top-N nhanh, đáp ứng yêu cầu cấu trúc dữ liệu dạng Heap.
-- `unordered_map`:
-  Dùng để lưu lịch sử tương tác của user và chỉ mục item-user, truy cập trung bình O(1).
+  Dung trong `PatternBST` de luu va tim kiem pattern co san theo ten.
 
-## Chức năng
+## Chuc nang
 
-1. Thêm người dùng mới.
-2. Thêm item vào catalog.
-3. Ghi nhận hành động `view`, `like`, `rating`.
-4. Tìm item trong BST theo ID.
-5. Hiển thị catalog.
-6. Gợi ý theo người dùng tương tự.
-7. Gợi ý theo item tương tự.
-8. Hiển thị Top-N gợi ý tổng hợp.
-9. Báo cáo thống kê.
-10. Xem lịch sử người dùng.
-11. Nạp dữ liệu mẫu để demo.
+1. Hien thi ban co hien tai.
+2. Thay doi kich thuoc ban co.
+3. Bat/tat mot o thu cong.
+4. Gieo ngau nhien theo mat do phan tram.
+5. Nap pattern Conway tu cay BST.
+6. Chay 1 the he.
+7. Chay N the he lien tiep.
+8. Hoan tac 1 buoc.
+9. Xem lich su mo phong.
+10. Liet ke pattern co san.
+11. Xoa ban co.
 
-## Thiết kế file
+## Thiet ke file
 
 ```text
 src/
-  main.cpp       - Menu và điều khiển chương trình
-  structures.h   - Khai báo struct, class, prototype
-  functions.cpp  - Cài đặt các cấu trúc dữ liệu và thuật toán
+  main.cpp       - Menu va dieu khien chuong trinh
+  structures.h   - Khai bao cau truc du lieu va prototype
+  functions.cpp  - Cai dat Conway va cac cau truc du lieu
 tests/
-  test_cases.cpp - Bộ test cơ bản và edge cases
+  test_cases.cpp - Bo test cac chuc nang chinh
 docs/
   .gitkeep
-README.md        - Mô tả ứng dụng và hướng dẫn chạy
+README.md        - Mo ta bai toan va huong dan chay
 ```
 
-## Compile và chạy
+## Compile va chay
 
-Build chương trình chính:
+Build chuong trinh chinh:
 
 ```bash
 g++ -std=c++17 src/main.cpp src/functions.cpp -o app
 ./app
 ```
 
-Build bộ test:
+Build bo test:
 
 ```bash
 g++ -std=c++17 tests/test_cases.cpp src/functions.cpp -o test_app
 ./test_app
 ```
 
-## Test cases chính
+## Test cases chinh
 
-1. Thêm user và item, kiểm tra catalog được sắp xếp theo BST.
-2. Tìm kiếm item tồn tại / không tồn tại.
-3. Ghi nhận `view`, `like`, `rating` và kiểm tra số liệu cập nhật đúng.
-4. Tạo gợi ý trên dữ liệu mẫu và đảm bảo có kết quả hợp lệ.
-5. Test edge case: ID rỗng, user/item không tồn tại, rating ngoài miền hợp lệ.
-6. Test thống kê item phổ biến và user hoạt động.
+1. `block` la still life nen khong doi sau 1 the he.
+2. `blinker` dao dong dung chu ky 2.
+3. BST chua va liet ke duoc pattern `glider`, `gosper`.
+4. Nap pattern `glider` dung so luong te bao song.
+5. `undo` khoi phuc dung trang thai truoc khi step.
+6. `HistoryQueue` ghi nhan dung thong tin the he.
+
+## Danh gia thiet ke
+
+- Uu diem:
+  - Menu ro rang, de demo tren terminal.
+  - Dung nhieu cau truc du lieu co y nghia voi bai toan.
+  - De mo rong them pattern moi hoac che do wrap board.
+- Han che:
+  - Ban co hien tai su dung ma tran trong RAM nen khong toi uu cho kich thuoc rat lon.
+  - Hien thi la dang text, chua co giao dien do hoa.
