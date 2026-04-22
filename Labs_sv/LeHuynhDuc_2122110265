@@ -1,0 +1,221 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+// ===== STRUCT =====
+struct Item {
+    string name;
+    int price;
+    int quantity;
+};
+
+struct Node {
+    Item data;
+    Node* next;
+};
+
+// ===== CREATE NODE =====
+Node* createNode(Item item) {
+    Node* p = new Node;
+    p->data = item;
+    p->next = NULL;
+    return p;
+}
+
+// ===== CLEAR SCREEN =====
+void clearScreen() {
+    system("cls"); // Windows
+}
+
+// ===== ADD ITEM =====
+void addItem(Node*& head) {
+    Item item;
+    cin.ignore();
+
+    cout << "\nNhap ten item: ";
+    getline(cin, item.name);
+    cout << "Nhap gia: ";
+    cin >> item.price;
+    cout << "Nhap so luong: ";
+    cin >> item.quantity;
+
+    Node* p = createNode(item);
+    p->next = head;
+    head = p;
+
+    cout << "\n>> Da them item!\n";
+    system("pause");
+}
+
+// ===== DISPLAY =====
+void display(Node* head) {
+    if (!head) {
+        cout << "\n[SHOP RONG]\n";
+        return;
+    }
+
+    cout << "\n====================================================\n";
+    cout << left << setw(5) << "STT"
+        << setw(20) << "TEN ITEM"
+        << setw(10) << "GIA"
+        << setw(10) << "SL" << endl;
+    cout << "----------------------------------------------------\n";
+
+    Node* cur = head;
+    int i = 1;
+    while (cur) {
+        cout << left << setw(5) << i++
+            << setw(20) << cur->data.name
+            << setw(10) << cur->data.price
+            << setw(10) << cur->data.quantity << endl;
+        cur = cur->next;
+    }
+
+    cout << "====================================================\n";
+}
+
+// ===== FIND ITEM =====
+Node* findItem(Node* head, string name) {
+    Node* cur = head;
+    while (cur) {
+        if (cur->data.name == name)
+            return cur;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+// ===== DELETE ITEM =====
+void deleteItem(Node*& head) {
+    if (!head) return;
+
+    string name;
+    cin.ignore();
+    cout << "\nNhap ten item can xoa: ";
+    getline(cin, name);
+
+    Node* cur = head;
+    Node* prev = NULL;
+
+    while (cur) {
+        if (cur->data.name == name) {
+            if (!prev) head = cur->next;
+            else prev->next = cur->next;
+
+            delete cur;
+            cout << ">> Da xoa!\n";
+            system("pause");
+            return;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+
+    cout << ">> Khong tim thay!\n";
+    system("pause");
+}
+
+// ===== BUY ITEM =====
+void buyItem(Node* head) {
+    string name;
+    cin.ignore();
+    cout << "\nNhap ten item muon mua: ";
+    getline(cin, name);
+
+    Node* item = findItem(head, name);
+
+    if (!item) {
+        cout << "Khong co item!\n";
+        system("pause");
+        return;
+    }
+
+    int qty;
+    cout << "Nhap so luong muon mua: ";
+    cin >> qty;
+
+    if (qty > item->data.quantity) {
+        cout << "Khong du hang!\n";
+        system("pause");
+        return;
+    }
+
+    int total = qty * item->data.price;
+    item->data.quantity -= qty;
+
+    cout << ">> Mua thanh cong! Tong tien: " << total << endl;
+    system("pause");
+}
+
+// ===== SORT =====
+void sortByPrice(Node*& head) {
+    for (Node* i = head; i != NULL; i = i->next) {
+        for (Node* j = i->next; j != NULL; j = j->next) {
+            if (i->data.price > j->data.price) {
+                swap(i->data, j->data);
+            }
+        }
+    }
+
+    cout << "\n>> Da sap xep!\n";
+    system("pause");
+}
+
+// ===== MENU =====
+void menu() {
+    cout << "\n=========================================\n";
+    cout << "           🎮 GAME SHOP SYSTEM\n";
+    cout << "=========================================\n";
+    cout << "1. Them item\n";
+    cout << "2. Hien thi shop\n";
+    cout << "3. Xoa item\n";
+    cout << "4. Mua item\n";
+    cout << "5. Sap xep theo gia\n";
+    cout << "0. Thoat\n";
+    cout << "=========================================\n";
+}
+
+// ===== MAIN =====
+int main() {
+    Node* head = NULL;
+    int choice;
+
+    do {
+        clearScreen();
+        menu();
+        cout << "Chon: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            clearScreen();
+            addItem(head);
+            break;
+
+        case 2:
+            clearScreen();
+            display(head);
+            system("pause");
+            break;
+
+        case 3:
+            clearScreen();
+            deleteItem(head);
+            break;
+
+        case 4:
+            clearScreen();
+            buyItem(head);
+            break;
+
+        case 5:
+            clearScreen();
+            sortByPrice(head);
+            break;
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
