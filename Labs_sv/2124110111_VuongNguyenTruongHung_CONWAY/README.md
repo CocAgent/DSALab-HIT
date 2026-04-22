@@ -1,91 +1,91 @@
 # Conway: Game of Life
 
-## Thong tin sinh vien
+## Thông tin sinh viên
 
-- Ho ten: Vuong Nguyen Truong Hung
+- Họ tên: Vương Nguyễn Trường Hùng
 - MSSV: 2124110111
-- De tai: Conway: Game of Life
+- Đề tài: Conway: Game of Life
 
-Day la ung dung C++ CLI mo phong tro choi te bao Conway's Game of Life tren ma tran 2 chieu. Nguoi dung co the tao ban co, gieo te bao song, nap pattern co san, chay mo phong theo tung the he, hoan tac va xem lich su bien doi.
+Đây là ứng dụng C++ CLI mô phỏng trò chơi tế bào Conway's Game of Life trên ma trận 2 chiều. Người dùng có thể tạo bàn cờ, gieo tế bào sống, nạp pattern có sẵn, chạy mô phỏng theo từng thế hệ, hoàn tác và xem lịch sử biến đổi.
 
-## Muc tieu bai toan
+## Mục tiêu bài toán
 
-- Mo phong luat song chet kinh dien cua Conway:
-  - O song song tiep neu co 2 hoac 3 hang xom song.
-  - O chet se duoc sinh ra neu co dung 3 hang xom song.
-- Cho phep thu nghiem cac pattern kinh dien nhu `block`, `blinker`, `glider`, `beacon`, `toad`, `gosper`.
-- Trinh bay bang menu de phu hop yeu cau bai nop mon hoc.
+- Mô phỏng luật sống chết kinh điển của Conway:
+  - Ô sống sống tiếp nếu có 2 hoặc 3 hàng xóm sống.
+  - Ô chết sẽ được sinh ra nếu có đúng 3 hàng xóm sống.
+- Cho phép thử nghiệm các pattern kinh điển như `block`, `blinker`, `glider`, `beacon`, `toad`, `gosper`.
+- Trình bày bằng menu để phù hợp yêu cầu bài nộp môn học.
 
-## Cau truc du lieu su dung
+## Cấu trúc dữ liệu sử dụng
 
 - `Linked List`:
-  Dung trong `AliveCellList` de luu danh sach cac o dang song tren ban co hien tai.
+  Dùng trong `AliveCellList` để lưu danh sách các ô đang sống trên bàn cờ hiện tại.
 - `Queue`:
-  Dung trong `HistoryQueue` de luu lich su cac the he gan day, gom so o song, so o moi sinh va so o chet.
+  Dùng trong `HistoryQueue` để lưu lịch sử các thế hệ gần đây, gồm số ô sống, số ô mới sinh và số ô chết.
 - `Stack`:
-  Dung trong `SnapshotStack` de ho tro thao tac `undo`, quay lai trang thai truoc do cua ban co.
+  Dùng trong `SnapshotStack` để hỗ trợ thao tác `undo`, quay lại trạng thái trước đó của bàn cờ.
 - `BST`:
-  Dung trong `PatternBST` de luu va tim kiem pattern co san theo ten.
+  Dùng trong `PatternBST` để lưu và tìm kiếm pattern có sẵn theo tên.
 
-## Chuc nang
+## Chức năng
 
-1. Hien thi ban co hien tai.
-2. Thay doi kich thuoc ban co.
-3. Bat/tat mot o thu cong.
-4. Gieo ngau nhien theo mat do phan tram.
-5. Nap pattern Conway tu cay BST.
-6. Chay 1 the he.
-7. Chay N the he lien tiep.
-8. Hoan tac 1 buoc.
-9. Xem lich su mo phong.
-10. Liet ke pattern co san.
-11. Xoa ban co.
+1. Hiển thị bàn cờ hiện tại.
+2. Thay đổi kích thước bàn cờ.
+3. Bật hoặc tắt một ô thủ công.
+4. Gieo ngẫu nhiên theo mật độ phần trăm.
+5. Nạp pattern Conway từ cây BST.
+6. Chạy 1 thế hệ.
+7. Chạy N thế hệ liên tiếp.
+8. Hoàn tác 1 bước.
+9. Xem lịch sử mô phỏng.
+10. Liệt kê pattern có sẵn.
+11. Xóa bàn cờ.
 
-## Thiet ke file
+## Thiết kế file
 
 ```text
 src/
-  main.cpp       - Menu va dieu khien chuong trinh
-  structures.h   - Khai bao cau truc du lieu va prototype
-  functions.cpp  - Cai dat Conway va cac cau truc du lieu
+  main.cpp       - Menu và điều khiển chương trình
+  structures.h   - Khai báo cấu trúc dữ liệu và prototype
+  functions.cpp  - Cài đặt Conway và các cấu trúc dữ liệu
 tests/
-  test_cases.cpp - Bo test cac chuc nang chinh
+  test_cases.cpp - Bộ test các chức năng chính
 docs/
   .gitkeep
-README.md        - Mo ta bai toan va huong dan chay
+README.md        - Mô tả bài toán và hướng dẫn chạy
 ```
 
-## Compile va chay
+## Compile và chạy
 
-Build chuong trinh chinh:
+Build chương trình chính:
 
 ```bash
 g++ -std=c++17 src/main.cpp src/functions.cpp -o app
 ./app
 ```
 
-Build bo test:
+Build bộ test:
 
 ```bash
 g++ -std=c++17 tests/test_cases.cpp src/functions.cpp -o test_app
 ./test_app
 ```
 
-## Test cases chinh
+## Test case chính
 
-1. `block` la still life nen khong doi sau 1 the he.
-2. `blinker` dao dong dung chu ky 2.
-3. BST chua va liet ke duoc pattern `glider`, `gosper`.
-4. Nap pattern `glider` dung so luong te bao song.
-5. `undo` khoi phuc dung trang thai truoc khi step.
-6. `HistoryQueue` ghi nhan dung thong tin the he.
+1. `block` là still life nên không đổi sau 1 thế hệ.
+2. `blinker` dao động đúng chu kỳ 2.
+3. BST chứa và liệt kê được pattern `glider`, `gosper`.
+4. Nạp pattern `glider` đúng số lượng tế bào sống.
+5. `undo` khôi phục đúng trạng thái trước khi step.
+6. `HistoryQueue` ghi nhận đúng thông tin thế hệ.
 
-## Danh gia thiet ke
+## Đánh giá thiết kế
 
-- Uu diem:
-  - Menu ro rang, de demo tren terminal.
-  - Dung nhieu cau truc du lieu co y nghia voi bai toan.
-  - De mo rong them pattern moi hoac che do wrap board.
-- Han che:
-  - Ban co hien tai su dung ma tran trong RAM nen khong toi uu cho kich thuoc rat lon.
-  - Hien thi la dang text, chua co giao dien do hoa.
+- Ưu điểm:
+  - Menu rõ ràng, dễ demo trên terminal.
+  - Dùng nhiều cấu trúc dữ liệu có ý nghĩa với bài toán.
+  - Dễ mở rộng thêm pattern mới hoặc chế độ wrap board.
+- Hạn chế:
+  - Bàn cờ hiện tại sử dụng ma trận trong RAM nên không tối ưu cho kích thước rất lớn.
+  - Hiển thị là dạng text, chưa có giao diện đồ họa.
