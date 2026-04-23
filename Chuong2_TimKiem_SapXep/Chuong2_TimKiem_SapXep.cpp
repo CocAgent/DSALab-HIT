@@ -28,7 +28,7 @@ void XuatMang(const int a[], int n, const string &ten = "") {
 // 1.1 Tim kiem tuyen tinh - O(N)
 int TimTuyenTinh(const int a[], int n, int x) {
     int i = 0;
-    while (a[i] != x && i < n) i++;
+    while (i < n && a[i] != x) i++;
     if (i < n) return i;
     return -1;
 }
@@ -76,10 +76,17 @@ void InsertionSort(int a[], int n) {
 
 // 2.3 Bubble Sort (Noi bot) - O(N^2)
 void BubbleSort(int a[], int n) {
-    for (int i = 0; i < n - 1; i++)
-        for (int j = n - 1; j > i; j--)
-            if (a[j] < a[j - 1])
+    bool swapped;
+    for (int i = 0; i < n - 1; i++) {
+        swapped = false;
+        for (int j = n - 1; j > i; j--) {
+            if (a[j] < a[j - 1]) {
                 HoanVi(a[j], a[j - 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break; // đã có thứ tự
+    }
 }
 
 // 2.4 Quick Sort (Sap xep nhanh) - O(N log N) trung binh
