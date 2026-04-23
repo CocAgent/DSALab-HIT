@@ -1,74 +1,64 @@
-# Maze Game (C++ CLI)
+# 🎮 Maze Game (C++ CLI Project)
 
-## Giới thiệu
-
-Đây là chương trình game mê cung chạy trên terminal được viết bằng C++.
-
-Người chơi có thể tự di chuyển hoặc để chương trình tự động giải mê cung bằng các thuật toán.
+## 📝 Giới thiệu
+Chương trình mô phỏng trò chơi mê cung trên Terminal (CLI) được viết bằng ngôn ngữ C++. Ứng dụng cho phép tạo mê cung ngẫu nhiên và cung cấp các công cụ giải mê cung tự động dựa trên các thuật toán tìm kiếm phổ biến.
 
 ---
 
-## Chức năng chính
-
-1. Tạo mê cung ngẫu nhiên bằng DFS (Recursive Backtracker)
-2. Hiển thị mê cung dạng ASCII
-3. Người chơi di chuyển bằng W/A/S/D
-4. Giải mê cung bằng BFS (đường ngắn nhất)
-5. Giải mê cung bằng DFS (có backtracking)
-6. So sánh độ dài đường đi giữa BFS và DFS
+## 🛠 Cấu trúc dữ liệu sử dụng
+Dự án áp dụng các cấu trúc dữ liệu cốt lõi sau để tối ưu hóa hiệu suất:
+* **Stack (Ngăn xếp):** Sử dụng trong thuật toán DFS để tạo mê cung và tìm đường theo chiều sâu.
+* **Queue (Hàng đợi):** Sử dụng trong thuật toán BFS để tìm kiếm đường đi ngắn nhất giữa hai điểm.
+* **Mảng 2 chiều (2D Array):** Được dùng để quản lý và lưu trữ bản đồ mê cung dưới dạng lưới tọa độ.
 
 ---
 
-## Cấu trúc dữ liệu sử dụng
-
-* **Mảng 2D**: lưu mê cung
-* **Stack**: dùng cho DFS (generate + solve)
-* **Queue**: dùng cho BFS
-
----
-
-## Thuật toán
-
-### DFS (Recursive Backtracker)
-
-* Dùng để tạo mê cung
-* Đi sâu và quay lui (backtracking)
-* Đảm bảo mê cung có đường đi
-
-### BFS
-
-* Duyệt theo từng lớp
-* Đảm bảo tìm đường ngắn nhất
-
-### DFS (Solve)
-
-* Duyệt sâu trước
-* Không đảm bảo đường ngắn nhất
+## 🚀 Thuật toán triển khai
+1. **DFS (Recursive Backtracker):** - Dùng để khởi tạo mê cung ngẫu nhiên, đảm bảo mọi vị trí đều có thể kết nối.
+   - Dùng để giải mê cung (không cam kết đường ngắn nhất).
+2. **BFS (Breadth-First Search):** - Tìm kiếm theo chiều rộng để tìm ra **đường đi ngắn nhất** từ điểm bắt đầu đến đích.
 
 ---
 
-## Cách chạy chương trình
+## 💻 Hướng dẫn Biên dịch và Chạy
+Sử dụng trình biên dịch g++ hỗ trợ chuẩn C++17 trở lên:
 
 ```bash
-g++ -std=c++17 *.cpp -o maze
-./maze
-```
+# Biên dịch chương trình
+g++ -std=c++17 src/main.cpp src/maze.cpp src/player.cpp src/solver.cpp -o maze_game
 
----
+# Chạy ứng dụng
+./maze_game
 
-## Test case
+## ✨ Chức năng chính
+- [x] **Menu điều hướng:** Giao diện Terminal trực quan, dễ sử dụng.
+- [x] **Tạo mê cung ngẫu nhiên:** Sử dụng thuật toán DFS đảm bảo luôn có lối thoát.
+- [x] **Chế độ Manual:** Người chơi tự do khám phá và di chuyển bằng phím W/A/S/D.
+- [x] **Giải thuật tự động:** Tích hợp BFS và DFS để tìm đường về đích.
+- [x] **Phân tích thuật toán:** So sánh độ dài đường đi và hiệu quả giữa BFS & DFS.
 
-1. Tạo mê cung ngẫu nhiên
-2. Tìm đường bằng BFS
-3. Tìm đường bằng DFS
-4. Kiểm tra di chuyển người chơi
-5. So sánh BFS và DFS
+## 🧪 Test cases (Kịch bản kiểm thử)
+* **Kiểm tra Khởi tạo:**
+    * Mê cung sinh ra không có vùng bị cô lập.
+    * Kích thước mê cung thay đổi đúng theo input của người dùng.
+* **Kiểm tra Logic Game:**
+    * Người chơi không thể đi xuyên qua các bức tường (`#`).
+    * Trò chơi kết thúc chính xác khi tọa độ người chơi trùng với đích (`E`).
+* **Kiểm tra Thuật toán:**
+    * **BFS:** Phải luôn trả về con đường có số bước di chuyển ít nhất.
+    * **DFS:** Phải tìm được đường ra ngay cả trong mê cung có nhiều ngõ cụt.
+* **Kiểm tra Ngoại lệ:**
+    * Xử lý khi người dùng nhập sai phím điều khiển hoặc kích thước âm.
 
----
 
-## Cấu trúc project
+Cấu Trúc thư mục: 
+/
+├── src/
+│   ├── main.cpp       - Menu chính và điều khiển luồng game
+│   ├── maze.cpp/h     - Xử lý logic khởi tạo và vẽ mê cung
+│   ├── player.cpp/h   - Xử lý tọa độ và bước đi của người chơi
+│   └── solver.cpp/h   - Cài đặt thuật toán BFS và DFS
+├── tests/
+│   └── test_cases.cpp - Các kịch bản kiểm thử chức năng
+└── README.md          - Tài liệu hướng dẫn dự án
 
-* main.cpp: điều khiển chương trình
-* maze.cpp/h: tạo và hiển thị mê cung
-* player.cpp/h: xử lý người chơi
-* solver.cpp/h: BFS và DFS
