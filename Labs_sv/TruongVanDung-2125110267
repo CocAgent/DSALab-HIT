@@ -1,0 +1,261 @@
+include <iostream>
+#include <queue>
+#include <stack>
+#include <vector>
+#include <string>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+using namespace std;
+
+// ================== KHÁCH HÀNG ==================
+struct KhachHang {
+    int id;
+    string ten;
+    int uuTien; // 1 = VIP, 0 = thường
+    int ghe_hang;
+    int ghe_cot;
+};
+
+// ================== BST ==================
+struct Node {
+    KhachHang data;
+    Node* trai;
+    Node* phai;
+};
+
+Node* taoNode(KhachHang kh) {
+    return new Node{ kh, NULL, NULL };
+}
+
+Node* themBST(Node* goc, KhachHang kh) {
+    if (goc == NULL) return taoNode(kh);
+    if (kh.id < goc->data.id)
+        goc->trai = themBST(goc->trai, kh);
+    else if (kh.id > goc->data.id)
+        goc->phai = themBST(goc->phai, kh);
+    return goc;
+}
+
+Node* timKiem(Node* goc, int id) {
+    if (goc == NULL || goc->data.id == id)
+        return goc;
+    if (id < goc->data.id)
+        return timKiem(goc->trai, id);
+    return timKiem(goc->phai, id);
+}
+
+Node* timMin(Node* goc) {
+    while (goc->trai != NULL) goc = goc->trai;
+    return goc;
+}
+
+Node* xoaBST(Node* goc, int id) {
+    if (goc == NULL) return NULL;
+    if (id < goc->data.id)
+        goc->trai = xoaBST(goc->trai, id);
+    else if (id > goc->data.id)
+        goc->phai = xoaBST(goc->phai, id);
+    else {
+        if (goc->trai == NULL) {
+            Node* tmp = goc->phai;
+            delete goc;
+            return tmp;
+        }
+        else if (goc->phai == NULL) {
+            Node* tmp = goc->trai;
+            delete goc;
+            return tmp;
+        }
+        Node* successor = timMin(goc->phai);
+        goc->data = successor->data;
+        goc->phai = xoaBST(goc->phai, successor->data.id);
+    }
+    return goc;
+}
+
+void duyetGiua(Node* goc) {
+    if (goc == NULL) return;
+    duyetGiua(goc->trai);
+    cout << "  ID: " << goc->data.id
+        << " | Ten: " << goc->data.ten
+        << " | " << (goc->data.uuTien ? "VIP" : "Thuong")
+        << " | Ghe: [" << goc->data.ghe_hang << "]["
+        << goc->data.ghe_cot << "]" << endl;
+    duyetGiua(goc->phai);
+}
+
+// ================== PRIORITY QUEUE ==================
+struct SoSanh {
+    bool operator()(KhachHang a, KhachHang b) {
+        return a.uuTien < b.uuTien;
+    }
+};
+priority_queue<KhachHang, vector<KhachHang>, SoSanh> hangDoiCho;
+
+// ================== STACK (lịch sử hủy để hoàn tác) ==================
+stack<KhachHang> lichSu;
+
+// ================== GHẾ ==================
+const int HANG = 3;
+const int COT = 4;
+int ghe[HANG][COT] = { 0 };
+
+// ================== HÀM GHẾ ==================
+void hienThiGhe() {
+    cout << "\nSo do ghe ([O]=trong, [X]=da dat):\n";
+    cout << "    ";
+    for (int j = 0; j < COT; j++) cout << " C" << j + 1 << " ";
+    cout << endl;
+    for (int i = 0; i < HANG; i++) {
+        cout << "H" << i + 1 << ": ";
+        for (int j = 0; j < COT; j++) {
+            cout << (ghe[i][j] == 0 ? "[O]" : "[X]");
+        }
+        cout << endl;
+    }
+}
+
+bool timGheTrong(int& r, int& c) {
+    for (int i = 0; i < HANG; i++)
+        for (int j = 0; j < COT; j++)
+            if (ghe[i][j] == 0) { r = i; c = j; return true; }
+    return false;
+}
+
+void datGhe(int r, int c) { ghe[r][c] = 1; }
+void huyGhe(int r, int c) { ghe[r][c] = 0; }
+
+// ================== ID tự động ==================
+int nextID = 1;
+
+// ================== MAIN ==================
+int main() {
+#ifdef _WIN32
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
+#endif
+
+    Node* goc = NULL;
+    int luaChon;
+
+    do {
+        cout << "\n===== HE THONG DAT VE =====\n";
+        cout << "1. Dat ve\n";
+        cout << "2. Huy ve\n";
+        cout << "3. Tim khach hang\n";
+        cout << "4. Danh sach khach hang\n";
+        cout << "5. Hien thi ghe\n";
+        cout << "6. Hoan tac (phuc hoi ve vua huy)\n";
+        cout << "0. Thoat\n";
+        cout << "Chon: ";
+        cin >> luaChon;
+
+        // ---- 1. ĐẶT VÉ ----
+        if (luaChon == 1) {
+            int r, c;
+            if (!timGheTrong(r, c)) {
+                cout << ">> Het ghe trong!\n";
+                continue;
+            }
+            KhachHang kh;
+            kh.id = nextID++;
+            cin.ignore();
+            cout << "Nhap ten: ";
+            getline(cin, kh.ten);
+            cout << "Uu tien (1=VIP, 0=Thuong): ";
+            cin >> kh.uuTien;
+            kh.ghe_hang = r;
+            kh.ghe_cot = c;
+
+            datGhe(r, c);
+            goc = themBST(goc, kh);
+            cout << ">> Da dat ve thanh cong! ID=" << kh.id
+                << ", Ghe [H" << r + 1 << "][C" << c + 1 << "]\n";
+
+            // ---- 2. HỦY VÉ ----
+        }
+        else if (luaChon == 2) {
+            int id;
+            cout << "Nhap ID khach hang can huy: ";
+            cin >> id;
+            Node* found = timKiem(goc, id);
+            if (found == NULL) {
+                cout << ">> Khong tim thay ID " << id << "\n";
+            }
+            else {
+                KhachHang kh = found->data;
+                huyGhe(kh.ghe_hang, kh.ghe_cot);
+                lichSu.push(kh);            // lưu để hoàn tác
+                goc = xoaBST(goc, id);
+                cout << ">> Da huy ve cua " << kh.ten << "\n";
+            }
+
+            // ---- 3. TÌM KHÁCH HÀNG ----
+        }
+        else if (luaChon == 3) {
+            int id;
+            cout << "Nhap ID can tim: ";
+            cin >> id;
+            Node* found = timKiem(goc, id);
+            if (found == NULL) {
+                cout << ">> Khong tim thay!\n";
+            }
+            else {
+                KhachHang& kh = found->data;
+                cout << ">> Tim thay: ID=" << kh.id
+                    << ", Ten=" << kh.ten
+                    << ", " << (kh.uuTien ? "VIP" : "Thuong")
+                    << ", Ghe [H" << kh.ghe_hang + 1
+                    << "][C" << kh.ghe_cot + 1 << "]\n";
+            }
+
+            // ---- 4. DANH SÁCH ----
+        }
+        else if (luaChon == 4) {
+            if (goc == NULL) {
+                cout << ">> Chua co khach hang nao.\n";
+            }
+            else {
+                cout << "\nDanh sach khach hang (tang dan ID):\n";
+                duyetGiua(goc);
+            }
+
+            // ---- 5. HIỂN THỊ GHẾ ----
+        }
+        else if (luaChon == 5) {
+            hienThiGhe();
+
+            // ---- 6. HOÀN TÁC ----
+        }
+        else if (luaChon == 6) {
+            if (lichSu.empty()) {
+                cout << ">> Khong co thao tac nao de hoan tac.\n";
+            }
+            else {
+                KhachHang kh = lichSu.top();
+                lichSu.pop();
+                // kiểm tra ghế còn trống không
+                if (ghe[kh.ghe_hang][kh.ghe_cot] == 1) {
+                    cout << ">> Ghe [H" << kh.ghe_hang + 1
+                        << "][C" << kh.ghe_cot + 1
+                        << "] da bi dat boi nguoi khac, khong the hoan tac!\n";
+                }
+                else {
+                    datGhe(kh.ghe_hang, kh.ghe_cot);
+                    goc = themBST(goc, kh);
+                    cout << ">> Da hoan tac: phuc hoi ve cua "
+                        << kh.ten << " (ID=" << kh.id << ")\n";
+                }
+            }
+
+        }
+        else if (luaChon != 0) {
+            cout << ">> Lua chon khong hop le!\n";
+        }
+
+    } while (luaChon != 0);
+
+    cout << ">> Tam biet!\n";
+    return 0;
+}
