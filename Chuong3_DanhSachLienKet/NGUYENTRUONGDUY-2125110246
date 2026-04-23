@@ -1,0 +1,324 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+// ================= NODE =================
+struct Node {
+    int data;
+    Node* next;
+};
+
+// ================= LIST =================
+struct List {
+    Node* head;
+    Node* tail;
+};
+
+// ================= KHOI TAO =================
+void KhoiTaoDSLK(List& L) {
+    L.head = L.tail = nullptr;
+}
+
+Node* TaoNode(int x) {
+    Node* p = new Node;
+    p->data = x;
+    p->next = nullptr;
+    return p;
+}
+
+bool DanhSachRong(const List& L) {
+    return L.head == nullptr;
+}
+
+// ================= THEM =================
+void ThemDau(List& L, int x) {
+    Node* p = TaoNode(x);
+    if (DanhSachRong(L)) L.head = L.tail = p;
+    else {
+        p->next = L.head;
+        L.head = p;
+    }
+}
+
+void ThemCuoi(List& L, int x) {
+    Node* p = TaoNode(x);
+    if (DanhSachRong(L)) L.head = L.tail = p;
+    else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+}
+
+void ThemSau(List& L, Node* q, int x) {
+    if (q == nullptr) return;
+    Node* p = TaoNode(x);
+    p->next = q->next;
+    q->next = p;
+    if (q == L.tail) L.tail = p;
+}
+
+void ThemTruoc(List& L, Node* q, int x) {
+    if (q == nullptr) return;
+
+    if (q == L.head) {
+        ThemDau(L, x);
+        return;
+    }
+
+    Node* cur = L.head;
+    while (cur != nullptr && cur->next != q)
+        cur = cur->next;
+
+    if (cur == nullptr) return; // q không thuộc list
+
+    Node* p = TaoNode(x);
+    p->next = q;
+    cur->next = p;
+}
+
+// ================= XOA =================
+void XoaDau(List& L) {
+    if (DanhSachRong(L)) return;
+    Node* p = L.head;
+    L.head = L.head->next;
+    if (L.head == nullptr) L.tail = nullptr;
+    delete p;
+}
+
+void XoaCuoi(List& L) {
+    if (DanhSachRong(L)) return;
+
+    if (L.head == L.tail) {
+        delete L.head;
+        L.head = L.tail = nullptr;
+        return;
+    }
+
+    Node* cur = L.head;
+    while (cur->next != L.tail)
+        cur = cur->next;
+
+    delete L.tail;
+    L.tail = cur;
+    L.tail->next = nullptr;
+}
+
+bool XoaGiaTri(List& L, int x) {
+    if (DanhSachRong(L)) return false;
+
+    Node* cur = L.head, * prev = nullptr;
+
+    while (cur != nullptr && cur->data != x) {
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if (cur == nullptr) return false;
+
+    if (prev == nullptr) XoaDau(L);
+    else {
+        prev->next = cur->next;
+        if (cur == L.tail) L.tail = prev;
+        delete cur;
+    }
+    return true;
+}
+
+void XoaDanhSach(List& L) {
+    while (!DanhSachRong(L))
+        XoaDau(L);
+}
+
+// ================= DUYET =================
+void InDanhSach(const List& L) {
+    if (DanhSachRong(L)) {
+        cout << "[Rong]\n";
+        return;
+    }
+
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        cout << cur->data << " -> ";
+        cur = cur->next;
+    }
+    cout << "NULL\n";
+}
+
+// ================= TIM KIEM =================
+int TimMax(const List& L) {
+    if (DanhSachRong(L)) return INT_MIN;
+
+    int mx = L.head->data;
+    for (Node* cur = L.head; cur != nullptr; cur = cur->next)
+        if (cur->data > mx) mx = cur->data;
+
+    return mx;
+}
+
+Node* TimX(const List& L, int x) {
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data == x) return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}
+
+// ================= THONG KE =================
+long long TongDuong(const List& L) {
+    long long s = 0;
+    for (Node* cur = L.head; cur != nullptr; cur = cur->next)
+        if (cur->data > 0) s += cur->data;
+    return s;
+}
+
+int DemAm(const List& L) {
+    int dem = 0;
+    for (Node* cur = L.head; cur != nullptr; cur = cur->next)
+        if (cur->data < 0) dem++;
+    return dem;
+}
+
+// ================= CHINH PHUONG =================
+bool LaChinhPhuong(int n) {
+    if (n < 0) return false;
+    int s = sqrt(n);
+    return s * s == n;
+}
+
+bool CoSoChinhPhuong(const List& L) {
+    for (Node* cur = L.head; cur != nullptr; cur = cur->next)
+        if (LaChinhPhuong(cur->data)) return true;
+    return false;
+}
+
+// ================= SAP XEP =================
+void SapXep(List& L) {
+    for (Node* i = L.head; i != nullptr; i = i->next)
+        for (Node* j = i->next; j != nullptr; j = j->next)
+            if (i->data > j->data)
+                swap(i->data, j->data);
+}
+
+// ================= DAO NGUOC =================
+void DaoNguoc(List& L) {
+    Node* prev = nullptr, * cur = L.head, * next = nullptr;
+    L.tail = L.head;
+
+    while (cur != nullptr) {
+        next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
+    }
+    L.head = prev;
+}
+
+// ================= STACK =================
+struct Stack {
+    Node* top;
+};
+
+void KhoiTaoStack(Stack& S) { S.top = nullptr; }
+
+bool StackRong(const Stack& S) { return S.top == nullptr; }
+
+void Push(Stack& S, int x) {
+    Node* p = TaoNode(x);
+    p->next = S.top;
+    S.top = p;
+}
+
+int Pop(Stack& S) {
+    if (StackRong(S)) return -1;
+    Node* p = S.top;
+    int val = p->data;
+    S.top = S.top->next;
+    delete p;
+    return val;
+}
+
+void XoaStack(Stack& S) {
+    while (!StackRong(S)) Pop(S);
+}
+
+// ================= QUEUE =================
+struct Queue {
+    Node* front, * rear;
+};
+
+void KhoiTaoQueue(Queue& Q) {
+    Q.front = Q.rear = nullptr;
+}
+
+bool QueueRong(const Queue& Q) {
+    return Q.front == nullptr;
+}
+
+void Enqueue(Queue& Q, int x) {
+    Node* p = TaoNode(x);
+    if (QueueRong(Q)) Q.front = Q.rear = p;
+    else {
+        Q.rear->next = p;
+        Q.rear = p;
+    }
+}
+
+int Dequeue(Queue& Q) {
+    if (QueueRong(Q)) return -1;
+
+    Node* p = Q.front;
+    int val = p->data;
+    Q.front = Q.front->next;
+
+    if (Q.front == nullptr) Q.rear = nullptr;
+    delete p;
+    return val;
+}
+
+void XoaQueue(Queue& Q) {
+    while (!QueueRong(Q)) Dequeue(Q);
+}
+
+// ================= MAIN =================
+int main() {
+    List L;
+    KhoiTaoDSLK(L);
+
+    // Demo
+    ThemCuoi(L, 10);
+    ThemCuoi(L, 5);
+    ThemCuoi(L, 20);
+    ThemDau(L, 1);
+
+    cout << "Danh sach:\n";
+    InDanhSach(L);
+
+    cout << "Max: " << TimMax(L) << endl;
+    cout << "Tong duong: " << TongDuong(L) << endl;
+
+    cout << "Dao nguoc:\n";
+    DaoNguoc(L);
+    InDanhSach(L);
+
+    // Stack
+    Stack S;
+    KhoiTaoStack(S);
+    Push(S, 10);
+    Push(S, 20);
+    cout << "Pop stack: " << Pop(S) << endl;
+
+    // Queue
+    Queue Q;
+    KhoiTaoQueue(Q);
+    Enqueue(Q, 1);
+    Enqueue(Q, 2);
+    cout << "Dequeue: " << Dequeue(Q) << endl;
+
+    // Giai phong
+    XoaDanhSach(L);
+    XoaStack(S);
+    XoaQueue(Q);
+
+    return 0;
+}
