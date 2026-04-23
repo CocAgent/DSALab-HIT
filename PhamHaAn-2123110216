@@ -1,0 +1,102 @@
+#include "bt.h"
+
+int Menu() {
+    system("cls");
+    int cv, k = 0;
+    cout << "\n  1. Nhap du lieu tao cay";k++;
+    cout << "\n  2. Xuat danh sach "; k++;
+    cout << "\n  3. Duyet NLR ";k++;
+    cout << "\n  4. Duyet LNR ";k++;
+    cout << "\n  5. Duyet LRN ";k++;
+    cout << "\n  6. Tim kiem mot khoa tren cay";k++;
+    cout << "\n  7. Xoa mot nut tren cay";k++;
+    cout << "\n  8. Tinh chieu cao cay";k++;
+    cout << "\n  9. Dem so nut tren cay";k++;
+    cout << "\n 10. Tim gia tri nho nhat / lon nhat";k++;
+    cout << "\n  0. Thoat";
+    do {
+        cout << "\n\n Nhap thao tac [0-" << k << "]: ";
+        cin >> cv;
+    } while (cv < 0 || cv > k);
+    return cv;
+}
+
+int main() {
+    BIN_TREE t;
+    KhoiTao(t);
+
+    int cv, x;
+    do {
+        cv = Menu();
+        switch (cv) {
+
+        case 1:
+            TaoCay(t);
+            break;
+
+        case 2:
+            cout << "\nDanh sach :\n  ";
+            XuatDS(t.pRoot);
+            break;
+
+        case 3:
+            if (t.pRoot == NULL) { cout << "\nCay rong!"; break; }
+            cout << "\nDuyet NLR : ";
+            NLR(t.pRoot);
+            break;
+
+        case 4:
+            if (t.pRoot == NULL) { cout << "\nCay rong!"; break; }
+            cout << "\nDuyet LNR   : ";
+            LNR(t.pRoot);
+            break;
+
+        case 5:
+            if (t.pRoot == NULL) { cout << "\nCay rong!"; break; }
+            cout << "\nDuyet LRN: ";
+            LRN(t.pRoot);
+            break;
+
+        case 6:
+            if (t.pRoot == NULL) { cout << "\nCay rong!"; break; }
+            cout << "\nNhap gia tri can tim: "; cin >> x;
+            if (BSTSearch(t.pRoot, x))
+                cout << ">>> Tim thay nut co khoa " << x << "!";
+            else
+                cout << ">>> Khong tim thay khoa " << x << " tren cay!";
+            break;
+
+        case 7:
+            if (t.pRoot == NULL) { cout << "\nCay rong!"; break; }
+            cout << "\nNhap gia tri can xoa: "; cin >> x;
+            if (BSTDelete(t.pRoot, x)) {
+                cout << ">>> Da xoa nut " << x << " thanh cong!\n";
+                cout << "Danh sach sau khi xoa:\n  ";
+                XuatDS(t.pRoot);
+            }
+            else {
+                cout << ">>> Khong tim thay nut " << x << " de xoa!";
+            }
+            break;
+
+        case 8:
+            cout << "\nChieu cao cua cay: " << TinhCC(t.pRoot);
+            break;
+
+        case 9:
+            cout << "\nSo nut hien co tren cay: " << DemSoNut(t.pRoot);
+            break;
+
+        case 10:
+            if (t.pRoot == NULL) { cout << "\nCay rong!"; break; }
+            cout << "\nGia tri nho nhat: " << TimMin(t.pRoot);
+            cout << "\nGia tri lon nhat: " << TimMax(t.pRoot);
+            break;
+        }
+
+        cout << "\n";
+        system("pause");
+    } while (cv != 0);
+
+    return 0;
+}
