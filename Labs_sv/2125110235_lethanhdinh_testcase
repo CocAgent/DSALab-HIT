@@ -1,0 +1,76 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include "structures.h"
+
+using namespace std;
+
+// Khai báo lại function từ functions.cpp
+void shoot(Target, Goalkeeper&, Ball&, Goal);
+void checkGoal(Ball&, Goalkeeper&, Goal, int&);
+
+int simulateShot(float targetX) {
+    Goal goal = {100, 50, 200, 60};
+
+    Target target = {targetX, 80, 5, 1};
+
+    Goalkeeper gk = {
+        175, 60,
+        50, 40,
+        8,
+        175
+    };
+
+    Ball ball = {
+        200, 420,
+        200, 420,
+        0
+    };
+
+    int score = 0;
+
+    // Thực hiện cú sút
+    shoot(target, gk, ball, goal);
+
+    // Giả lập bóng bay tới đích luôn (bỏ animation)
+    ball.x = ball.targetX;
+
+    // Kiểm tra kết quả
+    bool isHitGK = (ball.x >= gk.targetX && ball.x <= gk.targetX + gk.width);
+    bool isInGoal = (ball.x >= goal.x && ball.x <= goal.x + goal.width);
+
+    if (isHitGK) return 0;      // bị cản
+    if (isInGoal) return 1;     // vào
+    return -1;                 // ra ngoài
+}
+
+int main() {
+    srand(time(0));
+
+    int total = 10000;
+    int goalCount = 0;
+    int saveCount = 0;
+    int missCount = 0;
+
+    for (int i = 0; i < total; i++) {
+        // random vị trí sút trong khung thành
+        float randomX = 100 + rand() % 200;
+
+        int result = simulateShot(randomX);
+
+        if (result == 1) goalCount++;
+        else if (result == 0) saveCount++;
+        else missCount++;
+    }
+
+    cout << "===== TEST AI THỦ MÔN =====\n";
+    cout << "Tổng số lần sút: " << total << endl;
+    cout << "Ghi bàn: " << goalCount << endl;
+    cout << "Bị cản: " << saveCount << endl;
+    cout << "Ra ngoài: " << missCount << endl;
+
+    cout << "\nTỷ lệ ghi bàn: " << (goalCount * 100.0 / total) << "%\n";
+    cout << "Tỷ lệ bị cản: " << (saveCount * 100.0 / total) << "%\n";
+
+    return 0;
+}
