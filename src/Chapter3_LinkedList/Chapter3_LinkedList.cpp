@@ -45,7 +45,7 @@ bool DanhSachRong(const List &L) {
 //  THEM PHAN TU
 // ============================================================
 
-// 1-Them vao dau
+// Them vao dau
 void ThemDau(List &L, int x) {
     Node *p = TaoNode(x);
     if (DanhSachRong(L)) {
@@ -56,7 +56,7 @@ void ThemDau(List &L, int x) {
     }
 }
 
-// 2-Them vao cuoi
+// Them vao cuoi
 void ThemCuoi(List &L, int x) {
     Node *p = TaoNode(x);
     if (DanhSachRong(L)) {
@@ -67,7 +67,7 @@ void ThemCuoi(List &L, int x) {
     }
 }
 
-// 3-Them sau node q
+// Them sau node q
 void ThemSau(List &L, Node *q, int x) {
     if (q == nullptr) return;
     Node *p = TaoNode(x);
@@ -76,7 +76,7 @@ void ThemSau(List &L, Node *q, int x) {
     if (q == L.tail) L.tail = p;
 }
 
-// 4-Them truoc node q
+// Them truoc node q
 void ThemTruoc(List &L, Node *q, int x) {
     if (q == nullptr) return;
     if (q == L.head) { ThemDau(L, x); return; }
@@ -91,7 +91,7 @@ void ThemTruoc(List &L, Node *q, int x) {
 //  XOA PHAN TU
 // ============================================================
 
-// 5-Xoa dau
+// Xoa dau
 void XoaDau(List &L) {
     if (DanhSachRong(L)) return;
     Node *p = L.head;
@@ -100,7 +100,7 @@ void XoaDau(List &L) {
     delete p;
 }
 
-// 6-Xoa cuoi
+// Xoa cuoi
 void XoaCuoi(List &L) {
     if (DanhSachRong(L)) return;
     if (L.head == L.tail) { delete L.head; L.head = L.tail = nullptr; return; }
@@ -111,7 +111,7 @@ void XoaCuoi(List &L) {
     L.tail->next = nullptr;
 }
 
-// 7-Xoa node co gia tri x
+// Xoa node co gia tri x
 bool XoaGiaTri(List &L, int x) {
     if (DanhSachRong(L)) return false;
     Node *cur = L.head, *prev = nullptr;
@@ -134,7 +134,7 @@ void XoaDanhSach(List &L) {
 }
 
 // ============================================================
-//  8-DUYET DANH SACH
+//  DUYET DANH SACH
 // ============================================================
 void InDanhSach(const List &L) {
     if (DanhSachRong(L)) { cout << "  [Danh sach rong]\n"; return; }
@@ -148,7 +148,7 @@ void InDanhSach(const List &L) {
     cout << " -> NULL\n";
 }
 
-//9- Tim phan tu lon nhat
+// Tim phan tu lon nhat
 int TimMax(const List &L) {
     if (DanhSachRong(L)) return -1;
     int mx = L.head->data;
@@ -160,7 +160,7 @@ int TimMax(const List &L) {
     return mx;
 }
 
-//10- Tim phan tu x
+// Tim phan tu x
 Node* TimX(const List &L, int x) {
     Node *cur = L.head;
     while (cur != nullptr) {
@@ -170,7 +170,7 @@ Node* TimX(const List &L, int x) {
     return nullptr;
 }
 
-// 11-Tim chan dau
+// Tim chan dau
 int TimChanDau(const List &L) {
     Node *cur = L.head;
     while (cur != nullptr) {
@@ -180,7 +180,7 @@ int TimChanDau(const List &L) {
     return -1;
 }
 
-// 12-Tim chan cuoi
+// Tim chan cuoi
 int TimChanCuoi(const List &L) {
     int kq = -1;
     Node *cur = L.head;
@@ -191,7 +191,7 @@ int TimChanCuoi(const List &L) {
     return kq;
 }
 
-//13- Liet ke phan tu am
+// Liet ke phan tu am
 void LietKeAm(const List &L) {
     cout << "  Cac phan tu am: ";
     Node *cur = L.head;
@@ -204,7 +204,7 @@ void LietKeAm(const List &L) {
     cout << "\n";
 }
 
-// 14-Tinh tong phan tu duong
+// Tinh tong phan tu duong
 long long TongDuong(const List &L) {
     long long s = 0;
     Node *cur = L.head;
@@ -215,7 +215,7 @@ long long TongDuong(const List &L) {
     return s;
 }
 
-// 15-Dem phan tu am
+// Dem phan tu am
 int DemAm(const List &L) {
     int dem = 0;
     Node *cur = L.head;
@@ -226,7 +226,7 @@ int DemAm(const List &L) {
     return dem;
 }
 
-// 16-Kiem tra so chinh phuong
+// Kiem tra so chinh phuong
 bool LaChinhPhuong(int n) {
     if (n < 0) return false;
     int s = (int)sqrt((double)n);
@@ -242,7 +242,7 @@ bool CoSoChinhPhuong(const List &L) {
     return false;
 }
 
-// 17-Dem phan tu cuc dai (lon nhat)
+// Dem phan tu cuc dai (lon nhat)
 int DemCucDai(const List &L) {
     if (DanhSachRong(L)) return 0;
     int mx = TimMax(L), dem = 0;

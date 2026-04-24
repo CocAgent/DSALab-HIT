@@ -1,0 +1,29 @@
+//con trỏ(pointer) là một biến dùng để lưu địa chỉ của một biến khác hoặc của một vùng nhớ trong bộ nhớ.
+//Con trỏ không lưu giá trị trực tiếp mà lưu vị trí(địa chỉ) của dữ liệu trong RAM, nhờ đó chương trình có thể truy cập hoặc thay đổi dữ liệu thông qua địa chỉ đó.
+//Cú pháp khai báo con trỏ trong C / C++:
+//<KDL> *<tên_con_trỏ>;
+//Ví dụ :
+//int x = 10;
+//int* ptr = &x;
+//cout << *ptr;
+
+// ví dụ chạy thử
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a;          // khai báo biến a bất kì
+    int* p;         // khai báo con trỏ p
+
+    cout << "Nhap gia tri cua a: ";
+    cin >> a;       // nhập giá trị bất kỳ cho a
+
+    p = &a;         // p lưu địa chỉ của a
+
+    cout << "Gia tri cua a: " << a << endl;
+    cout << "Dia chi cua a: " << &a << endl;
+    cout << "Gia tri cua p (dia chi cua a): " << p << endl;
+    cout << "Gia tri ma p tro toi: " << *p << endl;
+
+    return 0;
+}
