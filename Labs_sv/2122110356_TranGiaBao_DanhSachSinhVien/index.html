@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Quan Ly Sinh Vien</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📋 Quản Lý Sinh Viên</h1>
+
+<!-- FORM -->
+
+<div class="form-box">
+
+<h3 id="formTitle">
+Thêm Sinh Viên
+</h3>
+
+<input id="mssv"
+placeholder="Nhập MSSV">
+
+<input id="ten"
+placeholder="Nhập Tên">
+
+<input id="diem"
+type="number"
+placeholder="Nhập Điểm">
+
+<br>
+
+<button onclick="luuSinhVien()">
+Lưu
+</button>
+
+<button onclick="resetForm()">
+Mới
+</button>
+
+<button onclick="xuatFile()">
+📂 Xuất File
+</button>
+
+</div>
+
+<!-- BANG -->
+
+<table>
+
+<thead>
+
+<tr>
+
+<th onclick="sapXep('mssv')">
+MSSV ▲▼
+</th>
+
+<th onclick="sapXep('ten')">
+Tên ▲▼
+</th>
+
+<th onclick="sapXep('diem')">
+Điểm ▲▼
+</th>
+
+<th>
+Học lực
+</th>
+
+<th>
+Thao tác
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="bangSinhVien">
+</tbody>
+
+</table>
+
+<!-- THONG KE -->
+
+<div id="thongKe">
+
+<h3>📊 Thống Kê</h3>
+
+<p id="max"></p>
+
+<p id="min"></p>
+
+<p id="avg"></p>
+
+<p id="hocLucTK"></p>
+
+</div>
+
+<!-- TIM KIEM -->
+
+<div class="search-box">
+
+<h3>🔍 Tìm kiếm</h3>
+
+<input id="tuKhoa"
+placeholder="Nhap Ten hoac MSSV">
+
+<button onclick="timKiem()">
+Tìm
+</button>
+
+<button onclick="hienThi()">
+Hiện tất cả
+</button>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
