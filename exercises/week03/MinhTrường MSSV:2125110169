@@ -1,0 +1,291 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <ctime>
+
+using namespace std;
+
+//======================
+// LINEAR SEARCH
+//======================
+int LinearSearch(int a[], int n, int x, int& buoc) {
+    buoc = 0;
+
+    for (int i = 0; i < n; i++) {
+        buoc++;
+
+        if (a[i] == x)
+            return i;
+    }
+
+    return -1;
+}
+
+//======================
+// BINARY SEARCH ITERATIVE
+//======================
+int BinarySearch(int a[], int n, int x, int& buoc) {
+
+    int l = 0;
+    int r = n - 1;
+
+    buoc = 0;
+
+    while (l <= r) {
+
+        buoc++;
+
+        int m = (l + r) / 2;
+
+        if (a[m] == x)
+            return m;
+
+        if (a[m] < x)
+            l = m + 1;
+        else
+            r = m - 1;
+    }
+
+    return -1;
+}
+
+//======================
+// BINARY SEARCH RECURSIVE
+//======================
+int BinarySearchDQ(
+    int a[],
+    int l,
+    int r,
+    int x
+) {
+
+    if (l > r)
+        return -1;
+
+    int m = (l + r) / 2;
+
+    if (a[m] == x)
+        return m;
+
+    if (a[m] > x)
+        return BinarySearchDQ(a, l, m - 1, x);
+
+    return BinarySearchDQ(a, m + 1, r, x);
+}
+
+//======================
+// SMART SEARCH TEN
+//======================
+void TimTen(string ds[], string sdt[], int n, string key) {
+
+    bool found = false;
+
+    cout << "\nKet qua:\n";
+
+    for (int i = 0;i < n;i++) {
+
+        if (ds[i].find(key) != string::npos) {
+
+            found = true;
+
+            cout
+                << i + 1
+                << ". "
+                << ds[i]
+                << " - "
+                << sdt[i]
+                << endl;
+        }
+    }
+
+    if (!found)
+        cout << "Khong tim thay\n";
+}
+
+//======================
+// MAIN
+//======================
+int main() {
+
+    cout << "=============================\n";
+    cout << "SMART SEARCH ENGINE\n";
+    cout << "=============================\n";
+
+    //------------------
+    // BAI 1
+    //------------------
+
+    int a[] = { 10,20,30,40,50,60,70,80 };
+
+    int n = 8;
+
+    int x;
+
+    cout << "\n[BAI 1] Linear Search\n";
+
+    cout << "Nhap gia tri: ";
+    cin >> x;
+
+    int buoc;
+
+    int vt =
+        LinearSearch(
+            a,
+            n,
+            x,
+            buoc
+        );
+
+    if (vt != -1)
+        cout << "Tim thay tai " << vt << endl;
+
+    else
+        cout << "Khong tim thay\n";
+
+    cout << "So buoc: " << buoc << endl;
+
+
+    //------------------
+    // BAI 2
+    //------------------
+
+    cout << "\n[BAI 2] Binary Search\n";
+
+    sort(a, a + n);
+
+    vt =
+        BinarySearch(
+            a,
+            n,
+            x,
+            buoc
+        );
+
+    cout << "Iterative: ";
+
+    if (vt != -1)
+        cout << vt;
+
+    else
+        cout << "Khong tim";
+
+    cout << endl;
+
+    vt =
+        BinarySearchDQ(
+            a,
+            0,
+            n - 1,
+            x
+        );
+
+    cout << "Recursive: ";
+
+    if (vt != -1)
+        cout << vt;
+
+    else
+        cout << "Khong tim";
+
+    cout << endl;
+
+
+    //------------------
+    // BAI 3
+    //------------------
+
+    cout << "\n[BAI 3] So sanh hieu nang\n";
+
+    clock_t bd =
+        clock();
+
+    LinearSearch(
+        a,
+        n,
+        x,
+        buoc
+    );
+
+    clock_t kt =
+        clock();
+
+    double tg1 =
+        (double)
+        (kt - bd)
+        / CLOCKS_PER_SEC;
+
+    bd =
+        clock();
+
+    BinarySearch(
+        a,
+        n,
+        x,
+        buoc
+    );
+
+    kt =
+        clock();
+
+    double tg2 =
+        (double)
+        (kt - bd)
+        / CLOCKS_PER_SEC;
+
+    cout
+        << "Linear: "
+        << tg1
+        << " s\n";
+
+    cout
+        << "Binary: "
+        << tg2
+        << " s\n";
+
+
+    //------------------
+    // BAI 4
+    //------------------
+
+    cout << "\n[BAI 4] Smart Search\n";
+
+    string ten[] = {
+    "Nguyen Van Minh",
+    "Tran Thi Minh Anh",
+    "Le Minh Tuan",
+    "Dung",
+    "An"
+    };
+
+    string sdt[] = {
+    "0901234567",
+    "0912345678",
+    "0923456789",
+    "0934567890",
+    "0945678901"
+    };
+
+    string key;
+
+    cin.ignore();
+
+    cout << "\nNhap ten can tim: ";
+
+    getline(
+        cin,
+        key
+    );
+
+    TimTen(
+        ten,
+        sdt,
+        5,
+        key
+    );
+
+    cout << "\n===== KET THUC =====\n";
+
+    return 0;
+
+}
+
