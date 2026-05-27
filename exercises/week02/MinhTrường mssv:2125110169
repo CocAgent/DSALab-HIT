@@ -1,0 +1,386 @@
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+
+using namespace std;
+
+//====================================
+// BAI 1 - MANG CO BAN
+//====================================
+void Bai1() {
+
+    cout << "\n===== BAI 1 =====\n";
+
+    int n;
+
+    cout << "Nhap so phan tu: ";
+    cin >> n;
+
+    int a[100];
+
+    int tong = 0;
+
+    for (int i = 0; i < n; i++) {
+        cout << "a[" << i << "] = ";
+        cin >> a[i];
+
+        tong += a[i];
+    }
+
+    int max = a[0];
+    int min = a[0];
+
+    for (int i = 1; i < n; i++) {
+
+        if (a[i] > max)
+            max = a[i];
+
+        if (a[i] < min)
+            min = a[i];
+    }
+
+    cout << "\nTong = " << tong;
+    cout << "\nTrung binh = " << (float)tong / n;
+    cout << "\nMax = " << max;
+    cout << "\nMin = " << min;
+}
+
+
+//====================================
+// BAI 2 - MANG 2D
+//====================================
+void Bai2() {
+
+    cout << "\n\n===== BAI 2 =====\n";
+
+    int A[2][2];
+    int B[2][2];
+    int C[2][2];
+
+    cout << "\nNhap ma tran A (2x2):\n";
+
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            cin >> A[i][j];
+
+    cout << "\nNhap ma tran B (2x2):\n";
+
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            cin >> B[i][j];
+
+    for (int i = 0; i < 2; i++) {
+
+        for (int j = 0; j < 2; j++) {
+
+            C[i][j] = 0;
+
+            for (int k = 0; k < 2; k++)
+                C[i][j] += A[i][k] * B[k][j];
+        }
+    }
+
+    cout << "\nKet qua nhan:\n";
+
+    for (int i = 0; i < 2; i++) {
+
+        for (int j = 0; j < 2; j++)
+            cout << setw(5) << C[i][j];
+
+        cout << endl;
+    }
+
+    int D[3][3];
+
+    cout << "\nNhap ma tran 3x3:\n";
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            cin >> D[i][j];
+
+    int det =
+
+        D[0][0] * (D[1][1] * D[2][2] - D[1][2] * D[2][1])
+
+        - D[0][1] * (D[1][0] * D[2][2] - D[1][2] * D[2][0])
+
+        + D[0][2] * (D[1][0] * D[2][1] - D[1][1] * D[2][0]);
+
+    cout << "\nDinh thuc = " << det;
+}
+
+
+//====================================
+// BAI 3 - CAP PHAT DONG
+//====================================
+
+class MangDong {
+
+private:
+
+    int* a;
+
+    int size;
+
+public:
+
+    MangDong() {
+
+        a = NULL;
+
+        size = 0;
+    }
+
+    void push_back(int x) {
+
+        int* temp = new int[size + 1];
+
+        for (int i = 0; i < size; i++)
+            temp[i] = a[i];
+
+        temp[size] = x;
+
+        delete[] a;
+
+        a = temp;
+
+        size++;
+    }
+
+    void pop_back() {
+
+        if (size == 0)
+            return;
+
+        size--;
+    }
+
+    int at(int i) {
+
+        if (i >= size)
+            return -1;
+
+        return a[i];
+    }
+
+    void xuat() {
+
+        for (int i = 0; i < size; i++)
+            cout << a[i] << " ";
+
+        cout << endl;
+    }
+
+};
+
+void Bai3() {
+
+    cout << "\n\n===== BAI 3 =====\n";
+
+    MangDong ds;
+
+    ds.push_back(10);
+
+    ds.push_back(20);
+
+    ds.push_back(30);
+
+    cout << "Sau push_back:\n";
+
+    ds.xuat();
+
+    ds.pop_back();
+
+    cout << "Sau pop_back:\n";
+
+    ds.xuat();
+
+    cout << "at(0) = "
+        << ds.at(0)
+        << endl;
+}
+
+
+
+//====================================
+// BAI 4 - STUDENT SCORE MANAGER
+//====================================
+
+struct SinhVien {
+
+    string ten;
+
+    string mssv;
+
+    float diem;
+
+};
+
+SinhVien ds[100];
+
+int n = 0;
+
+
+void Them() {
+
+    cin.ignore();
+
+    cout << "\nTen: ";
+    getline(cin, ds[n].ten);
+
+    cout << "MSSV: ";
+    getline(cin, ds[n].mssv);
+
+    cout << "Diem: ";
+    cin >> ds[n].diem;
+
+    n++;
+}
+
+
+void Tim() {
+
+    string x;
+
+    cin.ignore();
+
+    cout << "\nNhap ten: ";
+
+    getline(cin, x);
+
+    for (int i = 0; i < n; i++) {
+
+        if (ds[i].ten.find(x) != string::npos) {
+
+            cout
+                << ds[i].ten
+                << " - "
+                << ds[i].mssv
+                << " - "
+                << ds[i].diem
+                << endl;
+        }
+    }
+}
+
+
+void SapXep() {
+
+    for (int i = 0; i < n - 1; i++)
+
+        for (int j = i + 1; j < n; j++)
+
+            if (ds[i].diem < ds[j].diem)
+
+                swap(ds[i], ds[j]);
+}
+
+
+void BaoCao() {
+
+    ofstream f("diem_sinhvien.txt");
+
+    float tong = 0;
+
+    float max = ds[0].diem;
+
+    float min = ds[0].diem;
+
+    for (int i = 0; i < n; i++) {
+
+        tong += ds[i].diem;
+
+        if (ds[i].diem > max)
+            max = ds[i].diem;
+
+        if (ds[i].diem < min)
+            min = ds[i].diem;
+
+        f
+            << ds[i].ten
+            << " "
+            << ds[i].mssv
+            << " "
+            << ds[i].diem
+            << endl;
+    }
+
+    cout << "\nDiem TB = "
+        << tong / n;
+
+    cout << "\nMax = "
+        << max;
+
+    cout << "\nMin = "
+        << min;
+
+    f.close();
+}
+
+
+void Bai4() {
+
+    int chon;
+
+    do {
+
+        cout
+            << "\n\n===== QUAN LY =====\n";
+
+        cout
+            << "1. Them\n";
+
+        cout
+            << "2. Tim\n";
+
+        cout
+            << "3. Sap xep\n";
+
+        cout
+            << "4. Bao cao\n";
+
+        cout
+            << "0. Thoat\n";
+
+        cin >> chon;
+
+        switch (chon) {
+
+        case 1:
+            Them();
+            break;
+
+        case 2:
+            Tim();
+            break;
+
+        case 3:
+            SapXep();
+            break;
+
+        case 4:
+            BaoCao();
+            break;
+
+        }
+
+    } while (chon != 0);
+
+}
+
+
+
+//====================================
+int main() {
+
+    Bai1();
+
+    Bai2();
+
+    Bai3();
+
+    Bai4();
+
+    return 0;
+
+}
