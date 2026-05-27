@@ -1,0 +1,182 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+using namespace std;
+
+// ==========================
+// STRUCT SINH VIEN
+// ==========================
+struct Student {
+
+    char name[50];
+    char id[20];
+    float score;
+};
+
+// ==========================
+// CLASS QUAN LY
+// ==========================
+class StudentManager {
+
+private:
+
+    Student data[100];
+    int size;
+
+public:
+
+    StudentManager() {
+        size = 0;
+    }
+
+    // ==========================
+    // THEM SINH VIEN
+    // ==========================
+    void addStudent() {
+
+        cin.ignore();
+
+        cout << "Ten: ";
+        cin.getline(data[size].name, 50);
+
+        cout << "MSSV: ";
+        cin.getline(data[size].id, 20);
+
+        cout << "Diem: ";
+        cin >> data[size].score;
+
+        size++;
+    }
+
+    // ==========================
+    // HIEN THI
+    // ==========================
+    void showStudents() {
+
+        cout << "\n===== DANH SACH =====\n";
+
+        for (int i = 0; i < size; i++) {
+
+            cout << data[i].name << " | "
+                << data[i].id << " | "
+                << data[i].score << endl;
+        }
+    }
+
+    // ==========================
+    // SAP XEP DIEM GIAM DAN
+    // ==========================
+    void sortStudents() {
+
+        for (int i = 0; i < size - 1; i++) {
+
+            for (int j = i + 1; j < size; j++) {
+
+                if (data[j].score > data[i].score) {
+
+                    Student temp = data[i];
+                    data[i] = data[j];
+                    data[j] = temp;
+                }
+            }
+        }
+
+        cout << "Da sap xep!\n";
+    }
+
+    // ==========================
+    // TIM KIEM MSSV
+    // ==========================
+    void searchStudent() {
+
+        char target[20];
+
+        cin.ignore();
+
+        cout << "Nhap MSSV can tim: ";
+        cin.getline(target, 20);
+
+        for (int i = 0; i < size; i++) {
+
+            if (strcmp(data[i].id, target) == 0) {
+
+                cout << data[i].name << " | "
+                    << data[i].score << endl;
+            }
+        }
+    }
+
+    // ==========================
+    // THONG KE
+    // ==========================
+    void statistics() {
+
+        float maxScore = data[0].score;
+        float minScore = data[0].score;
+        float sum = 0;
+
+        for (int i = 0; i < size; i++) {
+
+            if (data[i].score > maxScore)
+                maxScore = data[i].score;
+
+            if (data[i].score < minScore)
+                minScore = data[i].score;
+
+            sum += data[i].score;
+        }
+
+        cout << "\nDiem cao nhat: " << maxScore;
+        cout << "\nDiem thap nhat: " << minScore;
+        cout << "\nTrung binh: " << sum / size << endl;
+    }
+};
+
+int main() {
+
+    StudentManager sm;
+
+    int choice;
+
+    do {
+
+        cout << "\n===== QUAN LY SINH VIEN =====\n";
+
+        cout << "1. Them sinh vien\n";
+        cout << "2. Hien thi danh sach\n";
+        cout << "3. Sap xep diem\n";
+        cout << "4. Tim kiem\n";
+        cout << "5. Thong ke\n";
+        cout << "0. Thoat\n";
+
+        cout << "Chon: ";
+        cin >> choice;
+
+        switch (choice) {
+
+        case 1:
+            sm.addStudent();
+            break;
+
+        case 2:
+            sm.showStudents();
+            break;
+
+        case 3:
+            sm.sortStudents();
+            break;
+
+        case 4:
+            sm.searchStudent();
+            break;
+
+        case 5:
+            sm.statistics();
+            break;
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}

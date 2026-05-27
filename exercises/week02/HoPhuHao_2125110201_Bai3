@@ -1,0 +1,118 @@
+#include <iostream>
+using namespace std;
+
+class DynamicArray {
+
+private:
+
+    int* data;
+    int size;
+    int capacity;
+
+    // ==========================
+    // HAM RESIZE
+    // ==========================
+    void resize() {
+
+        capacity *= 2;
+
+        int* newData = new int[capacity];
+
+        for (int i = 0; i < size; i++) {
+            newData[i] = data[i];
+        }
+
+        delete[] data;
+
+        data = newData;
+    }
+
+public:
+
+    // ==========================
+    // CONSTRUCTOR
+    // ==========================
+    DynamicArray() {
+
+        size = 0;
+        capacity = 2;
+
+        data = new int[capacity];
+    }
+
+    // ==========================
+    // DESTRUCTOR
+    // ==========================
+    ~DynamicArray() {
+
+        delete[] data;
+    }
+
+    // ==========================
+    // THEM PHAN TU
+    // ==========================
+    void push_back(int value) {
+
+        if (size == capacity) {
+            resize();
+        }
+
+        data[size] = value;
+
+        size++;
+    }
+
+    // ==========================
+    // XOA PHAN TU CUOI
+    // ==========================
+    void pop_back() {
+
+        if (size > 0) {
+            size--;
+        }
+    }
+
+    // ==========================
+    // LAY PHAN TU
+    // ==========================
+    int at(int index) {
+
+        if (index < 0 || index >= size) {
+            return -1;
+        }
+
+        return data[index];
+    }
+
+    // ==========================
+    // IN MANG
+    // ==========================
+    void print() {
+
+        for (int i = 0; i < size; i++) {
+            cout << data[i] << " ";
+        }
+
+        cout << endl;
+    }
+};
+
+int main() {
+
+    DynamicArray arr;
+
+    arr.push_back(10);
+    arr.push_back(20);
+    arr.push_back(30);
+
+    arr.print();
+
+    arr.pop_back();
+
+    arr.print();
+
+    cout << "Phan tu tai index 1 = ";
+    cout << arr.at(1);
+
+    return 0;
+}
