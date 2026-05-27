@@ -32,15 +32,8 @@ unsigned short TinhTongChuSo(unsigned int n) {
 //  BAI 2: Minh hoa CTDL - Bang diem Sinh Vien
 // ============================================================
 #define SOMH 3
-#define MAX_SV 100
-
-struct SinhVien {
-    int masv;
-    char hoten[51];
-    bool gtinh;     // true = Nam, false = Nu
-    char lop[9];
-    float dtb;
-};
+// xoa MAX_SV 100 vi chua su dung den
+// xoa struct SinhVien vi chua thay su dung den
 
 // Phương án 02: Mảng 2 chiều (giao trinh de xuat)
 void XuatBangDiem_2D(float a[][SOMH], int m) {
