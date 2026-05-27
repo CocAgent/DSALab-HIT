@@ -1,0 +1,552 @@
+Bài 1: Linear Search ⭐
+Tìm kiếm tuyến tính trên mảng số nguyên và mảng chuỗi. Đếm số bước so sánh. #include #include #include using namespace std; // 1. Sửa cảnh báo bằng cách chuyển kiểu trả về hoặc kiểu của biến i // Ép kiểu (int) ở lệnh return i để đồng bộ dữ liệu int LinearSearchInt(const vector& a, int x, int& compareCount) { compareCount = 0; for (size_t i = 0; i < a.size(); i++) { compareCount++; if (a[i] == x) { return (int)i; // Đã sửa: Ép kiểu tường minh từ size_t về int } } return -1; }
+
+int LinearSearchString(const vector& a, const string& x, int& compareCount) { compareCount = 0; for (size_t i = 0; i < a.size(); i++) { compareCount++; if (a[i] == x) { return (int)i; // Đã sửa: Ép kiểu tường minh từ size_t về int } } return -1; }
+
+// 2. BẮT BUỘC PHẢI CÓ HÀM MAIN NÀY ĐỂ SỬA LỖI LNK2019 int main() { int comps = 0;
+
+// Test số nguyên
+vector<int> arrInt = { 14, 25, 33, 41, 56, 72, 89 };
+int vtInt = LinearSearchInt(arrInt, 41, comps);
+cout << "Tim x = 41 trong mang so nguyen: Vi tri = " << vtInt << " (So buoc so sanh: " << comps << ")\n";
+
+// Test chuỗi
+vector<string> arrStr = { "An", "Binh", "Chinh", "Dong", "Giang" };
+int vtStr = LinearSearchString(arrStr, "Dong", comps);
+cout << "Tim x = 'Dong' trong mang chuoi: Vi tri = " << vtStr << " (So buoc so sanh: " << comps << ")\n";
+
+return 0;
+}
+
+Bài 2: Binary Search ⭐⭐
+Cài đặt Binary Search iterative + recursive. Tìm vị trí đầu tiên và cuối cùng của phần tử trùng. #include using namespace std;
+
+// ====================================================== // Binary Search Iterative // ======================================================
+
+int BinarySearchIterative(int a[], int n, int x) {
+
+int left = 0;
+int right = n - 1;
+
+while(left <= right) {
+
+    int mid = (left + right) / 2;
+
+    // Nếu tìm thấy
+    if(a[mid] == x)
+        return mid;
+
+    // Nếu x lớn hơn
+    if(a[mid] < x)
+        left = mid + 1;
+
+    // Nếu x nhỏ hơn
+    else
+        right = mid - 1;
+}
+
+return -1;
+}
+
+// ====================================================== // Binary Search Recursive // ======================================================
+
+int BinarySearchRecursive(int a[], int left, int right, int x) {
+
+// Không tìm thấy
+if(left > right)
+    return -1;
+
+int mid = (left + right) / 2;
+
+// Tìm thấy
+if(a[mid] == x)
+    return mid;
+
+// Tìm bên phải
+if(a[mid] < x)
+    return BinarySearchRecursive(a, mid + 1, right, x);
+
+// Tìm bên trái
+return BinarySearchRecursive(a, left, mid - 1, x);
+}
+
+// ====================================================== // Tìm vị trí đầu tiên // ======================================================
+
+int FirstOccurrence(int a[], int n, int x) {
+
+int left = 0;
+int right = n - 1;
+
+int result = -1;
+
+while(left <= right) {
+
+    int mid = (left + right) / 2;
+
+    if(a[mid] == x) {
+
+        result = mid;
+
+        // tiếp tục tìm bên trái
+        right = mid - 1;
+    }
+
+    else if(a[mid] < x)
+        left = mid + 1;
+
+    else
+        right = mid - 1;
+}
+
+return result;
+}
+
+// ====================================================== // Tìm vị trí cuối cùng // ======================================================
+
+int LastOccurrence(int a[], int n, int x) {
+
+int left = 0;
+int right = n - 1;
+
+int result = -1;
+
+while(left <= right) {
+
+    int mid = (left + right) / 2;
+
+    if(a[mid] == x) {
+
+        result = mid;
+
+        // tiếp tục tìm bên phải
+        left = mid + 1;
+    }
+
+    else if(a[mid] < x)
+        left = mid + 1;
+
+    else
+        right = mid - 1;
+}
+
+return result;
+}
+
+// ====================================================== // MAIN // ======================================================
+
+int main() {
+
+int a[] = {1,2,2,2,3,4,5,6,6,7};
+
+int n = sizeof(a) / sizeof(a[0]);
+
+int x;
+
+cout << "Nhap gia tri can tim: ";
+cin >> x;
+
+// ==================================================
+// Iterative
+// ==================================================
+
+int vt1 = BinarySearchIterative(a, n, x);
+
+if(vt1 != -1)
+    cout << "\n[Iterative] Tim thay tai vi tri: "
+         << vt1 << endl;
+else
+    cout << "\n[Iterative] Khong tim thay\n";
+
+// ==================================================
+// Recursive
+// ==================================================
+
+int vt2 = BinarySearchRecursive(a, 0, n - 1, x);
+
+if(vt2 != -1)
+    cout << "[Recursive] Tim thay tai vi tri: "
+         << vt2 << endl;
+else
+    cout << "[Recursive] Khong tim thay\n";
+
+// ==================================================
+// First Occurrence
+// ==================================================
+
+int first = FirstOccurrence(a, n, x);
+
+if(first != -1)
+    cout << "Vi tri dau tien: " << first << endl;
+
+// ==================================================
+// Last Occurrence
+// ==================================================
+
+int last = LastOccurrence(a, n, x);
+
+if(last != -1)
+    cout << "Vi tri cuoi cung: " << last << endl;
+
+return 0;
+}
+
+Bài 3: So sánh hiệu năng ⭐⭐
+Đo thời gian tìm kiếm với n = 10.000, 100.000, 1.000.000 phần tử. Vẽ bảng so sánh. #include #include using namespace std; using namespace chrono;
+
+// ====================================================== // LINEAR SEARCH // ======================================================
+
+int LinearSearch(int a[], int n, int x, int& steps) {
+
+steps = 0;
+
+for (int i = 0; i < n; i++) {
+
+    steps++;
+
+    if (a[i] == x)
+        return i;
+}
+
+return -1;
+}
+
+// ====================================================== // BINARY SEARCH // ======================================================
+
+int BinarySearch(int a[], int n, int x, int& steps) {
+
+int left = 0;
+int right = n - 1;
+
+steps = 0;
+
+while (left <= right) {
+
+    steps++;
+
+    int mid = (left + right) / 2;
+
+    if (a[mid] == x)
+        return mid;
+
+    if (a[mid] < x)
+        left = mid + 1;
+    else
+        right = mid - 1;
+}
+
+return -1;
+}
+
+// ====================================================== // TEST PERFORMANCE // ======================================================
+
+void TestPerformance(int n) {
+
+int* a = new int[n];
+
+// tạo mảng tăng dần
+for (int i = 0; i < n; i++)
+    a[i] = i;
+
+int x = n - 1;
+
+int steps;
+
+// ==================================================
+// LINEAR SEARCH
+// ==================================================
+
+auto start1 = high_resolution_clock::now();
+
+LinearSearch(a, n, x, steps);
+
+auto end1 = high_resolution_clock::now();
+
+auto time1 =
+    duration_cast<microseconds>(end1 - start1);
+
+cout << "\nLINEAR SEARCH";
+cout << "\nSo phan tu: " << n;
+cout << "\nSo buoc: " << steps;
+cout << "\nThoi gian: "
+    << time1.count() << " microseconds\n";
+
+// ==================================================
+// BINARY SEARCH
+// ==================================================
+
+auto start2 = high_resolution_clock::now();
+
+BinarySearch(a, n, x, steps);
+
+auto end2 = high_resolution_clock::now();
+
+auto time2 =
+    duration_cast<microseconds>(end2 - start2);
+
+cout << "\nBINARY SEARCH";
+cout << "\nSo phan tu: " << n;
+cout << "\nSo buoc: " << steps;
+cout << "\nThoi gian: "
+    << time2.count() << " microseconds\n";
+
+delete[] a;
+}
+
+// ====================================================== // MAIN // ======================================================
+
+int main() {
+
+TestPerformance(10000);
+
+cout << "\n=====================================\n";
+
+TestPerformance(100000);
+
+cout << "\n=====================================\n";
+
+TestPerformance(1000000);
+
+return 0;
+}
+
+Bài 4: 🔥 Dự Án Mini — Smart Search Engine ⭐⭐⭐
+Cảm hứng: Brute Force Search — algorithm-visualizer
+
+Xây dựng hệ thống tìm kiếm danh bạ điện thoại:
+
+Tìm theo tên: Linear Search (hỗ trợ tìm kiếm mờ — chứa chuỗi con)
+Tìm theo số điện thoại: Binary Search (sau khi sort theo SĐT)
+Thống kê: hiển thị số bước so sánh, thời gian tìm kiếm
+Gợi ý: nếu không tìm thấy, gợi ý 3 tên gần giống nhất
+Nhập tên cần tìm: "Minh"
+→ Tìm thấy 3 kết quả:
+   1. Nguyễn Văn Minh   - 0901234567
+   2. Trần Thị Minh Anh - 0912345678
+   3. Lê Minh Tuấn      - 0923456789
+   (Đã so sánh 15/50 phần tử — 0.002ms)
+#include #include #include #include
+
+using namespace std; using namespace chrono;
+
+// ====================================================== // STRUCT CONTACT // ======================================================
+
+struct Contact {
+
+string name;
+string phone;
+};
+
+// ====================================================== // HIỂN THỊ DANH BẠ // ======================================================
+
+void ShowContacts(Contact ds[], int n) {
+
+cout << "\n===== DANH BA =====\n";
+
+for(int i = 0; i < n; i++) {
+
+    cout << i + 1 << ". "
+         << ds[i].name
+         << " - "
+         << ds[i].phone << endl;
+}
+}
+
+// ====================================================== // TÌM THEO TÊN (LINEAR SEARCH) // ======================================================
+
+void SearchByName(Contact ds[], int n, string keyword) {
+
+int steps = 0;
+
+bool found = false;
+
+auto start = high_resolution_clock::now();
+
+cout << "\nKet qua tim kiem:\n";
+
+for(int i = 0; i < n; i++) {
+
+    steps++;
+
+    if(ds[i].name.find(keyword) != string::npos) {
+
+        found = true;
+
+        cout << ds[i].name
+             << " - "
+             << ds[i].phone
+             << endl;
+    }
+}
+
+auto end = high_resolution_clock::now();
+
+auto time =
+duration_cast<microseconds>(end - start);
+
+if(!found) {
+
+    cout << "Khong tim thay!\n";
+
+    cout << "\nGoi y:\n";
+
+    int count = 0;
+
+    for(int i = 0; i < n && count < 3; i++) {
+
+        if(ds[i].name[0] == keyword[0]) {
+
+            cout << "- "
+                 << ds[i].name
+                 << endl;
+
+            count++;
+        }
+    }
+}
+
+cout << "\nDa so sanh "
+     << steps
+     << " phan tu";
+
+cout << "\nThoi gian: "
+     << time.count()
+     << " microseconds\n";
+}
+
+// ====================================================== // SORT THEO PHONE // ======================================================
+
+bool ComparePhone(Contact a, Contact b) {
+
+return a.phone < b.phone;
+}
+
+// ====================================================== // BINARY SEARCH PHONE // ======================================================
+
+int BinarySearchPhone(Contact ds[], int n, string phone, int &steps) {
+
+int left = 0;
+int right = n - 1;
+
+steps = 0;
+
+while(left <= right) {
+
+    steps++;
+
+    int mid = (left + right) / 2;
+
+    if(ds[mid].phone == phone)
+        return mid;
+
+    if(ds[mid].phone < phone)
+        left = mid + 1;
+    else
+        right = mid - 1;
+}
+
+return -1;
+}
+
+// ====================================================== // MAIN // ======================================================
+
+int main() {
+
+Contact ds[] = {
+
+    {"Nguyen Van Minh", "0901234567"},
+    {"Tran Thi Minh Anh", "0912345678"},
+    {"Le Minh Tuan", "0923456789"},
+    {"Pham Gia Bao", "0931111111"},
+    {"Hoang Minh", "0942222222"}
+};
+
+int n = sizeof(ds) / sizeof(ds[0]);
+
+int choice;
+
+do {
+
+    cout << "\n========== MENU ==========\n";
+
+    cout << "1. Xem danh ba\n";
+    cout << "2. Tim theo ten\n";
+    cout << "3. Tim theo so dien thoai\n";
+    cout << "0. Thoat\n";
+
+    cout << "Nhap lua chon: ";
+    cin >> choice;
+
+    cin.ignore();
+
+    if(choice == 1) {
+
+        ShowContacts(ds, n);
+    }
+
+    else if(choice == 2) {
+
+        string keyword;
+
+        cout << "Nhap ten can tim: ";
+
+        getline(cin, keyword);
+
+        SearchByName(ds, n, keyword);
+    }
+
+    else if(choice == 3) {
+
+        sort(ds, ds + n, ComparePhone);
+
+        string phone;
+
+        cout << "Nhap SDT can tim: ";
+
+        getline(cin, phone);
+
+        int steps;
+
+        auto start =
+        high_resolution_clock::now();
+
+        int vt =
+        BinarySearchPhone(ds, n,
+                          phone,
+                          steps);
+
+        auto end =
+        high_resolution_clock::now();
+
+        auto time =
+        duration_cast<microseconds>
+        (end - start);
+
+        if(vt != -1) {
+
+            cout << "\nTim thay:\n";
+
+            cout << ds[vt].name
+                 << " - "
+                 << ds[vt].phone
+                 << endl;
+        }
+
+        else {
+
+            cout << "\nKhong tim thay!\n";
+        }
+
+        cout << "\nSo buoc so sanh: "
+             << steps;
+
+        cout << "\nThoi gian: "
+             << time.count()
+             << " microseconds\n";
+    }
+
+} while(choice != 0);
+
+return 0;
+}
+
+📁 Tham khảo: Chuong2_TimKiem_SapXep/Chuong2_TimKiem_SapXep.cpp
