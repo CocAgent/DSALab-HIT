@@ -1,0 +1,596 @@
+//week02
+//Bài 1: Mảng cơ bản
+//Nhập mảng n phần tử.Tính min, max, trung bình, tổng.Không dùng STL.
+#include <iostream>
+using namespace std;
+int main() {
+    int n;
+    cout << "Nhap so luong phan tu n: ";
+    cin >> n;
+    if (n <= 0) {
+        cout << "Mang khong hop le!" << endl;
+        return 0;
+    }
+    int* arr = new int[n];
+    double sum = 0;
+    cout << "Nhap cac phan tu cua mang:\n";
+    for (int i = 0; i < n; i++) {
+        cout << "phantu(" << i << ") = ";
+        cin >> arr[i];
+        sum += arr[i];
+    }
+    int min_val = arr[0];
+    int max_val = arr[0];
+    for (int i = 1; i < n; i++) {
+        if (arr[i] < min_val) min_val = arr[i];
+        if (arr[i] > max_val) max_val = arr[i];
+    }
+    double avg = sum / n;
+    cout << "\n--- KET QUA ---\n";
+    cout << "Tong: " << sum << endl;
+    cout << "Trung binh: " << avg << endl;
+    cout << "Min: " << min_val << endl;
+    cout << "Max: " << max_val << endl;
+    delete[] arr;
+    return 0;
+}
+//Bài 2: Mảng 2D
+//Nhân 2 ma trận n×n.Tính định thức ma trận 3×3.Hiển thị đẹp.
+#include <iostream>
+#include <iomanip>
+using namespace std;
+void printMatrix(int** mat, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << setw(5) << mat[i][j];
+        }
+        cout << endl;
+    }
+}
+int determinant3x3(int mat[3][3]) {
+    int det = mat[0][0] * (mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1])
+        - mat[0][1] * (mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0])
+        + mat[0][2] * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]);
+    return det;
+}
+int main() {
+    int n;
+    cout << "Nhap kich thuoc ma tran n x n: ";
+    cin >> n;
+    int** A = new int* [n];
+    int** B = new int* [n];
+    int** C = new int* [n];
+    for (int i = 0; i < n; i++) {
+        A[i] = new int[n];
+        B[i] = new int[n];
+        C[i] = new int[n];
+    }
+    cout << "Nhap ma tran A:\n";
+    for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) cin >> A[i][j];
+    cout << "Nhap ma tran B:\n";
+    for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) cin >> B[i][j];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < n; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    cout << "\nMa tran A * B:\n";
+    printMatrix(C, n);
+    for (int i = 0; i < n; i++) {
+        delete[] A[i]; delete[] B[i]; delete[] C[i];
+    }
+    delete[] A; delete[] B; delete[] C;
+    cout << "\n--- Tinh dinh thuc ma tran 3x3 ---\n";
+    int mat3x3[3][3] = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+    cout << "Ma tran 3x3:\n";
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) cout << setw(5) << mat3x3[i][j];
+        cout << endl;
+    }
+    cout << "Dinh thuc = " << determinant3x3(mat3x3) << endl;
+    return 0;
+}
+//Bài 3: Con trỏ & cấp phát động
+//Cài đặt mảng động tự resize(như std::vector đơn giản).Hỗ trợ push_back, pop_back, at(i).
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+class MyVector {
+private:
+    int* data;
+    size_t capacity;
+    size_t current_size;
+    void resize() {
+        capacity = (capacity == 0) ? 1 : capacity * 2;
+        int* new_data = new int[capacity];
+        for (size_t i = 0; i < current_size; i++) {
+            new_data[i] = data[i];
+        }
+        delete[] data;
+        data = new_data;
+    }
+public:
+    MyVector() : data(nullptr), capacity(0), current_size(0) {}
+    ~MyVector() {
+        delete[] data;
+    }
+    void push_back(int value) {
+        if (current_size == capacity) {
+            resize();
+        }
+        data[current_size] = value;
+        current_size++;
+    }
+    void pop_back() {
+        if (current_size > 0) {
+            current_size--;
+        }
+    }
+    int& at(size_t index) {
+        if (index >= current_size) {
+            throw out_of_range("Index out of bounds!");
+        }
+        return data[index];
+    }
+    size_t size() const { return current_size; }
+    size_t cap() const { return capacity; }
+};
+int main() {
+    MyVector vec;
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    cout << "Size: " << vec.size() << ", Capacity: " << vec.cap() << endl;
+    cout << "Phan tu thu 1: " << vec.at(1) << endl;
+    vec.pop_back();
+    cout << "Sau khi pop_back, size: " << vec.size() << endl;
+    vec.at(0) = 100;
+    cout << "Phan tu thu 0 sau khi sua: " << vec.at(0) << endl;
+    return 0;
+}
+//Bài 4: Dự Án Mini — Student Score Manager
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <iomanip>
+using namespace std;
+struct Student {
+    string id;
+    string name;
+    float score;
+};
+class StudentManager {
+private:
+    Student* students;
+    int capacity;
+    int count;
+    void resize() {
+        capacity = (capacity == 0) ? 2 : capacity * 2;
+        Student* new_students = new Student[capacity];
+        for (int i = 0; i < count; i++) {
+            new_students[i] = students[i];
+        }
+        delete[] students;
+        students = new_students;
+    }
+public:
+    StudentManager() : students(nullptr), capacity(0), count(0) {}
+
+    ~StudentManager() {
+        delete[] students;
+    }
+    void addStudent() {
+        if (count == capacity) resize();
+        cout << "Nhap MSSV: "; cin >> students[count].id;
+        cin.ignore();
+        cout << "Nhap Ten: "; getline(cin, students[count].name);
+        cout << "Nhap Diem: "; cin >> students[count].score;
+        count++;
+        cout << "-> Them thanh cong!\n";
+    }
+    void deleteStudent() {
+        string target_id;
+        cout << "Nhap MSSV can xoa: "; cin >> target_id;
+        int index = -1;
+        for (int i = 0; i < count; i++) {
+            if (students[i].id == target_id) {
+                index = i; break;
+            }
+        }
+        if (index != -1) {
+            for (int i = index; i < count - 1; i++) {
+                students[i] = students[i + 1];
+            }
+            count--;
+            cout << "-> Da xoa sinh vien.\n";
+        }
+        else {
+            cout << "-> Khong tim thay MSSV!\n";
+        }
+    }
+    void searchStudent() {
+        string query;
+        cout << "Nhap ten hoac MSSV can tim: ";
+        cin.ignore();
+        getline(cin, query);
+
+        bool found = false;
+        cout << "--- KET QUA TIM KIEM ---\n";
+        for (int i = 0; i < count; i++) {
+            if (students[i].id == query || students[i].name == query) {
+                cout << "MSSV: " << students[i].id << " | Ten: " << students[i].name << " | Diem: " << students[i].score << "\n";
+                found = true;
+            }
+        }
+        if (!found) cout << "Khong tim thay ket qua nao.\n";
+    }
+    void sortAndDisplay() {
+        for (int i = 0; i < count - 1; i++) {
+            int max_idx = i;
+            for (int j = i + 1; j < count; j++) {
+                if (students[j].score > students[max_idx].score) {
+                    max_idx = j;
+                }
+            }
+            swap(students[i], students[max_idx]);
+        }
+        cout << "--- BANG XEP HANG LOP ---\n";
+        cout << left << setw(15) << "MSSV" << setw(25) << "Ho va Ten" << "Diem\n";
+        for (int i = 0; i < count; i++) {
+            cout << left << setw(15) << students[i].id << setw(25) << students[i].name << students[i].score << "\n";
+        }
+    }
+    void exportReport() {
+        if (count == 0) {
+            cout << "Lop chua co sinh vien!\n";
+            return;
+        }
+        float max_s = students[0].score, min_s = students[0].score, sum = 0;
+        for (int i = 0; i < count; i++) {
+            if (students[i].score > max_s) max_s = students[i].score;
+            if (students[i].score < min_s) min_s = students[i].score;
+            sum += students[i].score;
+        }
+        ofstream file("diem_sinhvien.txt");
+        if (!file.is_open()) {
+            cout << "Loi mo file!\n";
+            return;
+        }
+        file << "=== BAO CAO QUAN LY DIEM ===\n";
+        file << "So luong sinh vien: " << count << "\n";
+        file << "Diem cao nhat: " << max_s << "\n";
+        file << "Diem thap nhat: " << min_s << "\n";
+        file << "Diem trung binh: " << sum / count << "\n";
+        file << "----------------------------\n";
+        file << left << setw(15) << "MSSV" << setw(25) << "Ho va Ten" << "Diem\n";
+        for (int i = 0; i < count; i++) {
+            file << left << setw(15) << students[i].id << setw(25) << students[i].name << students[i].score << "\n";
+        }
+        file.close();
+        cout << "-> Da xuat bao cao ra file diem_sinhvien.txt\n";
+    }
+};
+int main() {
+    StudentManager manager;
+    int choice;
+    do {
+        cout << "\n=== QUAN LY DIEM SINH VIEN ===\n";
+        cout << "1. Them sinh vien\n";
+        cout << "2. Xoa sinh vien\n";
+        cout << "3. Tim kiem\n";
+        cout << "4. Xep hang lop (kem xuat danh sach)\n";
+        cout << "5. Xuat bao cao ra file\n";
+        cout << "0. Thoat\n";
+        cout << "Chon chuc nang: ";
+        cin >> choice;
+        switch (choice) {
+        case 1: manager.addStudent(); break;
+        case 2: manager.deleteStudent(); break;
+        case 3: manager.searchStudent(); break;
+        case 4: manager.sortAndDisplay(); break;
+        case 5: manager.exportReport(); break;
+        case 0: cout << "Dang thoat...\n"; break;
+        default: cout << "Lua chon khong hop le!\n";
+        }
+    } while (choice != 0);
+    return 0;
+}
+//week03
+//Bài 1: Linear Search
+//Tìm kiếm tuyến tính trên mảng số nguyên và mảng chuỗi.Đếm số bước so sánh.
+#include <iostream>
+#include <string>
+using namespace std;
+template <typename T>
+int linearSearch(T arr[], int n, T target, int& steps) {
+    steps = 0;
+    for (int i = 0; i < n; i++) {
+        steps++;
+        if (arr[i] == target) {
+            return i;
+        }
+    }
+    return -1;
+}
+int main() {
+    int intArr[] = { 4, 2, 7, 1, 9, 5 };
+    int nInt = sizeof(intArr) / sizeof(intArr[0]);
+    int stepsInt = 0;
+    cout << "--- Linear Search Mang So Nguyen ---\n";
+    int idxInt = linearSearch(intArr, nInt, 9, stepsInt);
+    if (idxInt != -1) cout << "Tim thay 9 tai vi tri: " << idxInt << " (So buoc: " << stepsInt << ")\n";
+    string strArr[] = { "apple", "banana", "cherry", "date" };
+    int nStr = sizeof(strArr) / sizeof(strArr[0]);
+    int stepsStr = 0;
+    cout << "\n--- Linear Search Mang Chuoi ---\n";
+    int idxStr = linearSearch(strArr, nStr, string("cherry"), stepsStr);
+    if (idxStr != -1) cout << "Tim thay 'cherry' tai vi tri: " << idxStr << " (So buoc: " << stepsStr << ")\n";
+    return 0;
+}
+//Bài 2: Binary Search
+//Cài đặt Binary Search iterative + recursive.Tìm vị trí đầu tiên và cuối cùng của phần tử trùng.
+#include <iostream>
+using namespace std;
+int binarySearchIterative(int arr[], int n, int target) {
+    int left = 0, right = n - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+int binarySearchRecursive(int arr[], int left, int right, int target) {
+    if (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) return binarySearchRecursive(arr, mid + 1, right, target);
+        return binarySearchRecursive(arr, left, mid - 1, target);
+    }
+    return -1;
+}
+int findFirst(int arr[], int n, int target) {
+    int left = 0, right = n - 1, res = -1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) {
+            res = mid;
+            right = mid - 1;
+        }
+        else if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return res;
+}
+int findLast(int arr[], int n, int target) {
+    int left = 0, right = n - 1, res = -1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) {
+            res = mid;
+            left = mid + 1;
+        }
+        else if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return res;
+}
+
+int main() {
+    int arr[] = { 1, 2, 2, 2, 2, 3, 4, 7, 8, 8 };
+    int n = sizeof(arr) / sizeof(arr[0]);
+    int target = 2;
+
+    cout << "Mang: 1 2 2 2 2 3 4 7 8 8\n";
+    cout << "Vi tri dau tien cua " << target << ": " << findFirst(arr, n, target) << endl;
+    cout << "Vi tri cuoi cung cua " << target << ": " << findLast(arr, n, target) << endl;
+
+    return 0;
+}
+//Bài 3: So sánh hiệu năng
+//Đo thời gian tìm kiếm với n = 10.000, 100.000, 1.000.000 phần tử.Vẽ bảng so sánh.
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <algorithm>
+#include <iomanip>
+using namespace std;
+using namespace std::chrono;
+int linearSearchTest(const vector<int>& arr, int target) {
+    for (size_t i = 0; i < arr.size(); i++) {
+        if (arr[i] == target) return i;
+    }
+    return -1;
+}
+int binarySearchTest(const vector<int>& arr, int target) {
+    int left = 0, right = arr.size() - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+void testPerformance(int n) {
+    vector<int> arr(n);
+    for (int i = 0; i < n; i++) arr[i] = i;
+    int target = n - 1;
+    auto start1 = high_resolution_clock::now();
+    linearSearchTest(arr, target);
+    auto stop1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(stop1 - start1);
+    auto start2 = high_resolution_clock::now();
+    binarySearchTest(arr, target);
+    auto stop2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<microseconds>(stop2 - start2);
+
+    cout << "| " << setw(9) << n << " | "
+        << setw(16) << duration1.count() << " us | "
+        << setw(16) << duration2.count() << " us |\n";
+}
+int main() {
+    cout << "--- BANG SO SANH THOI GIAN TIM KIEM ---\n";
+    cout << "| So Phan Tu | Linear Search (us) | Binary Search (us) |\n";
+    cout << "|------------|--------------------|--------------------|\n";
+    testPerformance(10000);
+    testPerformance(100000);
+    testPerformance(1000000);
+    testPerformance(10000000);
+    return 0;
+}
+//Bài 4: Dự Án Mini — Smart Search Engine
+#include <iostream>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <algorithm>
+using namespace std;
+using namespace std::chrono;
+struct Contact {
+    string name;
+    string phone;
+};
+string toLower(string s) {
+    string res = s;
+    for (char& c : res) c = tolower(c);
+    return res;
+}
+int levenshtein(const string& s1, const string& s2) {
+    int m = s1.size(), n = s2.size();
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1));
+
+    for (int i = 0; i <= m; i++) dp[i][0] = i;
+    for (int j = 0; j <= n; j++) dp[0][j] = j;
+
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (s1[i - 1] == s2[j - 1])
+                dp[i][j] = dp[i - 1][j - 1];
+            else
+                dp[i][j] = 1 + min({ dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] });
+        }
+    }
+    return dp[m][n];
+}
+class SearchEngine {
+private:
+    vector<Contact> contacts;
+public:
+    void addContact(string name, string phone) {
+        contacts.push_back({ name, phone });
+    }
+    void sortByPhone() {
+        sort(contacts.begin(), contacts.end(), [](const Contact& a, const Contact& b) {
+            return a.phone < b.phone;
+            });
+    }
+    void searchByName(string query) {
+        auto start = high_resolution_clock::now();
+        int steps = 0;
+        vector<Contact> results;
+        string queryLower = toLower(query);
+        for (const auto& c : contacts) {
+            steps++;
+            if (toLower(c.name).find(queryLower) != string::npos) {
+                results.push_back(c);
+            }
+        }
+        auto stop = high_resolution_clock::now();
+        double time_ms = duration<double, milli>(stop - start).count();
+        if (!results.empty()) {
+            cout << "-> Tim thay " << results.size() << " ket qua:\n";
+            for (size_t i = 0; i < results.size(); i++) {
+                cout << "   " << i + 1 << ". " << results[i].name << " - " << results[i].phone << "\n";
+            }
+            cout << "   (Da so sanh " << steps << "/" << contacts.size() << " phan tu - " << time_ms << "ms)\n";
+        }
+        else {
+            cout << "-> Khong tim thay ten chua chuoi '" << query << "'.\n";
+            suggestNames(queryLower);
+        }
+    }
+
+    void searchByPhone(string phoneQuery) {
+        sortByPhone();
+
+        auto start = high_resolution_clock::now();
+        int left = 0, right = contacts.size() - 1;
+        int steps = 0;
+        int foundIdx = -1;
+
+        while (left <= right) {
+            steps++;
+            int mid = left + (right - left) / 2;
+            if (contacts[mid].phone == phoneQuery) {
+                foundIdx = mid;
+                break;
+            }
+            if (contacts[mid].phone < phoneQuery) left = mid + 1;
+            else right = mid - 1;
+        }
+        auto stop = high_resolution_clock::now();
+        double time_ms = duration<double, milli>(stop - start).count();
+        if (foundIdx != -1) {
+            cout << "-> Tim thay: " << contacts[foundIdx].name << " - " << contacts[foundIdx].phone << "\n";
+        }
+        else {
+            cout << "-> Khong tim thay SDT nay.\n";
+        }
+        cout << "   (Da so sanh " << steps << " buoc - " << time_ms << "ms)\n";
+    }
+    void suggestNames(string query) {
+        cout << "   Goi y 3 ten gan giong nhat:\n";
+        vector<pair<int, Contact>> distances;
+        for (const auto& c : contacts) {
+            int dist = levenshtein(query, toLower(c.name));
+            distances.push_back({ dist, c });
+        }
+        sort(distances.begin(), distances.end(), [](const pair<int, Contact>& a, const pair<int, Contact>& b) {
+            return a.first < b.first;
+            });
+        for (int i = 0; i < min(3, (int)distances.size()); i++) {
+            cout << "   " << i + 1 << ". " << distances[i].second.name << " - " << distances[i].second.phone << "\n";
+        }
+    }
+};
+int main() {
+    SearchEngine engine;
+    engine.addContact("Nguyen Van Minh", "0901234567");
+    engine.addContact("Tran Thi Minh Anh", "0912345678");
+    engine.addContact("Le Minh Tuan", "0923456789");
+    engine.addContact("Hoang Binh", "0934567890");
+    engine.addContact("Vu Quoc Manh", "0945678901");
+    engine.addContact("Pham Tuan", "0956789012");
+    int choice;
+    do {
+        cout << "\n=== SMART SEARCH ENGINE ===\n";
+        cout << "1. Tim kiem theo Ten (Mo)\n";
+        cout << "2. Tim kiem theo SDT (Chinh xac)\n";
+        cout << "0. Thoat\n";
+        cout << "Chon: ";
+        cin >> choice;
+        if (choice == 1) {
+            string q;
+            cout << "Nhap ten can tim: ";
+            cin.ignore();
+            getline(cin, q);
+            engine.searchByName(q);
+        }
+        else if (choice == 2) {
+            string p;
+            cout << "Nhap SDT can tim: ";
+            cin >> p;
+            engine.searchByPhone(p);
+        }
+    } while (choice != 0);
+    return 0;
+}
