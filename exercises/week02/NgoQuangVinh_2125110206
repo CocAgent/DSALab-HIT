@@ -1,0 +1,296 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
+
+// ==========================================
+// CẤU TRÚC DỮ LIỆU CHO BÀI 3 & BÀI 4
+// ==========================================
+
+// Cấu trúc mảng động tự resize (Bài 3)
+struct MyVector {
+    int* data;
+    int capacity;
+    int size;
+
+    void init() {
+        capacity = 2; // Bắt đầu nhỏ để dễ quan sát quá trình tự resize
+        size = 0;
+        data = new int[capacity];
+    }
+
+    void resize(int newCapacity) {
+        int* temp = new int[newCapacity];
+        for (int i = 0; i < size; i++) {
+            temp[i] = data[i];
+        }
+        delete[] data;
+        data = temp;
+        capacity = newCapacity;
+    }
+
+    void push_back(int value) {
+        if (size == capacity) {
+            resize(capacity * 2);
+        }
+        data[size] = value;
+        size++;
+    }
+
+    void pop_back() {
+        if (size > 0) size--;
+    }
+
+    int at(int index) {
+        if (index >= 0 && index < size) return data[index];
+        return -1;
+    }
+
+    void free() {
+        delete[] data;
+        data = nullptr;
+        size = capacity = 0;
+    }
+};
+
+// Cấu trúc Quản lý sinh viên (Bài 4)
+struct SinhVien {
+    std::string mssv;
+    std::string hoTen;
+    double diem;
+};
+
+struct DanhSachSinhVien {
+    SinhVien* ds;
+    int size;
+    int capacity;
+
+    void init() {
+        capacity = 4;
+        size = 0;
+        ds = new SinhVien[capacity];
+    }
+
+    void resize(int newCapacity) {
+        SinhVien* temp = new SinhVien[newCapacity];
+        for (int i = 0; i < size; i++) {
+            temp[i] = ds[i];
+        }
+        delete[] ds;
+        ds = temp;
+        capacity = newCapacity;
+    }
+
+    void themSinhVien(SinhVien sv) {
+        if (size == capacity) resize(capacity * 2);
+        ds[size] = sv;
+        size++;
+        std::cout << "-> Them sinh vien thanh cong!\n";
+    }
+
+    void xoaSinhVien(std::string mssv) {
+        int index = -1;
+        for (int i = 0; i < size; i++) {
+            if (ds[i].mssv == mssv) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            std::cout << "-> Khong tim thay MSSV: " << mssv << '\n';
+            return;
+        }
+        for (int i = index; i < size - 1; i++) {
+            ds[i] = ds[i + 1];
+        }
+        size--;
+        std::cout << "-> Xoa sinh vien thanh cong!\n";
+    }
+
+    void timKiem(std::string tuKhoa) {
+        bool timThay = false;
+        std::cout << "\n" << std::left << std::setw(15) << "MSSV" << std::setw(25) << "Ho va Ten" << std::setw(10) << "Diem" << '\n';
+        for (int i = 0; i < size; i++) {
+            if (ds[i].mssv == tuKhoa || ds[i].hoTen.find(tuKhoa) != std::string::npos) {
+                std::cout << std::left << std::setw(15) << ds[i].mssv << std::setw(25) << ds[i].hoTen << std::setw(10) << ds[i].diem << '\n';
+                timThay = true;
+            }
+        }
+        if (!timThay) std::cout << "Khong tim thay sinh vien phu hop.\n";
+    }
+
+    void sapXepGiamDan() {
+        for (int i = 0; i < size - 1; i++) {
+            int maxIdx = i;
+            for (int j = i + 1; j < size; j++) {
+                if (ds[j].diem > ds[maxIdx].diem) maxIdx = j;
+            }
+            SinhVien temp = ds[i];
+            ds[i] = ds[maxIdx];
+            ds[maxIdx] = temp;
+        }
+    }
+
+    void hienThi() {
+        if (size == 0) { std::cout << "Danh sach trong!\n"; return; }
+        std::cout << std::left << std::setw(6) << "STT" << std::setw(15) << "MSSV" << std::setw(25) << "Ho va Ten" << std::setw(10) << "Diem" << '\n';
+        for (int i = 0; i < size; i++) {
+            std::cout << std::left << std::setw(6) << i + 1 << std::setw(15) << ds[i].mssv << std::setw(25) << ds[i].hoTen << std::setw(10) << ds[i].diem << '\n';
+        }
+    }
+
+    void xuatFile(std::string filename) {
+        std::ofstream fout(filename);
+        if (!fout.is_open()) return;
+        fout << "=== BAO CAO DIEM SINH VIEN ===\n\n";
+        double maxDiem = size > 0 ? ds[0].diem : 0, minDiem = size > 0 ? ds[0].diem : 0, tong = 0;
+        for (int i = 0; i < size; i++) {
+            fout << std::left << std::setw(15) << ds[i].mssv << std::setw(25) << ds[i].hoTen << std::setw(10) << ds[i].diem << '\n';
+            if (ds[i].diem > maxDiem) maxDiem = ds[i].diem;
+            if (ds[i].diem < minDiem) minDiem = ds[i].diem;
+            tong += ds[i].diem;
+        }
+        if (size > 0) {
+            fout << "\nMax: " << maxDiem << " | Min: " << minDiem << " | Avg: " << (tong / size) << '\n';
+        }
+        fout.close();
+        std::cout << "-> Da xuat file '" << filename << "'\n";
+    }
+
+    void free() {
+        delete[] ds;
+        ds = nullptr;
+        size = capacity = 0;
+    }
+};
+
+// ==========================================
+// CÁC HÀM XỬ LÝ CHO BÀI 1 & BÀI 2
+// ==========================================
+
+void chayBai1() {
+    int n, arr[1000];
+    std::cout << "\n--- BAI 1: MANG CO BAN ---\nNhap n: "; std::cin >> n;
+    if (n <= 0) return;
+    std::cout << "Nhap " << n << " phan tu: ";
+    for (int i = 0; i < n; i++) std::cin >> arr[i];
+
+    int minV = arr[0], maxV = arr[0]; long long sum = 0;
+    for (int i = 0; i < n; i++) {
+        if (arr[i] < minV) minV = arr[i];
+        if (arr[i] > maxV) maxV = arr[i];
+        sum += arr[i];
+    }
+    std::cout << "Min: " << minV << " | Max: " << maxV << " | Tong: " << sum << " | TB: " << (double)sum / n << '\n';
+}
+
+void chayBai2() {
+    std::cout << "\n--- BAI 2: MANG 2D ---\n";
+    int n, A[30][30], B[30][30], C[30][30] = { 0 };
+    std::cout << "Nhap cap n ma tran vuong de nhan: "; std::cin >> n;
+
+    std::cout << "Nhap ma tran A:\n";
+    for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) std::cin >> A[i][j];
+    std::cout << "Nhap ma tran B:\n";
+    for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) std::cin >> B[i][j];
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            for (int k = 0; k < n; k++) C[i][j] += A[i][k] * B[k][j];
+        }
+    }
+    std::cout << "Ma tran ket qua C = A * B:\n";
+    for (int i = 0; i < n; i++) {
+        std::cout << "[ ";
+        for (int j = 0; j < n; j++) std::cout << std::setw(5) << C[i][j] << " ";
+        std::cout << "]\n";
+    }
+
+    std::cout << "\nTinh dinh thuc ma tran M (3x3):\n";
+    int M[3][3];
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) std::cin >> M[i][j];
+    int det = M[0][0] * M[1][1] * M[2][2] + M[0][1] * M[1][2] * M[2][0] + M[0][2] * M[1][0] * M[2][1]
+        - M[0][2] * M[1][1] * M[2][0] - M[0][0] * M[1][2] * M[2][1] - M[0][1] * M[1][0] * M[2][2];
+    std::cout << "=> Dinh thuc Det(M) = " << det << '\n';
+}
+
+void chayBai3() {
+    std::cout << "\n--- BAI 3: CON TRO & CAP PHAT DONG ---\n";
+    MyVector v; v.init();
+    std::cout << "Push_back cac so: 10, 20, 30\n";
+    v.push_back(10); v.push_back(20); v.push_back(30);
+    std::cout << "Kich thuoc hien tai: " << v.size << " | Suc chua: " << v.capacity << '\n';
+    std::cout << "Cac phan tu: ";
+    for (int i = 0; i < v.size; i++) std::cout << v.at(i) << " ";
+    std::cout << "\nPop_back 1 phan tu...\n";
+    v.pop_back();
+    std::cout << "Phan tu cuoi cung sau khi pop: " << v.at(v.size - 1) << '\n';
+    v.free();
+}
+
+void chayBai4(DanhSachSinhVien& qlsv) {
+    int con;
+    do {
+        std::cout << "\n=== QUAN LY DIEM SINH VIEN ===\n";
+        std::cout << "1. Them sinh vien\n2. Xoa sinh vien\n3. Tim kiem\n4. Xep hang lop\n5. Xuat bao cao\n0. Quay lai menu chinh\n";
+        std::cout << "Nhap lua chon: "; std::cin >> con; std::cin.ignore();
+        switch (con) {
+        case 1: {
+            SinhVien sv;
+            std::cout << "MSSV: "; std::getline(std::cin, sv.mssv);
+            std::cout << "Ten: "; std::getline(std::cin, sv.hoTen);
+            std::cout << "Diem: "; std::cin >> sv.diem;
+            qlsv.themSinhVien(sv); break;
+        }
+        case 2: {
+            std::string mssv; std::cout << "Nhap MSSV can xoa: "; std::getline(std::cin, mssv);
+            qlsv.xoaSinhVien(mssv); break; // Hàm xóa sinh viên dựa trên cơ chế dịch mảng
+        }
+        case 3: {
+            std::string tk; std::cout << "Nhap ten/MSSV can tim: "; std::getline(std::cin, tk);
+            qlsv.timKiem(tk); break;
+        }
+        case 4:
+            qlsv.sapXepGiamDan();
+            std::cout << "\n--- KET QUA XEP HANG TỪ CAO XUỐNG THẤP ---\n";
+            qlsv.hienThi(); break;
+        case 5:
+            qlsv.xuatFile("diem_sinhvien.txt"); break;
+        }
+    } while (con != 0);
+}
+
+// ==========================================
+// MENU CHÍNH ĐIỀU HƯỚNG TOÀN BỘ CHƯƠNG TRÌNH
+// ==========================================
+int main() {
+    DanhSachSinhVien qlsv;
+    qlsv.init(); // Khởi tạo sẵn vùng nhớ cho Bài 4 để giữ trạng thái dữ liệu xuyên suốt
+
+    int luaChon;
+    do {
+        std::cout << "\n=========================================\n";
+        std::cout << "       MENU HOAN THANH MUC TIEU TUAN\n";
+        std::cout << "=========================================\n";
+        std::cout << "1. Chay Bai 1: Mang co ban (Min, Max, Sum, Avg)\n";
+        std::cout << "2. Chay Bai 2: Mang 2D (Nhan ma tran & Tinh Det)\n";
+        std::cout << "3. Chay Bai 3: Con tro & Cap phat dong (Tu viet Vector)\n";
+        std::cout << "4. Chay Bai 4: Du an Mini - Student Score Manager\n";
+        std::cout << "0. Thoat chuong trinh\n";
+        std::cout << "-----------------------------------------\n";
+        std::cout << "Nhap bai muon kiem tra (0-4): ";
+        std::cin >> luaChon;
+
+        switch (luaChon) {
+        case 1: chayBai1(); break;
+        case 2: chayBai2(); break;
+        case 3: chayBai3(); break;
+        case 4: chayBai4(qlsv); break;
+        case 0: std::cout << "Tam biet! Chuc ban mot tuan hoc tap hieu qua.\n"; break;
+        default: std::cout << "Lua chon khong hop le!\n";
+        }
+    } while (luaChon != 0);
+
+    qlsv.free(); // Giải phóng dữ liệu bài 4 trước khi tắt ứng dụng
+    return 0;
+}
