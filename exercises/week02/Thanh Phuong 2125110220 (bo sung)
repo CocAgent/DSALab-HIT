@@ -1,0 +1,118 @@
+#include <iostream>
+#include <iomanip> // Thu vien de can chinh "hien thi dep"
+
+int main() {
+    // --- PHAN 1: NHAN HAI MA TRAN N x N ---
+    std::cout << "=== PHAN 1: NHAN HAI MA TRAN N x N ===" << std::endl;
+    int n;
+    std::cout << "Nhap kich thuoc n cua ma tran (n x n): ";
+    std::cin >> n;
+
+    if (n <= 0) {
+        std::cout << "Kich thuoc khong hop le!" << std::endl;
+        return 1;
+    }
+
+    // Cap phat dong cho 3 ma tran A, B, C bang con tro cap 2
+    int** A = new int*[n];
+    int** B = new int*[n];
+    int** C = new int*[n];
+    for (int i = 0; i < n; i++) {
+        A[i] = new int[n];
+        B[i] = new int[n];
+        C[i] = new int[n];
+    }
+
+    // Nhap ma tran A
+    std::cout << "\nNhap ma tran A:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cout << "A[" << i << "][" << j << "] = ";
+            std::cin >> A[i][j];
+        }
+    }
+
+    // Nhap ma tran B
+    std::cout << "\nNhap ma tran B:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cout << "B[" << i << "][" << j << "] = ";
+            std::cin >> B[i][j];
+        }
+    }
+
+    // Thuc hien phep nhan hai ma tran: C = A * B
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = 0; // Khoi tao gia tri o bang 0
+            for (int k = 0; k < n; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+
+    // Hien thi dep ma tran ket qua C
+    std::cout << "\nMa tran ket qua C (A * B) la:\n";
+    for (int i = 0; i < n; i++) {
+        std::cout << "[ ";
+        for (int j = 0; j < n; j++) {
+            // std::setw(6) giup moi so chiem dung doc quyen 6 khoang trong, thang hang dep mat
+            std::cout << std::setw(6) << C[i][j] << " ";
+        }
+        std::cout << " ]\n";
+    }
+
+    // Giai phong bo nho ma tran A, B, C
+    for (int i = 0; i < n; i++) {
+        delete[] A[i];
+        delete[] B[i];
+        delete[] C[i];
+    }
+    delete[] A;
+    delete[] B;
+    delete[] C;
+
+
+    // --- PHAN 2: TINH DINH THUC MA TRAN 3 X 3 ---
+    std::cout << "\n=== PHAN 2: TINH DINH THUC MA TRAN 3 X 3 ===" << std::endl;
+    
+    // Cap phat dong ma tran 3x3
+    int** M = new int*[3];
+    for (int i = 0; i < 3; i++) {
+        M[i] = new int[3];
+    }
+
+    std::cout << "Nhap các phan tu cho ma tran M (3x3):\n";
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            std::cout << "M[" << i << "][" << j << "] = ";
+            std::cin >> M[i][j];
+        }
+    }
+
+    // In lai ma tran M cho dep
+    std::cout << "\nMa tran M vua nhap:\n";
+    for (int i = 0; i < 3; i++) {
+        std::cout << "[ ";
+        for (int j = 0; j < 3; j++) {
+            std::cout << std::setw(6) << M[i][j] << " ";
+        }
+        std::cout << " ]\n";
+    }
+
+    // Ap dung cong thuc Sarrus de tinh dinh thuc ma tran 3x3
+    long long det = 0;
+    det = (long long)M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1])
+        - (long long)M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0])
+        + (long long)M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
+
+    std::cout << "\nDinh thuc (Determinant) cua ma tran M la: " << det << std::endl;
+
+    // Giai phong bo nho ma tran M
+    for (int i = 0; i < 3; i++) {
+        delete[] M[i];
+    }
+    delete[] M;
+
+    return 0;
+}
