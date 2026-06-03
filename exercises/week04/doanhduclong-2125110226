@@ -1,0 +1,250 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <iomanip>
+#include <chrono>
+#include <thread>
+#include <algorithm>
+
+using namespace std;
+
+// Mã màu ANSI cho Bài 4 Trực quan hóa
+const string MA_GOC = "\033[0m";
+const string MA_DO = "\033[31m";
+const string MA_XANH_LA = "\033[32m";
+const string MA_XANH_LAM = "\033[36m";
+
+// --- HÀM BỔ TRỢ ---
+void xoaManHinh() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void inMang(const vector<int>& mang) {
+    for (int x : mang) cout << x << " ";
+    cout << "\n";
+}
+
+vector<int> taoMangNgauNhien(int kichThuoc, int giaTriLonNhat) {
+    vector<int> mang(kichThuoc);
+    for (int i = 0; i < kichThuoc; i++) mang[i] = rand() % giaTriLonNhat + 1;
+    return mang;
+}
+
+// --- BÀI 1 nổi bọt chọn và chèn & 2: CÀI ĐẶT CƠ BẢN VÀ ĐẾM PHÉP TOÁN ---so sánh hoán vị
+void sapXepNoiBot(vector<int> mang, long long& soSanh, long long& hoanVi, bool inTungBuoc) {
+    soSanh = 0; hoanVi = 0;
+    int n = mang.size();
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            soSanh++;
+            if (mang[j] > mang[j + 1]) {
+                swap(mang[j], mang[j + 1]);
+                hoanVi++;
+            }
+        }
+        if (inTungBuoc) { cout << "Buoc " << i + 1 << ": "; inMang(mang); }
+    }
+}
+
+void sapXepChon(vector<int> mang, long long& soSanh, long long& hoanVi, bool inTungBuoc) {
+    soSanh = 0; hoanVi = 0;
+    int n = mang.size();
+    for (int i = 0; i < n - 1; i++) {
+        int viTriNhoNhat = i;
+        for (int j = i + 1; j < n; j++) {
+            soSanh++;
+            if (mang[j] < mang[viTriNhoNhat]) viTriNhoNhat = j;
+        }
+        if (viTriNhoNhat != i) {
+            swap(mang[i], mang[viTriNhoNhat]);
+            hoanVi++;
+        }
+        if (inTungBuoc) { cout << "Buoc " << i + 1 << ": "; inMang(mang); }
+    }
+}
+
+void sapXepChen(vector<int> mang, long long& soSanh, long long& hoanVi, bool inTungBuoc) {
+    soSanh = 0; hoanVi = 0;
+    int n = mang.size();
+    for (int i = 1; i < n; i++) {
+        int giaTriChen = mang[i];
+        int j = i - 1;
+        while (j >= 0 && mang[j] > giaTriChen) {
+            soSanh++;
+            mang[j + 1] = mang[j];
+            hoanVi++;
+            j--;
+        }
+        if (j >= 0) soSanh++;
+        mang[j + 1] = giaTriChen;
+        if (inTungBuoc) { cout << "Buoc " << i << ": "; inMang(mang); }
+    }
+}
+
+// --- BÀI 3: ĐO THỜI GIAN THỰC TẾ ---
+double doThoiGian(void (*hamSapXep)(vector<int>, long long&, long long&, bool), const vector<int>& mangGoc) {
+    vector<int> mangTam = mangGoc;
+    long long c = 0, s = 0;
+    auto batDau = chrono::high_resolution_clock::now();
+    hamSapXep(mangTam, c, s, false);
+    auto ketThuc = chrono::high_resolution_clock::now();
+    return chrono::duration<double, milli>(ketThuc - batDau).count();
+}
+
+void chayBai3() {
+    int kichThuoc = 10000;
+    vector<int> totNhat(kichThuoc), teNhat(kichThuoc), trungBinh(kichThuoc);
+    for (int i = 0; i < kichThuoc; i++) {
+        totNhat[i] = i;
+        teNhat[i] = kichThuoc - i;
+        trungBinh[i] = rand() % kichThuoc;
+    }
+
+    cout << "\n=== BAI 3: DO THOI GIAN CHAY (MANG 10,000 PHAN TU) ===\n";
+    cout << left << setw(25) << "Thuat Toan" << setw(22) << "Tot Nhat (ms)" << setw(22) << "Te Nhat (ms)" << setw(22) << "Trung Binh (ms)" << "\n";
+    cout << string(90, '-') << "\n";
+
+    cout << left << setw(25) << "Sap Xep Noi Bot"
+        << setw(22) << doThoiGian(sapXepNoiBot, totNhat)
+        << setw(22) << doThoiGian(sapXepNoiBot, teNhat)
+        << setw(22) << doThoiGian(sapXepNoiBot, trungBinh) << "\n";
+
+    cout << left << setw(25) << "Sap Xep Chon"
+        << setw(22) << doThoiGian(sapXepChon, totNhat)
+        << setw(22) << doThoiGian(sapXepChon, teNhat)
+        << setw(22) << doThoiGian(sapXepChon, trungBinh) << "\n";
+
+    cout << left << setw(25) << "Sap Xep Chen"
+        << setw(22) << doThoiGian(sapXepChen, totNhat)
+        << setw(22) << doThoiGian(sapXepChen, teNhat)
+        << setw(22) << doThoiGian(sapXepChen, trungBinh) << "\n";
+
+    cout << "\n--> KET LUAN CHUNG:\n";
+    cout << "* Sap Xep Chen: Tot nhat khi mang gan nhu da sap xep (Truong hop tot nhat chay cuc nhanh).\n";
+    cout << "* Sap Xep Chon: So phep so sanh luon co dinh, nhung so phep hoan vi la it nhat.\n";
+    cout << "* Sap Xep Noi Bot: Chay cham nhat trong moi truong hop, chi nen dung de hoc tap.\n";
+}
+
+// --- BÀI 4: TRỰC QUAN HÓA TRÊN GIAO DIỆN CONSOLE ---
+void veThanhDoThi(const vector<int>& mang, int viTri1, int viTri2, string tenThuatToan, int buocHienTai, int tongSoBuoc) {
+    xoaManHinh();
+    cout << MA_XANH_LAM << "--- TRUC QUAN HOA: " << tenThuatToan << " (Buoc " << buocHienTai << "/" << tongSoBuoc << ") ---\n" << MA_GOC;
+    for (int i = 0; i < mang.size(); i++) {
+        cout << " ";
+        if (i == viTri1 || i == viTri2) cout << MA_DO;
+        else cout << MA_XANH_LA;
+
+        for (int k = 0; k < mang[i]; k++) cout << "█";
+        for (int k = mang[i]; k < 25; k++) cout << " ";
+        cout << MA_GOC << " " << mang[i] << "\n";
+    }
+    cout << "\nDang so sanh/xu ly: vi tri [" << viTri1 << "] va [" << viTri2 << "]\n";
+    cout << "So buoc con lai: " << (tongSoBuoc - buocHienTai) << "\n";
+    this_thread::sleep_for(chrono::milliseconds(200));
+}
+
+void trucQuanNoiBot(vector<int> mang) {
+    int n = mang.size(), buoc = 0, tongSoBuoc = (n * (n - 1)) / 2;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            buoc++;
+            veThanhDoThi(mang, j, j + 1, "SAP XEP NOI BOT", buoc, tongSoBuoc);
+            if (mang[j] > mang[j + 1]) swap(mang[j], mang[j + 1]);
+        }
+    }
+}
+
+void trucQuanChon(vector<int> mang) {
+    int n = mang.size(), buoc = 0, tongSoBuoc = (n * (n - 1)) / 2;
+    for (int i = 0; i < n - 1; i++) {
+        int viTriNhoNhat = i;
+        for (int j = i + 1; j < n; j++) {
+            buoc++;
+            veThanhDoThi(mang, j, viTriNhoNhat, "SAP XEP CHON", buoc, tongSoBuoc);
+            if (mang[j] < mang[viTriNhoNhat]) viTriNhoNhat = j;
+        }
+        swap(mang[i], mang[viTriNhoNhat]);
+    }
+}
+
+void trucQuanChen(vector<int> mang) {
+    int n = mang.size(), buoc = 0, tongSoBuoc = n - 1;
+    for (int i = 1; i < n; i++) {
+        int giaTriChen = mang[i], j = i - 1;
+        buoc++;
+        while (j >= 0 && mang[j] > giaTriChen) {
+            veThanhDoThi(mang, j, j + 1, "SAP XEP CHEN", buoc, tongSoBuoc);
+            mang[j + 1] = mang[j];
+            j--;
+        }
+        mang[j + 1] = giaTriChen;
+        veThanhDoThi(mang, j + 1, i, "SAP XEP CHEN", buoc, tongSoBuoc);
+    }
+}
+
+// --- ĐIỀU HƯỚNG MENU CHÍNH ---
+int main() {
+    srand(time(0));
+    int luaChon;
+
+    while (true) {
+        cout << MA_XANH_LAM << "\n================= MENU QUAN LY THUAT TOAN =================\n" << MA_GOC;
+        cout << "1. Chay Bai 1 & 2: In tung buoc & In bang dem phep toan (Mang 100)\n";
+        cout << "2. Chay Bai 3: Do thoi gian Cac Truong Hop (Mang 10,000)\n";
+        cout << "3. Chay Bai 4: Do hoa truc quan bang ASCII Console\n";
+        cout << "4. Thoat chuong trinh\n";
+        cout << "Nhap lua chon cua ban (1-4): ";
+        cin >> luaChon;
+
+        if (luaChon == 4) break;
+
+        switch (luaChon) {
+        case 1: {
+            vector<int> mangGoc = taoMangNgauNhien(100, 500);
+            long long soSanhNoiBot, hoanViNoiBot;
+            long long soSanhChon, hoanViChon;
+            long long soSanhChen, hoanViChen;
+
+            cout << "\n--- MINH HOA IN BUOC THAY DOI (10 phan tu dau tien) ---\n";
+            vector<int> mangNho = taoMangNgauNhien(10, 50);
+            cout << "Mang ban dau: "; inMang(mangNho);
+            cout << "\n[CAC BUOC SAP XEP NOI BOT]:\n"; sapXepNoiBot(mangNho, soSanhNoiBot, hoanViNoiBot, true);
+
+            sapXepNoiBot(mangGoc, soSanhNoiBot, hoanViNoiBot, false);
+            sapXepChon(mangGoc, soSanhChon, hoanViChon, false);
+            sapXepChen(mangGoc, soSanhChen, hoanViChen, false);
+
+            cout << "\n=== BAI 2: BANG SO LIEU DEM SO PHEP TOAN (Mang 100 phan tu) ===\n";
+            cout << left << setw(25) << "Thuat Toan" << setw(25) << "So Phep So Sanh" << setw(25) << "So Phep Hoan Vi/Ghi" << "\n";
+            cout << string(75, '-') << "\n";
+            cout << left << setw(25) << "Sap Xep Noi Bot" << setw(25) << soSanhNoiBot << setw(25) << hoanViNoiBot << "\n";
+            cout << left << setw(25) << "Sap Xep Chon" << setw(25) << soSanhChon << setw(25) << hoanViChon << "\n";
+            cout << left << setw(25) << "Sap Xep Chen" << setw(25) << soSanhChen << setw(25) << hoanViChen << "\n";
+            break;
+        }
+        case 2:
+            chayBai3();
+            break;
+        case 3: {
+            int thuatToanChon;
+            vector<int> mangTrucQuan = { 5, 12, 17, 8, 22, 15, 3, 19, 10 };
+            cout << "\n--- CHON THUAT TOAN MINH HOA ---\n";
+            cout << "1. Sap Xep Noi Bot\n2. Sap Xep Chon\n3. Sap Xep Chen\nChon: ";
+            cin >> thuatToanChon;
+            if (thuatToanChon == 1) trucQuanNoiBot(mangTrucQuan);
+            else if (thuatToanChon == 2) trucQuanChon(mangTrucQuan);
+            else if (thuatToanChon == 3) trucQuanChen(mangTrucQuan);
+            break;
+        }
+        default:
+            cout << "Lua chon khong hop le!\n";
+        }
+    }
+    return 0;
+}
+
