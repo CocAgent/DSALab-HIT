@@ -1,0 +1,509 @@
+Tuần 4: Sắp Xếp Cơ Bản — Bài tập
+🎯 Mục tiêu tuần này
+Cài đặt và hiểu Bubble Sort, Selection Sort, Insertion Sort.
+
+Bài 1: Cài đặt 3 thuật toán ⭐⭐
+Bubble Sort, Selection Sort, Insertion Sort. Mỗi cái in từng bước thay đổi mảng.
+#include <iostream>
+using namespace std;
+
+void printArray(int a[], int n)
+{
+    for(int i=0;i<n;i++)
+        cout << a[i] << " ";
+    cout << endl;
+}
+
+// ================= BUBBLE SORT =================
+void bubbleSort(int a[], int n)
+{
+    cout << "\n===== BUBBLE SORT =====\n";
+
+    for(int i=0;i<n-1;i++)
+    {
+        for(int j=0;j<n-i-1;j++)
+        {
+            if(a[j] > a[j+1])
+            {
+                swap(a[j], a[j+1]);
+                printArray(a,n);
+            }
+        }
+    }
+}
+
+// ================= SELECTION SORT =================
+void selectionSort(int a[], int n)
+{
+    cout << "\n===== SELECTION SORT =====\n";
+
+    for(int i=0;i<n-1;i++)
+    {
+        int min=i;
+
+        for(int j=i+1;j<n;j++)
+        {
+            if(a[j] < a[min])
+                min=j;
+        }
+
+        if(min != i)
+        {
+            swap(a[i], a[min]);
+            printArray(a,n);
+        }
+    }
+}
+
+// ================= INSERTION SORT =================
+void insertionSort(int a[], int n)
+{
+    cout << "\n===== INSERTION SORT =====\n";
+
+    for(int i=1;i<n;i++)
+    {
+        int key=a[i];
+        int j=i-1;
+
+        while(j>=0 && a[j] > key)
+        {
+            a[j+1]=a[j];
+            j--;
+        }
+
+        a[j+1]=key;
+
+        printArray(a,n);
+    }
+}
+
+// ================= MAIN =================
+int main()
+{
+    int a[] = {5,3,8,4,2};
+    int n = 5;
+
+    int b[5], c[5], d[5];
+
+    for(int i=0;i<n;i++)
+    {
+        b[i]=a[i];
+        c[i]=a[i];
+        d[i]=a[i];
+    }
+
+    bubbleSort(b,n);
+    selectionSort(c,n);
+    insertionSort(d,n);
+
+    return 0;
+}
+Bài 2: Đếm số phép so sánh và hoán vị ⭐⭐
+Với cùng 1 mảng 100 phần tử: đếm số lần so sánh và số lần hoán vị của 3 thuật toán. In bảng so sánh.
+#include <iostream>
+using namespace std;
+
+const int N = 100;
+
+// Bubble Sort
+void bubbleSort(int a[], int n, long long &cmp, long long &swp) {
+    cmp = swp = 0;
+
+    for(int i = 0; i < n - 1; i++) {
+        for(int j = 0; j < n - i - 1; j++) {
+            cmp++;
+
+            if(a[j] > a[j + 1]) {
+                swap(a[j], a[j + 1]);
+                swp++;
+            }
+        }
+    }
+}
+
+// Selection Sort
+void selectionSort(int a[], int n, long long &cmp, long long &swp) {
+    cmp = swp = 0;
+
+    for(int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+
+        for(int j = i + 1; j < n; j++) {
+            cmp++;
+
+            if(a[j] < a[minIndex])
+                minIndex = j;
+        }
+
+        if(minIndex != i) {
+            swap(a[i], a[minIndex]);
+            swp++;
+        }
+    }
+}
+
+// Insertion Sort
+void insertionSort(int a[], int n, long long &cmp, long long &swp) {
+    cmp = swp = 0;
+
+    for(int i = 1; i < n; i++) {
+        int key = a[i];
+        int j = i - 1;
+
+        while(j >= 0) {
+            cmp++;
+
+            if(a[j] > key) {
+                a[j + 1] = a[j];
+                swp++;      // tính dịch chuyển như 1 lần hoán vị
+                j--;
+            }
+            else
+                break;
+        }
+
+        a[j + 1] = key;
+    }
+}
+
+int main() {
+    int original[N];
+
+    cout << "Nhap 100 phan tu:\n";
+    for(int i = 0; i < N; i++)
+        cin >> original[i];
+
+    int a[N], b[N], c[N];
+
+    for(int i = 0; i < N; i++) {
+        a[i] = original[i];
+        b[i] = original[i];
+        c[i] = original[i];
+    }
+
+    long long cmp1, swp1;
+    long long cmp2, swp2;
+    long long cmp3, swp3;
+
+    bubbleSort(a, N, cmp1, swp1);
+    selectionSort(b, N, cmp2, swp2);
+    insertionSort(c, N, cmp3, swp3);
+
+    cout << "\n===== BANG SO SANH =====\n";
+    cout << "Thuat toan\tSo sanh\tHoan vi\n";
+    cout << "Bubble Sort\t" << cmp1 << "\t" << swp1 << endl;
+    cout << "Selection Sort\t" << cmp2 << "\t" << swp2 << endl;
+    cout << "Insertion Sort\t" << cmp3 << "\t" << swp3 << endl;
+
+    return 0;
+}
+Bài 3: Best / Worst / Average Case ⭐⭐
+Với mảng đã sắp xếp, ngược chiều, và ngẫu nhiên — đo thời gian chạy 3 thuật toán. Kết luận khi nào nên dùng cái nào.
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+#include <ctime>
+#include <iomanip>
+
+using namespace std;
+using namespace chrono;
+
+const int N = 1000;
+
+// ================= SORT =================
+
+void bubbleSort(int a[], int n)
+{
+    for(int i=0;i<n-1;i++)
+        for(int j=0;j<n-i-1;j++)
+            if(a[j] > a[j+1])
+                swap(a[j], a[j+1]);
+}
+
+void selectionSort(int a[], int n)
+{
+    for(int i=0;i<n-1;i++)
+    {
+        int min=i;
+        for(int j=i+1;j<n;j++)
+            if(a[j] < a[min])
+                min=j;
+
+        swap(a[i], a[min]);
+    }
+}
+
+void insertionSort(int a[], int n)
+{
+    for(int i=1;i<n;i++)
+    {
+        int key=a[i];
+        int j=i-1;
+
+        while(j>=0 && a[j]>key)
+        {
+            a[j+1]=a[j];
+            j--;
+        }
+        a[j+1]=key;
+    }
+}
+
+// ================= TIME =================
+
+double measure(void (*sortFunc)(int[],int), int a[], int n)
+{
+    auto start = high_resolution_clock::now();
+
+    sortFunc(a,n);
+
+    auto end = high_resolution_clock::now();
+
+    return duration<double, milli>(end-start).count();
+}
+
+// ================= MAIN =================
+
+int main()
+{
+    srand(time(0));
+
+    int best[N], worst[N], avg[N];
+
+    // BEST CASE (tăng dần)
+    for(int i=0;i<N;i++)
+        best[i]=i;
+
+    // WORST CASE (giảm dần)
+    for(int i=0;i<N;i++)
+        worst[i]=N-i;
+
+    // AVERAGE CASE (ngẫu nhiên)
+    for(int i=0;i<N;i++)
+        avg[i]=rand()%10000;
+
+    cout << fixed << setprecision(3);
+
+    cout << "================= BAI 3 =================\n\n";
+
+    cout << "CASE\t\tBubble\tSelection\tInsertion\n";
+
+    // -------- BEST --------
+    int a1[N], b1[N], c1[N];
+
+    copy(best,best+N,a1);
+    copy(best,best+N,b1);
+    copy(best,best+N,c1);
+
+    cout << "BEST\t\t"
+         << measure(bubbleSort,a1,N) << "ms\t"
+         << measure(selectionSort,b1,N) << "ms\t"
+         << measure(insertionSort,c1,N) << "ms\n";
+
+    // -------- WORST --------
+    int a2[N], b2[N], c2[N];
+
+    copy(worst,worst+N,a2);
+    copy(worst,worst+N,b2);
+    copy(worst,worst+N,c2);
+
+    cout << "WORST\t\t"
+         << measure(bubbleSort,a2,N) << "ms\t"
+         << measure(selectionSort,b2,N) << "ms\t"
+         << measure(insertionSort,c2,N) << "ms\n";
+
+    // -------- AVERAGE --------
+    int a3[N], b3[N], c3[N];
+
+    copy(avg,avg+N,a3);
+    copy(avg,avg+N,b3);
+    copy(avg,avg+N,c3);
+
+    cout << "AVERAGE\t\t"
+         << measure(bubbleSort,a3,N) << "ms\t"
+         << measure(selectionSort,b3,N) << "ms\t"
+         << measure(insertionSort,c3,N) << "ms\n";
+
+    cout << "\n=========== KET LUAN ===========\n";
+    cout << "- Bubble Sort: don gian nhung cham\n";
+    cout << "- Selection Sort: it swap nhat\n";
+    cout << "- Insertion Sort: tot khi mang gan sap xep\n";
+
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Sorting Visualizer (Console) ⭐⭐⭐
+Cảm hứng: Sorting — algorithm-visualizer.org
+
+Hiển thị từng bước sắp xếp trực quan bằng thanh ASCII:
+
+Bubble Sort — Bước 3/8:
+█████████████████ 17
+████████████ 12
+██████████████████████ 22
+████████ 8
+███████████████ 15
+
+Đang so sánh: vị trí [1] và [2] ← đánh dấu màu
+Số bước còn lại: 5
+Yêu cầu: dùng ANSI color codes để tô màu thanh đang so sánh, delay 200ms giữa các bước, cho phép chọn thuật toán.
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <cstdlib>
+
+using namespace std;
+
+// ===== ANSI COLOR =====
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define RESET   "\033[0m"
+
+void sleep200()
+{
+    this_thread::sleep_for(
+        chrono::milliseconds(200)
+    );
+}
+
+void clearScreen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+// ================= DRAW =================
+void draw(int a[], int n, int x, int y, int step, int total)
+{
+    clearScreen();
+
+    cout << GREEN << "===== SORTING VISUALIZER =====\n" << RESET;
+    cout << "Step: " << step << "/" << total << "\n\n";
+
+    for(int i=0;i<n;i++)
+    {
+        if(i==x || i==y)
+            cout << RED;
+        else
+            cout << YELLOW;
+
+        for(int j=0;j<a[i];j++)
+            cout << "█";
+
+        cout << " " << a[i] << RESET << endl;
+    }
+
+    cout << "\nDang so sanh: [" << x << "] va [" << y << "]\n";
+    cout << "So buoc con lai: " << (total-step) << endl;
+
+    sleep200();
+}
+
+// ================= BUBBLE =================
+void bubble(int a[], int n)
+{
+    int total = n*(n-1)/2;
+    int step = 0;
+
+    for(int i=0;i<n-1;i++)
+    {
+        for(int j=0;j<n-i-1;j++)
+        {
+            step++;
+
+            draw(a,n,j,j+1,step,total);
+
+            if(a[j] > a[j+1])
+                swap(a[j],a[j+1]);
+        }
+    }
+}
+
+// ================= SELECTION =================
+void selection(int a[], int n)
+{
+    int total = n*(n-1)/2;
+    int step = 0;
+
+    for(int i=0;i<n-1;i++)
+    {
+        int min=i;
+
+        for(int j=i+1;j<n;j++)
+        {
+            step++;
+
+            draw(a,n,min,j,step,total);
+
+            if(a[j] < a[min])
+                min=j;
+        }
+
+        swap(a[i],a[min]);
+    }
+}
+
+// ================= INSERTION =================
+void insertion(int a[], int n)
+{
+    int total = n*(n-1)/2;
+    int step = 0;
+
+    for(int i=1;i<n;i++)
+    {
+        int key=a[i];
+        int j=i-1;
+
+        while(j>=0 && a[j]>key)
+        {
+            step++;
+
+            draw(a,n,j,j+1,step,total);
+
+            a[j+1]=a[j];
+            j--;
+        }
+
+        a[j+1]=key;
+    }
+}
+
+// ================= MAIN =================
+int main()
+{
+    int a[] = {17,12,22,8,15,10,5,20};
+    int n = sizeof(a)/sizeof(a[0]);
+
+    cout << "===== SORTING VISUALIZER =====\n";
+    cout << "1. Bubble Sort\n";
+    cout << "2. Selection Sort\n";
+    cout << "3. Insertion Sort\n";
+
+    int choice;
+    cout << "Chon: ";
+    cin >> choice;
+
+    int b[100];
+    for(int i=0;i<n;i++) b[i]=a[i];
+
+    switch(choice)
+    {
+        case 1:
+            bubble(b,n);
+            break;
+        case 2:
+            selection(b,n);
+            break;
+        case 3:
+            insertion(b,n);
+            break;
+        default:
+            cout << "Sai lua chon!";
+    }
+
+    cout << "\nDone!\n";
+    return 0;
+}
