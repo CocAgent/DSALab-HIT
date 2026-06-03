@@ -1,0 +1,316 @@
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <random>
+#include <iomanip>
+#include <thread>
+
+using namespace std;
+
+struct SortStats {
+    long long comparisons = 0;
+    long long swaps = 0;
+    double duration_ms = 0.0;
+};
+
+void printArray(const vector<int>& arr);
+vector<int> generateArray(int size, string type);
+void drawVisualizer(const vector<int>& arr, int idx1, int idx2, string algoName, int currentStep);
+
+// ==========================================
+// ==========================================
+
+SortStats bubbleSort(vector<int> arr, bool printSteps = false) {
+    SortStats stats;
+    int n = arr.size();
+    int stepCount = 0;
+
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            stats.comparisons++;
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                stats.swaps++;
+                swapped = true;
+
+                if (printSteps) {
+                    cout << "Step " << ++stepCount << ": Swap (" << arr[j + 1] << ", " << arr[j] << ") -> ";
+                    printArray(arr);
+                }
+            }
+        }
+        if (!swapped) break;
+    }
+    return stats;
+}
+//Bubble Sort: Duyệt mảng nhiều lần, đẩy phần tử lớn nhất về cuối. Thêm swapped để tối ưu: nếu một lượt duyệt mà không có hoán vị nào xảy ra, tức là mảng đã xếp xong, chương trình sẽ tự ngắt sớm.
+//Tệ nhất trong 3 thuật toán do phải hoán vị quá nhiều lần liên tục. Ít dùng thực tế ngoài mục đích giảng dạy.
+
+SortStats selectionSort(vector<int> arr, bool printSteps = false) {
+    SortStats stats;
+    int n = arr.size();
+    int stepCount = 0;
+
+    for (int i = 0; i < n - 1; i++) {
+        int min_idx = i;
+        for (int j = i + 1; j < n; j++) {
+            stats.comparisons++;
+            if (arr[j] < arr[min_idx]) {
+                min_idx = j;
+            }
+        }
+        if (min_idx != i) {
+            swap(arr[i], arr[min_idx]);
+            stats.swaps++;
+
+            if (printSteps) {
+                cout << "Step " << ++stepCount << ": Swap index " << i << " and " << min_idx << " -> ";
+                printArray(arr);
+            }
+        }
+        else if (printSteps) {
+            cout << "Step " << ++stepCount << ": Index " << i << " dung vi tri -> ";
+            printArray(arr);
+        }
+    }
+    return stats;
+}
+//Selection Sort: Tìm phần tử nhỏ nhất trong đoạn chưa xếp và đưa nó về vị trí đầu. Số lần so sánh luôn là n(n-1)/2, nhưng số lần hoán vị lại cực ít
+//Số lần So sánh luôn cố định nhưng số lần Hoán vị cực kỳ ít (tối đa $n$ lần).
+
+SortStats insertionSort(vector<int> arr, bool printSteps = false) {
+    SortStats stats;
+    int n = arr.size();
+    int stepCount = 0;
+
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+
+        stats.comparisons++;
+        while (j >= 0 && arr[j] > key) {
+            if (j < i - 1) stats.comparisons++;
+            arr[j + 1] = arr[j];
+            stats.swaps++;
+            j--;
+        }
+        arr[j + 1] = key;
+
+        if (printSteps) {
+            cout << "Step " << ++stepCount << ": Insert " << key << " -> ";
+            printArray(arr);
+        }
+    }
+    return stats;
+}
+//Insertion Sort: Giống như cách bạn xếp bài trên tay. Nó lấy từng phần tử và chèn vào vị trí thích hợp trong đoạn đã xếp. Đây là thuật toán nhanh nhất trong 3 cái khi dữ liệu "gần như đã sắp xếp".
+//Hiệu năng thực tế tốt nhất trong 3 thuật toán dạng sơ cấp nhờ cơ chế chèn lùi linh hoạt.
+
+// ==========================================
+// BÀI 4: VISUALIZER (Đã sửa lỗi Selection Visualizer)
+// ==========================================
+void runVisualizer(vector<int> arr, int choice) {
+    int n = arr.size();
+    string algoName = (choice == 1) ? "Bubble Sort" : (choice == 2) ? "Selection Sort" : "Insertion Sort";
+    int currentStep = 0;
+
+    if (choice == 1) {
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                currentStep++;
+                drawVisualizer(arr, j, j + 1, algoName, currentStep);
+                if (arr[j] > arr[j + 1]) {
+                    swap(arr[j], arr[j + 1]);
+                }
+            }
+        }
+        drawVisualizer(arr, -1, -1, algoName, currentStep);
+    }
+    else if (choice == 2) { // Selection Sort Visualizer
+        for (int i = 0; i < n - 1; i++) {
+            int min_idx = i;
+            for (int j = i + 1; j < n; j++) {
+                currentStep++;
+                // Hiển thị phần tử nhỏ nhất hiện tại (min_idx) và phần tử đang duyệt (j)
+                drawVisualizer(arr, min_idx, j, algoName, currentStep);
+                if (arr[j] < arr[min_idx]) {
+                    min_idx = j;
+                }
+            }
+            // SỬA LỖI: Đồng bộ logic swap đúng vào đồ họa trực quan
+            swap(arr[i], arr[min_idx]);
+        }
+        drawVisualizer(arr, -1, -1, algoName, currentStep);
+    }
+    else if (choice == 3) {
+        for (int i = 1; i < n; i++) {
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= 0 && arr[j] > key) {
+                currentStep++;
+                arr[j + 1] = arr[j];
+                drawVisualizer(arr, j, j + 1, algoName, currentStep);
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+        drawVisualizer(arr, -1, -1, algoName, currentStep);
+    }
+}
+
+// ==========================================
+// HÀM TRỢ GIÚP
+// ==========================================
+
+void printArray(const vector<int>& arr) {
+    for (int val : arr) cout << val << " ";
+    cout << "\n";
+}
+
+vector<int> generateArray(int size, string type) {
+    vector<int> arr(size);
+    if (type == "sorted") {
+        for (int i = 0; i < size; i++) arr[i] = i + 1;
+    }
+    else if (type == "reversed") {
+        for (int i = 0; i < size; i++) arr[i] = size - i;
+    }
+    else {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(3, 20);
+        for (int i = 0; i < size; i++) arr[i] = dis(gen);
+    }
+    return arr;
+}
+
+void drawVisualizer(const vector<int>& arr, int idx1, int idx2, string algoName, int currentStep) {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+
+    cout << "=========================================\n";
+    cout << " " << algoName << " - Buoc: " << currentStep << "\n";
+    cout << "=========================================\n\n";
+
+    for (int i = 0; i < arr.size(); i++) {
+        string colorCode = "\033[0m";
+        if (i == idx1 || i == idx2) {
+            colorCode = "\033[1;31m"; // Màu đỏ nổi bật khi so sánh
+        }
+
+        cout << " ";
+        cout << colorCode;
+
+        for (int k = 0; k < arr[i]; k++) {
+            cout << "[]";
+        }
+
+        cout << "\033[0m" << " " << arr[i] << "\n";
+    }
+
+    cout << "\n Dang so sanh vi tri: [" << idx1 << "] va [" << idx2 << "]\n";
+    this_thread::sleep_for(chrono::milliseconds(200));
+}
+
+void runBenchmarking() {
+    int size = 100;
+    vector<string> cases = { "sorted", "reversed", "random" };
+
+    cout << "\n=== BIEU DO DANH GIA HIEU NANG (Mang " << size << " phan tu) ===\n\n";
+
+    for (const string& cCase : cases) {
+        vector<int> original = generateArray(size, cCase);
+
+        auto start = chrono::high_resolution_clock::now();
+        SortStats bStats = bubbleSort(original);
+        auto end = chrono::high_resolution_clock::now();
+        bStats.duration_ms = chrono::duration<double, milli>(end - start).count();
+
+        start = chrono::high_resolution_clock::now();
+        SortStats sStats = selectionSort(original);
+        end = chrono::high_resolution_clock::now();
+        sStats.duration_ms = chrono::duration<double, milli>(end - start).count();
+
+        start = chrono::high_resolution_clock::now();
+        SortStats iStats = insertionSort(original);
+        end = chrono::high_resolution_clock::now();
+        iStats.duration_ms = chrono::duration<double, milli>(end - start).count();
+
+        cout << ">> TRUONG HOP MANG: " << cCase << "\n";
+        cout << "-----------------------------------------------------------------\n";
+        cout << left << setw(18) << "Thuat toan" << setw(15) << "So sanh" << setw(15) << "Hoan vi/Dich" << setw(15) << "Thoi gian (ms)" << "\n";
+        cout << "-----------------------------------------------------------------\n";
+        cout << left << setw(18) << "Bubble Sort" << setw(15) << bStats.comparisons << setw(15) << bStats.swaps << setw(15) << fixed << setprecision(4) << bStats.duration_ms << "\n";
+        cout << left << setw(18) << "Selection Sort" << setw(15) << sStats.comparisons << setw(15) << sStats.swaps << setw(15) << fixed << setprecision(4) << sStats.duration_ms << "\n";
+        cout << left << setw(18) << "Insertion Sort" << setw(15) << iStats.comparisons << setw(15) << iStats.swaps << setw(15) << fixed << setprecision(4) << iStats.duration_ms << "\n";
+        cout << "-----------------------------------------------------------------\n\n";
+    }
+}
+
+int main() {
+#ifdef _WIN32
+    system("chcp 65001 > nul");
+#endif
+
+    int choice;
+    do {
+        cout << "=== MENU THUC HANH THUAT TOAN SAP XEP ===\n";
+        cout << "1. Bai 1: In tung buoc thay doi mang mau\n";
+        cout << "2. Bai 2 & 3: In bang so sanh va do thoi gian (100 phan tu)\n";
+        cout << "3. Bai 4: Du an Mini - Sorting Visualizer (ASCII Console)\n";
+        cout << "0. Thoat\n";
+        cout << "Lua chon cua ban: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: {
+            vector<int> sample = { 5, 2, 9, 1, 5, 6 };
+            cout << "\nMang goc: "; printArray(sample);
+            cout << "\n--- BUBBLE SORT ---\n"; bubbleSort(sample, true);
+            cout << "\n--- SELECTION SORT ---\n"; selectionSort(sample, true);
+            cout << "\n--- INSERTION SORT ---\n"; insertionSort(sample, true);
+            break;
+        }
+        case 2:
+            runBenchmarking();
+            break;
+        case 3: {
+            int algoChoice;
+            cout << "\nChon thuat toan bieu dien:\n1. Bubble Sort\n2. Selection Sort\n3. Insertion Sort\nLua chon: ";
+            cin >> algoChoice;
+            if (algoChoice >= 1 && algoChoice <= 3) {
+                vector<int> visualData = generateArray(12, "random");
+                runVisualizer(visualData, algoChoice);
+                cout << "\nSap xep hoan tat! Nhan Enter de tiep tuc...";
+                cin.ignore(); cin.get();
+            }
+            break;
+        }
+        }
+        cout << "\n";
+    } while (choice != 0);
+
+    return 0;
+}
+//Để dễ hình dung, hãy xem cách các thuật toán xử lý mảng mẫu: [5, 2, 9, 1]
+//A. Bubble Sort (Sắp xếp nổi bọt)Ý tưởng là duyệt mảng từ trái sang phải, so sánh 2 phần tử cạnh nhau, nếu phần tử trước lớn hơn phần tử sau thì đổi chỗ ngay lập tức.
+// Sau mỗi vòng lặp lớn, phần tử lớn nhất sẽ "nổi" về cuối mảng.
+// Vòng 1:So sánh 5 và 2 ==> $5 > 2$ ==> Đổi chỗ: [2, 5, 9, 1]
+// ===So sánh 5 và 9 ==> $5 < 9$ ==> Giữ nguyên.
+// ===So sánh 9 và 1 ==> $9 > 1$ ==> Đổi chỗ: [2, 5, 1, 9] (Số 9 lớn nhất đã về cuối).
+// Vòng 2:So sánh 2 và 5 ==> Giữ nguyên.
+// So sánh 5 và 1 ==> $5 > 1$ ==> Đổi chỗ: [2, 1, 5, 9].
+// Vòng 3:So sánh 2 và 1 ==> $2 > 1$ ==> Đổi chỗ: [1, 2, 5, 9] 
+// Mảng đã hoàn thành sắp xếp.
+// Vòng 1 (i = 0) : Mảng hiện tại[5, 2, 9, 1].Coi min_idx ban đầu là vị trí của số 5. Đem số 5 đi so sánh với tất cả các số còn lại để tìm số nhỏ nhất thực sự.
+// Tìm thấy số nhỏ nhất là 1 (tại chỉ số min_idx = 3).Đổi chỗ phần tử đầu tiên với phần tử nhỏ nhất : Đổi chỗ arr[0](số 5) và arr[3](số 1).Mảng thành : [1, 2, 9, 5] .
+// Vòng 2 (i = 1) : Xét đoạn còn lại[2, 9, 5].Số nhỏ nhất trong đoạn này là 2 (nó đã nằm sẵn ở chỉ số 1).min_idx trùng với i, không cần đổi chỗ.Mảng giữ nguyên : [1, 2, 9, 5] .
+// Vòng 3 (i = 2) : Xét đoạn còn lại[9, 5].Số nhỏ nhất là 5 (tại chỉ số 3).Đổi chỗ arr[2](số 9) và arr[3](số 5).Mảng thành : [1, 2, 5, 9]. Hoàn thành.
+// Bước 1 (i = 1) : key = 2. Mảng trước đó chỉ có[5].So sánh 2 với 5, vì $5 > 2$ nên dịch chuyển số 5 sang phải : [5, 5, 9, 1] .
+// Chèn key = 2 vào vị trí trống đầu tiên : [2, 5, 9, 1] .Bước 2 (i = 2) : key = 9. Mảng phía trước là[2, 5].So sánh 9 với 5, vì $5 < 9$ nên số 9 đã đứng đúng vị trí.Mảng giữ nguyên : [2, 5, 9, 1] .
+// Bước 3 (i = 3) : key = 1. Mảng phía trước là[2, 5, 9].So sánh 1 với 9 ==> $9 > 1$ ==> dịch chuyển 9: [2, 5, 9, 9] 
+// So sánh 1 với 5 ==> $5 > 1$ ==> dịch chuyển 5: [2, 5, 5, 9] So sánh 1 với 2 ==> $2 > 1$ ==> dịch chuyển 2: [2, 2, 5, 9] Hết mảng, chèn key = 1 vào vị trí đầu tiên : [1, 2, 5, 9] Hoàn thành.
