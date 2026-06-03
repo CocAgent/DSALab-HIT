@@ -1,0 +1,386 @@
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <iomanip>
+#include <algorithm>
+#include <random>
+#include <thread>
+
+using namespace std;
+
+// Struct lưu cấu trúc thống kê cho Bài 2 và Bài 3
+struct SortStats {
+    long long comparisons = 0;
+    long long swaps = 0;
+    double duration_ms = 0.0;
+};
+
+// --- CÁC HÀM BỔ TRỢ ---
+void printArray(const vector<int>& arr) {
+    for (int x : arr) cout << x << " ";
+    cout << "\n";
+}
+
+vector<int> generateRandomArray(int size) {
+    vector<int> arr(size);
+    for (int i = 0; i < size; ++i) arr[i] = rand() % 100 + 1; // 1 đến 100
+    return arr;
+}
+
+vector<int> generateSortedArray(int size) {
+    vector<int> arr(size);
+    for (int i = 0; i < size; ++i) arr[i] = i + 1;
+    return arr;
+}
+
+vector<int> generateReversedArray(int size) {
+    vector<int> arr(size);
+    for (int i = 0; i < size; ++i) arr[i] = size - i;
+    return arr;
+}
+
+
+// ==========================================
+// BÀI 1: CÀI ĐẶT 3 THUẬT TOÁN & IN TỪNG BƯỚC
+// ==========================================
+void bubbleSortDemo(vector<int> arr) {
+    cout << "\n--- BUBBLE SORT DEMO ---\nBan dau: "; printArray(arr);
+    int n = arr.size();
+    int step = 1;
+    for (int i = 0; i < n - 1; ++i) {
+        bool swapped = false;
+        for (int j = 0; j < n - i - 1; ++j) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+                cout << "Buoc " << step++ << " (Swap " << arr[j + 1] << " & " << arr[j] << "): ";
+                printArray(arr);
+            }
+        }
+        if (!swapped) break;
+    }
+}
+
+void selectionSortDemo(vector<int> arr) {
+    cout << "\n--- SELECTION SORT DEMO ---\nBan dau: "; printArray(arr);
+    int n = arr.size();
+    int step = 1;
+    for (int i = 0; i < n - 1; ++i) {
+        int min_idx = i;
+        for (int j = i + 1; j < n; ++j) {
+            if (arr[j] < arr[min_idx]) min_idx = j;
+        }
+        if (min_idx != i) {
+            swap(arr[i], arr[min_idx]);
+            cout << "Buoc " << step++ << " (Swap " << arr[min_idx] << " & " << arr[i] << "): ";
+            printArray(arr);
+        }
+    }
+}
+
+void insertionSortDemo(vector<int> arr) {
+    cout << "\n--- INSERTION SORT DEMO ---\nBan dau: "; printArray(arr);
+    int n = arr.size();
+    int step = 1;
+    for (int i = 1; i < n; ++i) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+        cout << "Buoc " << step++ << " (Chen " << key << "): ";
+        printArray(arr);
+    }
+}
+
+
+// ==========================================
+// BÀI 2 & 3: ĐẾM PHÉP TÍNH & ĐO THỜI GIAN
+// ==========================================
+SortStats bubbleSortCalc(vector<int> arr) {
+    SortStats stats;
+    int n = arr.size();
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < n - 1; ++i) {
+        bool swapped = false;
+        for (int j = 0; j < n - i - 1; ++j) {
+            stats.comparisons++;
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                stats.swaps++;
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+
+    auto end = chrono::high_resolution_clock::now();
+    stats.duration_ms = chrono::duration<double, milli>(end - start).count();
+    return stats;
+}
+
+SortStats selectionSortCalc(vector<int> arr) {
+    SortStats stats;
+    int n = arr.size();
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < n - 1; ++i) {
+        int min_idx = i;
+        for (int j = i + 1; j < n; ++j) {
+            stats.comparisons++;
+            if (arr[j] < arr[min_idx]) {
+                min_idx = j;
+            }
+        }
+        if (min_idx != i) {
+            swap(arr[i], arr[min_idx]);
+            stats.swaps++;
+        }
+    }
+
+    auto end = chrono::high_resolution_clock::now();
+    stats.duration_ms = chrono::duration<double, milli>(end - start).count();
+    return stats;
+}
+
+SortStats insertionSortCalc(vector<int> arr) {
+    SortStats stats;
+    int n = arr.size();
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 1; i < n; ++i) {
+        int key = arr[i];
+        int j = i - 1;
+        // Phép so sánh đầu tiên của vòng lặp while (hoặc kiểm tra điều kiện)
+        while (j >= 0) {
+            stats.comparisons++;
+            if (arr[j] > key) {
+                arr[j + 1] = arr[j];
+                stats.swaps++; // Coi hành động dịch chuyển như 1 lần ghi nhận đổi chỗ/hoán vị dữ liệu
+                j--;
+            }
+            else {
+                break;
+            }
+        }
+        arr[j + 1] = key;
+    }
+
+    auto end = chrono::high_resolution_clock::now();
+    stats.duration_ms = chrono::duration<double, milli>(end - start).count();
+    return stats;
+}
+
+void runExercise2And3() {
+    cout << "\n======================================================\n";
+    cout << "BÀI 2 & BÀI 3: THỐNG KÊ CHI TIẾT (Mảng 100 phần tử)\n";
+    cout << "======================================================\n";
+
+    // Khởi tạo các tập dữ liệu mảng 100 phần tử
+    vector<int> randArr = generateRandomArray(100);
+    vector<int> sortedArr = generateSortedArray(100);
+    vector<int> revArr = generateReversedArray(100);
+
+    // Chạy thống kê cho từng loại mảng
+    SortStats b_rand = bubbleSortCalc(randArr), b_sort = bubbleSortCalc(sortedArr), b_rev = bubbleSortCalc(revArr);
+    SortStats s_rand = selectionSortCalc(randArr), s_sort = selectionSortCalc(sortedArr), s_rev = selectionSortCalc(revArr);
+    SortStats i_rand = insertionSortCalc(randArr), i_sort = insertionSortCalc(sortedArr), i_rev = insertionSortCalc(revArr);
+
+    // In bảng kết quả Bài 2 (Với mảng ngẫu nhiên)
+    cout << "\n[BÀI 2] BẢNG SO SÁNH TRÊN MẢNG NGẪU NHIÊN (100 phần tử):\n";
+    cout << setw(18) << left << "Thuật toán" << setw(15) << right << "Số phép so sánh" << setw(18) << right << "Số lần hoán vị" << "\n";
+    cout << string(52, '-') << "\n";
+    cout << setw(18) << left << "Bubble Sort" << setw(15) << right << b_rand.comparisons << setw(18) << right << b_rand.swaps << "\n";
+    cout << setw(18) << left << "Selection Sort" << setw(15) << right << s_rand.comparisons << setw(18) << right << s_rand.swaps << "\n";
+    cout << setw(18) << left << "Insertion Sort" << setw(15) << right << i_rand.comparisons << setw(18) << right << i_rand.swaps << "\n";
+
+    // In bảng kết quả Bài 3 (Thời gian chạy các Case)
+    cout << "\n[BÀI 3] THỜI GIAN CHẠY TRÊN CÁC CASE (đơn vị: ms):\n";
+    cout << setw(18) << left << "Thuật toán" << setw(15) << right << "Best (Sorted)" << setw(15) << right << "Worst (Reverse)" << setw(15) << right << "Average (Rand)" << "\n";
+    cout << string(65, '-') << "\n";
+    cout << setw(18) << left << "Bubble Sort" << setw(15) << right << fixed << setprecision(4) << b_sort.duration_ms << setw(15) << right << b_rev.duration_ms << setw(15) << right << b_rand.duration_ms << "\n";
+    cout << setw(18) << left << "Selection Sort" << setw(15) << right << s_sort.duration_ms << setw(15) << right << s_rev.duration_ms << setw(15) << right << s_rand.duration_ms << "\n";
+    cout << setw(18) << left << "Insertion Sort" << setw(15) << right << i_sort.duration_ms << setw(15) << right << i_rev.duration_ms << setw(15) << right << i_rand.duration_ms << "\n";
+
+    // Kết luận bài 3
+    cout << "\nKẾT LUẬN LỰA CHỌN THUẬT TOÁN:\n";
+    cout << "> Insertion Sort: Tốt nhất khi mảng ĐÃ GẦN NHƯ SẮP XẾP (Best Case tốn rất ít thời gian O(n)). Chạy thực tế mảng nhỏ nhanh hơn hẳn.\n";
+    cout << "> Selection Sort: Số lần Hoán Vị luôn ổn định và cực ít (tối đa n-1). Đáng dùng khi chi phí hoán vị/ghi dữ liệu lớn dữ dội.\n";
+    cout << "> Bubble Sort: Hiệu năng kém nhất trong đa số trường hợp thực tế, chủ yếu dùng học thuật.\n";
+}
+
+
+// ==========================================
+// BÀI 4: MINI PROJECT - SORTING VISUALIZER
+// ==========================================
+
+// ANSI Color Codes
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define CYAN    "\033[36m"
+
+void clearConsole() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+// Vẽ đồ họa ASCII bar
+void renderVisualizer(const vector<int>& arr, int active1, int active2, string algoName, int currentStep, int totalSteps) {
+    clearConsole();
+    cout << CYAN << "=== SORTING VISUALIZER (CONSOLE) ===" << RESET << "\n";
+    cout << YELLOW << algoName << " — Bước " << currentStep << "/" << totalSteps << ":" << RESET << "\n\n";
+
+    for (int i = 0; i < (int)arr.size(); ++i) {
+        // Nếu phần tử đang được so sánh thì tô màu RED/YELLOW, ngược lại màu GREEN mặc định
+        if (i == active1 || i == active2) {
+            cout << RED;
+        }
+        else {
+            cout << GREEN;
+        }
+
+        // Vẽ các thanh chữ nhật ký tự ASCII '█' tỉ lệ thuận với giá trị phần tử
+        for (int k = 0; k < arr[i]; ++k) {
+            cout << "█";
+        }
+        // In giá trị số ở cuối thanh
+        cout << " " << arr[i] << RESET << "\n";
+    }
+
+    cout << "\nĐang so sánh: vị trí [" << active1 << "] và [" << active2 << "] " << RED << "← đánh dấu màu" << RESET << "\n";
+    cout << "Số bước còn lại: " << (totalSteps - currentStep) << "\n";
+    this_thread::sleep_for(chrono::milliseconds(200)); // Delay 200ms theo yêu cầu
+}
+
+void runVisualizer() {
+    // Mảng dữ liệu mẫu trực quan (tầm 10-15 phần tử để dễ nhìn trên console)
+    vector<int> origin = { 17, 12, 22, 8, 15, 5, 25, 19, 10, 14 };
+
+    while (true) {
+        cout << "\n======================================================\n";
+        cout << "BÀI 4: CHỌN THUẬT TOÁN ĐỂ XEM VISUALIZER\n";
+        cout << "1. Bubble Sort\n";
+        cout << "2. Selection Sort\n";
+        cout << "3. Insertion Sort\n";
+        cout << "4. Thoát Visualizer\n";
+        cout << "Lựa chọn của bạn (1-4): ";
+        int choice;
+        cin >> choice;
+
+        if (choice == 4) break;
+
+        vector<int> arr = origin;
+        int n = arr.size();
+
+        if (choice == 1) {
+            // Đếm tổng ước lượng bước trước để hiển thị Step X/Y
+            int totalSteps = 0;
+            vector<int> temp = arr;
+            for (int i = 0; i < n - 1; ++i) {
+                for (int j = 0; j < n - i - 1; ++j) totalSteps++;
+            }
+
+            int currStep = 0;
+            for (int i = 0; i < n - 1; ++i) {
+                for (int j = 0; j < n - i - 1; ++j) {
+                    currStep++;
+                    renderVisualizer(arr, j, j + 1, "Bubble Sort", currStep, totalSteps);
+                    if (arr[j] > arr[j + 1]) {
+                        swap(arr[j], arr[j + 1]);
+                    }
+                }
+            }
+            // Render bước cuối đã hoàn thành sạch đẹp
+            renderVisualizer(arr, -1, -1, "Bubble Sort (Hoàn thành!)", totalSteps, totalSteps);
+
+        }
+        else if (choice == 2) {
+            int totalSteps = 0;
+            for (int i = 0; i < n - 1; ++i) {
+                for (int j = i + 1; j < n; ++j) totalSteps++;
+            }
+
+            int currStep = 0;
+            for (int i = 0; i < n - 1; ++i) {
+                int min_idx = i;
+                for (int j = i + 1; j < n; ++j) {
+                    currStep++;
+                    renderVisualizer(arr, min_idx, j, "Selection Sort", currStep, totalSteps);
+                    if (arr[j] < arr[min_idx]) {
+                        min_idx = j;
+                    }
+                }
+                if (min_idx != i) {
+                    swap(arr[i], min_idx);
+                }
+            }
+            renderVisualizer(arr, -1, -1, "Selection Sort (Hoàn thành!)", totalSteps, totalSteps);
+
+        }
+        else if (choice == 3) {
+            // Mô phỏng số bước ước tính dựa trên thuật toán chèn thực tế
+            int currStep = 0;
+            int totalSteps = 25; // Ước chừng đại lượng cho mảng ngẫu nhiên 10 phần tử này để thanh tiến trình mượt mà
+
+            for (int i = 1; i < n; ++i) {
+                int key = arr[i];
+                int j = i - 1;
+                while (j >= 0) {
+                    currStep++;
+                    renderVisualizer(arr, j, j + 1, "Insertion Sort", min(currStep, totalSteps), totalSteps);
+                    if (arr[j] > key) {
+                        arr[j + 1] = arr[j];
+                        j--;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                arr[j + 1] = key;
+            }
+            renderVisualizer(arr, -1, -1, "Insertion Sort (Hoàn thành!)", totalSteps, totalSteps);
+        }
+        else {
+            cout << "Lựa chọn không hợp lệ.\n";
+        }
+    }
+}
+
+
+// ==========================================
+// HÀM MAIN ĐIỀU HƯỚNG TẤT CẢ CÁC BÀI TOÁN
+// ==========================================
+int main() {
+    // Thiết lập mã hóa UTF-8 để hiển thị ký tự ASCII đặc biệt trên một số console cũ
+#ifdef _WIN32
+    system("chcp 65001 > nul");
+#endif
+
+    srand(time(NULL));
+
+    cout << "======================================================\n";
+    cout << "BÀI 1: IN TỪNG BƯỚC THAY ĐỔI MẢNG\n";
+    cout << "======================================================\n";
+    vector<int> demoArr = { 3, -12, 14, 9, 11, -50, -100 };
+
+    bubbleSortDemo(demoArr);
+    selectionSortDemo(demoArr);
+    insertionSortDemo(demoArr);
+
+    // Chạy tiếp Bài 2 & 3
+    runExercise2And3();
+
+    // Chạy tiếp dự án Mini Bài 4
+    runVisualizer();
+
+    return 0;
+}
+
