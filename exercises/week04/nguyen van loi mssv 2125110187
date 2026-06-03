@@ -1,0 +1,146 @@
+Bài 1: Cài đặt 3 thuật toán ⭐⭐ Bubble Sort, Selection Sort, Insertion Sort. Mỗi cái in từng bước thay đổi mảng.
+
+Bubble Sort, Selection Sort, Insertion Sort. Mỗi cái in từng bước thay đổi mảng. //Bubble Sort void BubbleSort_Buoc(int a[], int n) { cout << "\n=== BUBBLE SORT ===\n";
+
+for (int i = 0; i < n - 1; i++) { cout << "Buoc " << i + 1 << ": ";
+
+for (int j = n - 1; j > i; j--) {
+    if (a[j] < a[j - 1])
+        HoanVi(a[j], a[j - 1]);
+}
+
+XuatMang(a, n);
+} } //Selection Sort void SelectionSort_Buoc(int a[], int n) { cout << "\n=== SELECTION SORT ===\n";
+
+for (int i = 0; i < n - 1; i++) { int vt = i;
+
+for (int j = i + 1; j < n; j++)
+    if (a[j] < a[vt])
+        vt = j;
+
+HoanVi(a[i], a[vt]);
+
+cout << "Buoc " << i + 1 << ": ";
+XuatMang(a, n);
+} } //Insertion Sort void InsertionSort_Buoc(int a[], int n) { cout << "\n=== INSERTION SORT ===\n";
+
+for (int i = 1; i < n; i++) { int x = a[i]; int pos = i;
+
+while (pos > 0 && a[pos - 1] > x) {
+    a[pos] = a[pos - 1];
+    pos--;
+}
+
+a[pos] = x;
+
+cout << "Buoc " << i << ": ";
+XuatMang(a, n);
+} }
+
+Bài 2: Đếm số phép so sánh và hoán vị ⭐⭐ Với cùng 1 mảng 100 phần tử: đếm số lần so sánh và số lần hoán vị của 3 thuật toán. In bảng so sánh. Tạo struct:
+
+struct ThongKe { long long soSanh = 0; long long hoanVi = 0; }; Bubble Sort thống kê void BubbleSort_ThongKe(int a[], int n, ThongKe &tk) { for (int i = 0; i < n - 1; i++) { for (int j = n - 1; j > i; j--) {
+
+    tk.soSanh++;
+
+    if (a[j] < a[j - 1]) {
+        HoanVi(a[j], a[j - 1]);
+        tk.hoanVi++;
+    }
+}
+} } Selection Sort thống kê void SelectionSort_ThongKe(int a[], int n, ThongKe &tk) { for (int i = 0; i < n - 1; i++) {
+
+int vt = i;
+
+for (int j = i + 1; j < n; j++) {
+
+    tk.soSanh++;
+
+    if (a[j] < a[vt])
+        vt = j;
+}
+
+if (vt != i) {
+    HoanVi(a[i], a[vt]);
+    tk.hoanVi++;
+}
+} } Insertion Sort thống kê void InsertionSort_ThongKe(int a[], int n, ThongKe &tk) {
+
+for (int i = 1; i < n; i++) {
+
+int x = a[i];
+int pos = i;
+
+while (pos > 0) {
+
+    tk.soSanh++;
+
+    if (a[pos - 1] > x) {
+        a[pos] = a[pos - 1];
+        tk.hoanVi++;
+        pos--;
+    }
+    else break;
+}
+
+a[pos] = x;
+} } In bảng kết quả cout << left << setw(15) << "Thuat toan" << setw(15) << "So sanh" << setw(15) << "Hoan vi" << endl;
+
+Ví dụ:
+
+Thuat toan So sanh Hoan vi Bubble 4950 2481 Selection 4950 92 Insertion 2512 2413 Bài 3: Best / Worst / Average Case ⭐⭐ Với mảng đã sắp xếp, ngược chiều, và ngẫu nhiên — đo thời gian chạy 3 thuật toán. Kết luận khi nào nên dùng cái nào.
+
+Với mảng đã sắp xếp, ngược chiều, và ngẫu nhiên — đo thời gian chạy 3 thuật toán. Kết luận khi nào nên dùng cái nào. Hàm đo thời gian long long DoThoiGian(void (*Sort)(int[], int), int a[], int n) { auto start = chrono::high_resolution_clock::now();
+
+Sort(a, n);
+
+auto end = chrono::high_resolution_clock::now();
+
+return chrono::duration_cast chrono::microseconds (end - start).count(); } Tạo dữ liệu //Best Case for(int i=0;i<n;i++) a[i]=i; //Worst Case for(int i=0;i<n;i++) a[i]=n-i; //Average Case for(int i=0;i<n;i++) a[i]=rand()%1000;
+
+Bài 4: 🔥 Dự Án Mini — Sorting Visualizer (Console) ⭐⭐⭐ Cảm hứng: Sorting — algorithm-visualizer.org
+
+Bubble Sort — Bước 3/8: █████████████████ 17 ████████████ 12 ██████████████████████ 22 ████████ 8 ███████████████ 15
+
+Đang so sánh: vị trí [1] và [2] ← đánh dấu màu Số bước còn lại: 5 Yêu cầu: dùng ANSI color codes để tô màu thanh đang so sánh, delay 200ms giữa các bước, cho phép chọn thuật toán.
+
+Yêu cầu: dùng ANSI color codes để tô màu thanh đang so sánh, delay 200ms giữa các bước, cho phép chọn thuật toán. //ANSI Color #define RED "\033[31m" #define GREEN "\033[32m" #define YELLOW "\033[33m" #define RESET "\033[0m" Vẽ thanh void VeThanh(int value, bool highlight=false) { if(highlight) cout << RED;
+
+for(int i=0;i<value;i++) cout << char(219);
+
+cout << " " << value;
+
+if(highlight) cout << RESET;
+
+cout << endl; } //Hiển thị mảng void HienThiMang(int a[], int n, int p1, int p2) { system("cls");
+
+for(int i=0;i<n;i++) VeThanh(a[i], (i==p1 || i==p2)); } //Bubble Visualizer #include #include
+
+void BubbleVisualizer(int a[], int n) { int buoc = 0;
+
+for(int i=0;i<n-1;i++) { for(int j=n-1;j>i;j--) { buoc++;
+
+    HienThiMang(a,n,j,j-1);
+
+    cout << "\nBuoc: "
+         << buoc << endl;
+
+    cout << "Dang so sanh: "
+         << j-1
+         << " va "
+         << j
+         << endl;
+
+    this_thread::sleep_for(
+        chrono::milliseconds(200));
+
+    if(a[j]<a[j-1])
+        HoanVi(a[j],a[j-1]);
+}
+} } //Menu chọn thuật toán int chon;
+
+cout << "1. Bubble Sort\n"; cout << "2. Selection Sort\n"; cout << "3. Insertion Sort\n"; cout << "Chon: "; cin >> chon; switch(chon) { case 1: BubbleVisualizer(a,n); break;
+
+case 2: SelectionVisualizer(a,n); break;
+
+case 3: InsertionVisualizer(a,n); break; } 📁 Tham khảo: Chuong2_TimKiem_SapXep/Chuong2_TimKiem_SapXep.cpp
