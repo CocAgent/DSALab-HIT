@@ -1,0 +1,433 @@
+Bài 1: Cài đặt 3 thuật toán ⭐⭐
+Bubble Sort, Selection Sort, Insertion Sort. Mỗi cái in từng bước thay đổi mảng.
+Bài làm:
+Bubble sort
+#include <iostream>
+using namespace std;
+void BubbleSort(int a[], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            if (a[j] > a[j + 1])
+            {
+                swap(a[j], a[j + 1]);
+            }
+            cout << "Buoc " << i + 1 << "." << j + 1 << ": ";
+            for (int k = 0; k < n; k++)
+                cout << a[k] << " ";
+            cout << endl;
+        }
+    }
+}
+int main()
+{
+    int a[] = {5, 3, 8, 4, 2};
+    int n = 5;
+    BubbleSort(a, n);
+    return 0;
+}
+
+Selection sort
+#include <iostream>
+using namespace std;
+
+void SelectionSort(int a[], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        int minPos = i;
+        for (int j = i + 1; j < n; j++)
+        {
+            if (a[j] < a[minPos])
+                minPos = j;
+        }
+        swap(a[i], a[minPos]);
+        cout << "Buoc " << i + 1 << ": ";
+        for (int k = 0; k < n; k++)
+            cout << a[k] << " ";
+        cout << endl;
+    }
+}
+int main()
+{
+    int a[] = {5, 3, 8, 4, 2};
+    int n = 5;
+    SelectionSort(a, n);
+    return 0;
+}
+
+Inserttion sort
+#include <iostream>
+using namespace std;
+
+void InsertionSort(int a[], int n)
+{
+    for (int i = 1; i < n; i++)
+    {
+        int x = a[i];
+        int j = i - 1;
+        while (j >= 0 && a[j] > x)
+        {
+            a[j + 1] = a[j];
+            j--;
+        }
+        a[j + 1] = x;
+        cout << "Buoc " << i << ": ";
+        for (int k = 0; k < n; k++)
+            cout << a[k] << " ";
+        cout << endl;
+    }
+}
+int main()
+{
+    int a[] = {5, 3, 8, 4, 2};
+    int n = 5;
+    InsertionSort(a, n);
+    return 0;
+}
+Bài 2: Đếm số phép so sánh và hoán vị ⭐⭐
+Với cùng 1 mảng 100 phần tử: đếm số lần so sánh và số lần hoán vị của 3 thuật toán. In bảng so sánh.
+Bài làm:
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+int main()
+{
+    const int n = 100;
+    int a[n];
+    srand(time(0));
+    for (int i = 0; i < n; i++)
+        a[i] = rand() % 1000;
+
+    long long sosanh = 0, hoanvi = 0;
+    int b[n];
+    for (int i = 0; i < n; i++)
+        b[i] = a[i];
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            sosanh++;
+            if (b[j] > b[j + 1])
+            {
+                swap(b[j], b[j + 1]);
+                hoanvi++;
+            }
+        }
+    }
+    cout << "Bubble Sort" << endl;
+    cout << "So sanh: " << sosanh << endl;
+    cout << "Hoan vi: " << hoanvi << endl;
+    return 0;
+}
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+// Bubble Sort
+void BubbleSort(int a[], int n, long long &sosanh, long long &hoanvi)
+{
+    sosanh = 0;
+    hoanvi = 0;
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            sosanh++;
+
+            if (a[j] > a[j + 1])
+            {
+                swap(a[j], a[j + 1]);
+                hoanvi++;
+            }
+        }
+    }
+}
+
+// Selection Sort
+void SelectionSort(int a[], int n, long long &sosanh, long long &hoanvi)
+{
+    sosanh = 0;
+    hoanvi = 0;
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        int minPos = i;
+
+        for (int j = i + 1; j < n; j++)
+        {
+            sosanh++;
+
+            if (a[j] < a[minPos])
+            {
+                minPos = j;
+            }
+        }
+
+        if (minPos != i)
+        {
+            swap(a[i], a[minPos]);
+            hoanvi++;
+        }
+    }
+}
+
+// Insertion Sort
+void InsertionSort(int a[], int n, long long &sosanh, long long &hoanvi)
+{
+    sosanh = 0;
+    hoanvi = 0;
+
+    for (int i = 1; i < n; i++)
+    {
+        int x = a[i];
+        int j = i - 1;
+
+        while (j >= 0)
+        {
+            sosanh++;
+
+            if (a[j] > x)
+            {
+                a[j + 1] = a[j];
+                hoanvi++;
+                j--;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        a[j + 1] = x;
+    }
+}
+
+int main()
+{
+    const int n = 100;
+
+    int a[n], b[n], c[n];
+
+    srand(time(0));
+
+    for (int i = 0; i < n; i++)
+    {
+        a[i] = rand() % 1000;
+        b[i] = a[i];
+        c[i] = a[i];
+    }
+
+    long long ss, hv;
+
+    // Bubble Sort
+    BubbleSort(a, n, ss, hv);
+    cout << "===== BUBBLE SORT =====" << endl;
+    cout << "So phep so sanh: " << ss << endl;
+    cout << "So phep hoan vi: " << hv << endl;
+
+    // Selection Sort
+    SelectionSort(b, n, ss, hv);
+    cout << "\n===== SELECTION SORT =====" << endl;
+    cout << "So phep so sanh: " << ss << endl;
+    cout << "So phep hoan vi: " << hv << endl;
+
+    // Insertion Sort
+    InsertionSort(c, n, ss, hv);
+    cout << "\n===== INSERTION SORT =====" << endl;
+    cout << "So phep so sanh: " << ss << endl;
+    cout << "So phep hoan vi: " << hv << endl;
+
+    return 0;
+}
+
+Nhận xét khi chạy
+
+* Bubble Sort
+    * So sánh ≈ 4950 lần.
+    * Hoán vị nhiều nhất nếu mảng lộn xộn.
+* Selection Sort
+    * So sánh luôn ≈ 4950 lần.
+    * Hoán vị rất ít (tối đa 99 lần).
+* Insertion Sort
+    * So sánh và dịch chuyển ít nếu mảng gần có thứ tự.
+    * Hiệu quả hơn Bubble Sort trong nhiều trường hợp.
+
+Bài 3: Best / Worst / Average Case ⭐⭐
+Với mảng đã sắp xếp, ngược chiều, và ngẫu nhiên — đo thời gian chạy 3 thuật toán. Kết luận khi nào nên dùng cái nào.
+Bài làm:
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+using namespace std::chrono;
+
+// 1. Thuật toán Bubble Sort (Có tối ưu bằng flag)
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    bool swapped;
+    for (int i = 0; i < n - 1; i++) {
+        swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break; // Nếu không có hoán vị nào, mảng đã sắp xếp xong
+    }
+}
+
+// 2. Thuật toán Insertion Sort
+void insertionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+// 3. Thuật toán Quick Sort (Chọn pivot là phần tử cuối)
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = (low - 1);
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return (i + 1);
+}
+
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+// Hàm đo thời gian chạy của thuật toán
+void measureTime(string algoName, vector<int> arr, int algoType) {
+    auto start = high_resolution_clock::now();
+    
+    if (algoType == 1) {
+        bubbleSort(arr);
+    } else if (algoType == 2) {
+        insertionSort(arr);
+    } else if (algoType == 3) {
+        quickSort(arr, 0, arr.size() - 1);
+    }
+    
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << "   + " << algoName << ": " << duration.count() << " ms" << endl;
+}
+
+int main() {
+    // Đặt kích thước mảng (Ví dụ: 10,000 phần tử để thấy rõ sự khác biệt)
+    const int N = 10000; 
+    srand(time(0));
+
+    // Khởi tạo 3 dạng mảng dữ liệu gốc
+    vector<int> sorted_arr(N);
+    vector<int> reversed_arr(N);
+    vector<int> random_arr(N);
+
+    for (int i = 0; i < N; i++) {
+        sorted_arr[i] = i;                  // Mảng đã sắp xếp tăng dần
+        reversed_arr[i] = N - i;            // Mảng sắp xếp ngược chiều
+        random_arr[i] = rand() % 100000;    // Mảng ngẫu nhiên
+    }
+
+    cout << "=== KẾT QUẢ ĐO THỜI GIAN CHẠY (MẢNG " << N << " PHẦN TỬ) ===" << endl << endl;
+
+    // --- TRƯỜNG HỢP 1: MẢNG ĐÃ SẮP XẾP TĂNG DẦN ---
+    cout << "1. Truong hop mang DA SAP XEP (Best Case):" << endl;
+    measureTime("Bubble Sort", sorted_arr, 1);
+    measureTime("Insertion Sort", sorted_arr, 2);
+    // Lưu ý: Quick Sort chọn pivot cuối trên mảng đã sắp xếp sẽ chạy rất lâu (O(n^2)), 
+    // nếu N quá lớn (>10,000) có thể gây tràn stack. 
+    measureTime("Quick Sort", sorted_arr, 3); 
+    cout << "----------------------------------------" << endl;
+
+    // --- TRƯỜNG HỢP 2: MẢNG SẮP XẾP NGƯỢC CHIỀU ---
+    cout << "2. Truong hop mang NGUOC CHIEU (Worst Case):" << endl;
+    measureTime("Bubble Sort", reversed_arr, 1);
+    measureTime("Insertion Sort", reversed_arr, 2);
+    measureTime("Quick Sort", reversed_arr, 3);
+    cout << "----------------------------------------" << endl;
+
+    // --- TRƯỜNG HỢP 3: MẢNG NGẪU NHIÊN ---
+    cout << "3. Truong hop mang NGAU NHIEN (Average Case):" << endl;
+    measureTime("Bubble Sort", random_arr, 1);
+    measureTime("Insertion Sort", random_arr, 2);
+    measureTime("Quick Sort", random_arr, 3);
+    cout << "----------------------------------------" << endl;
+
+    return 0;
+}
+
+Bài 4: 🔥 Dự Án Mini — Sorting Visualizer (Console) ⭐⭐⭐
+Cảm hứng: Sorting — algorithm-visualizer.org
+Bài làm:
+#include <iostream>
+#include <windows.h>
+using namespace std;
+
+void VeMang(int a[], int n)
+{
+    system("cls");
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < a[i]; j++)
+            cout << (char)219;
+
+        cout << " " << a[i] << endl;
+    }
+
+    Sleep(200);
+}
+
+void BubbleSortVisual(int a[], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            if (a[j] > a[j + 1])
+                swap(a[j], a[j + 1]);
+
+            VeMang(a, n);
+        }
+    }
+}
+
+int main()
+{
+    int a[] = {17,12,22,8,15};
+    int n = 5;
+
+    BubbleSortVisual(a, n);
+
+    return 0;
+}
