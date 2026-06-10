@@ -1,0 +1,232 @@
+1/
+header:
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+//4-1
+void printArray(int arr[], int n);
+
+void bubbleSort(int arr[], int n);
+void selectionSort(int arr[], int n);
+void insertionSort(int arr[], int n);
+
+function:
+#include "Header.h"
+//4-1
+void printArray(int arr[], int n) {
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << "\n";
+}
+void bubbleSort(int arr[], int n)
+{
+    for (int i = 0; i < n -1; i++)
+    {
+        bool swapped = false;
+        for (int j = 0; j < n - 1 - i;j++)
+        {
+            if (arr[j] > arr[j + 1])
+            {
+                std::swap(arr[j],arr[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+}
+void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++)
+            if (arr[j] < arr[minIdx]) minIdx = j;
+        if (minIdx != i) {
+            swap(arr[i], arr[minIdx]);
+            cout << "  swap [" << i << "] <> [" << minIdx << "]: ";
+            printArray(arr, n);
+        }
+    }
+}
+void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i], j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+        cout << "  insert key=" << key << " at [" << j + 1 << "]: ";
+        printArray(arr, n);
+    }
+}
+
+main:
+#include "Header.h"
+int main() {
+    int src[] = {5, 3, 8, 1, 4};
+    int n = sizeof(src) / sizeof(src[0]);
+    int arr[5];
+
+    //bubble
+    copy(src, src + n, arr);
+    cout << "=== Bubble Sort ===\n";
+    cout << "  ban dau: "; printArray(arr, n);
+    bubbleSort(arr, n);
+    cout << "  ket qua: "; printArray(arr, n);
+
+    //selection
+    copy(src, src + n, arr);
+    cout << "\n=== Selection Sort ===\n";
+    cout << "  ban dau: "; printArray(arr, n);
+    selectionSort(arr, n);
+    cout << "  ket qua: "; printArray(arr, n);
+
+    //insertion
+    copy(src, src + n, arr);
+    cout << "\n=== Insertion Sort ===\n";
+    cout << "  ban dau: "; printArray(arr, n);
+    insertionSort(arr, n);
+    cout << "  ket qua: "; printArray(arr, n);
+
+    return 0;
+2/
+header:
+#include <iostream>
+#include <algorithm>
+using namespace std;
+//4-2
+#include <cstdlib>
+#include <ctime>
+struct SortStats {
+    long long ss = 0;
+    long long swaps = 0;
+};
+
+//4-1
+void printArray(int arr[], int n);
+
+void bubbleSort(int arr[], int n, SortStats& stats);
+void selectionSort(int arr[], int n, SortStats& stats);
+void insertionSort(int arr[], int n, SortStats& stats);
+function:
+#include "Header.h"
+void printArray(int arr[], int n)
+{
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << endl;
+}
+void bubbleSort(int arr[], int n, SortStats& stats)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        bool swapped = false;
+        for (int j = 0; j < n - 1 - i; j++)
+        {
+            stats.ss++;
+            if (arr[j] > arr[j + 1])
+            {
+                swap(arr[j], arr[j + 1]);
+                stats.swaps++;
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+}
+void selectionSort(int arr[], int n, SortStats& stats)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++)
+        {
+            stats.ss++;
+            if (arr[j] < arr[minIdx])
+                minIdx = j;
+        }
+        if (minIdx != i)
+        {
+            swap(arr[i], arr[minIdx]);
+            stats.swaps++;
+        }
+    }
+}
+void insertionSort(int arr[], int n, SortStats& stats)
+{
+    for (int i = 1; i < n; i++)
+    {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0)
+        {
+            stats.ss++;
+            if (arr[j] > key)
+            {
+                arr[j + 1] = arr[j];
+                stats.swaps++;
+                j--;
+            }
+            else
+            {
+                break;
+            }
+        }
+        arr[j + 1] = key;
+    }
+}
+main:
+#include "Header.h"
+int main() {
+    const int n = 100;
+    int src[n];
+    int arr[n];
+    SortStats bubbleStats;
+    SortStats selectionStats;
+    SortStats insertionStats;
+
+    srand((unsigned)time(NULL));
+    for (int i = 0; i < 100; i++)
+    {
+        src[i] = rand() % 1000;
+    }
+
+
+    // bubble
+    copy(src, src + n, arr);
+    cout << "bubble sort\n";
+    cout << "  ban dau: "; printArray(arr, n);
+    bubbleSort(arr, n, bubbleStats);
+    cout << "  ket qua: "; printArray(arr, n);
+
+    // selection
+    copy(src, src + n, arr);
+    cout << "\nselection sort\n";
+    cout << "  ban dau: "; printArray(arr, n);
+    selectionSort(arr, n, selectionStats);
+    cout << "  ket qua: "; printArray(arr, n);
+
+    // insertion
+    copy(src, src + n, arr);
+    cout << "\ninsertion sort\n";
+    cout << "  ban dau: "; printArray(arr, n);
+    insertionSort(arr, n, insertionStats);
+    cout << "  ket qua: "; printArray(arr, n);
+    cout << "algo   \tso sanh  \tSwaps\n";
+
+    cout << "Bubble\t\t"
+        << bubbleStats.ss << "\t\t"
+        << bubbleStats.swaps << endl;
+
+    cout << "Selection\t"
+        << selectionStats.ss << "\t\t"
+        << selectionStats.swaps << endl;
+
+    cout << "Insertion\t"
+        << insertionStats.ss << "\t\t"
+        << insertionStats.swaps << endl;
+
+
+    return 0;
+}
