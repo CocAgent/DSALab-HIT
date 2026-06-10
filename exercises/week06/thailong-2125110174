@@ -1,0 +1,292 @@
+Bài 1: Cài đặt Linked List ⭐⭐
+Cài đặt đầy đủ: thêm đầu, thêm cuối, xóa đầu, xóa cuối, xóa theo giá trị, tìm kiếm, in danh sách.
+Bài giải:
+// ===================== BÀI 1: LINKED LIST =====================
+
+// Thêm đầu
+void addHead(LinkedList& l, int x) {
+    Node* p = createNode(x);
+    p->next = l.head;
+    l.head = p;
+}
+
+// Thêm cuối
+void addTail(LinkedList& l, int x) {
+    Node* p = createNode(x);
+
+    if (l.head == NULL) {
+        l.head = p;
+        return;
+    }
+
+    Node* temp = l.head;
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = p;
+}
+
+// Xóa đầu
+void deleteHead(LinkedList& l) {
+    if (l.head == NULL) return;
+
+    Node* p = l.head;
+    l.head = l.head->next;
+    delete p;
+}
+
+// Xóa cuối
+void deleteTail(LinkedList& l) {
+    if (l.head == NULL) return;
+
+    if (l.head->next == NULL) {
+        delete l.head;
+        l.head = NULL;
+        return;
+    }
+
+    Node* temp = l.head;
+    while (temp->next->next != NULL)
+        temp = temp->next;
+
+    delete temp->next;
+    temp->next = NULL;
+}
+
+// Xóa theo giá trị
+void deleteValue(LinkedList& l, int x) {
+    if (l.head == NULL) return;
+
+    if (l.head->data == x) {
+        deleteHead(l);
+        return;
+    }
+
+    Node* temp = l.head;
+    while (temp->next != NULL && temp->next->data != x)
+        temp = temp->next;
+
+    if (temp->next == NULL) return;
+
+    Node* del = temp->next;
+    temp->next = del->next;
+    delete del;
+}
+
+// Tìm kiếm
+bool search(LinkedList l, int x) {
+    Node* temp = l.head;
+
+    while (temp != NULL) {
+        if (temp->data == x)
+            return true;
+        temp = temp->next;
+    }
+    return false;
+}
+
+// In danh sách
+void printList(LinkedList l) {
+    Node* temp = l.head;
+
+    while (temp != NULL) {
+        cout << temp->data << " -> ";
+        temp = temp->next;
+    }
+    cout << "NULL\n";
+}
+
+
+Bài 2: Đảo ngược danh sách ⭐⭐
+Đảo ngược Linked List bằng 2 cách: iterative (3 con trỏ) và recursive. So sánh.
+Bài giải:
+
+// ===================== BÀI 2: ĐẢO NGƯỢC =====================
+
+// Iterative
+Node* reverseIterative(Node* head) {
+    Node* prev = NULL;
+    Node* curr = head;
+    Node* next = NULL;
+
+    while (curr != NULL) {
+        next = curr->next;
+        curr->next = prev;
+
+        prev = curr;
+        curr = next;
+    }
+
+    return prev;
+}
+
+// Recursive
+Node* reverseRecursive(Node* head) {
+    if (head == NULL || head->next == NULL)
+        return head;
+
+    Node* newHead = reverseRecursive(head->next);
+
+    head->next->next = head;
+    head->next = NULL;
+
+    return newHead;
+}
+
+
+Bài 3: Phát hiện vòng lặp ⭐⭐⭐
+Cài đặt Floyd's Cycle Detection (slow/fast pointer). Tìm điểm bắt đầu vòng lặp.
+Bài giải:
+// ===================== BÀI 3: PHÁT HIỆN VÒNG =====================
+
+// Floyd cycle detection
+bool hasCycle(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+
+        if (slow == fast)
+            return true;
+    }
+
+    return false;
+}
+
+// Tìm node bắt đầu vòng lặp
+Node* findCycleStart(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+
+        if (slow == fast)
+            break;
+    }
+
+    if (!fast || !fast->next)
+        return NULL;
+
+    slow = head;
+
+    while (slow != fast) {
+        slow = slow->next;
+        fast = fast->next;
+    }
+
+    return slow;
+}
+
+
+Bài 4: 🔥 Dự Án Mini — Lịch Sử Trình Duyệt ⭐⭐⭐
+Giải:
+// ===================== BÀI 4: BROWSER HISTORY =====================
+
+struct Browser {
+    string current;
+    stack<string> backStack;
+    stack<string> forwardStack;
+};
+
+void visit(Browser& b, string url) {
+    if (b.current != "")
+        b.backStack.push(b.current);
+
+    b.current = url;
+
+    while (!b.forwardStack.empty())
+        b.forwardStack.pop();
+}
+
+void back(Browser& b) {
+    if (b.backStack.empty()) {
+        cout << "Khong the back\n";
+        return;
+    }
+
+    b.forwardStack.push(b.current);
+    b.current = b.backStack.top();
+    b.backStack.pop();
+}
+
+void forward(Browser& b) {
+    if (b.forwardStack.empty()) {
+        cout << "Khong the forward\n";
+        return;
+    }
+
+    b.backStack.push(b.current);
+    b.current = b.forwardStack.top();
+    b.forwardStack.pop();
+}
+
+void show(Browser b) {
+    cout << "Current: " << b.current << endl;
+}
+
+// ===================== MAIN =====================
+int main() {
+
+    // ===== BÀI 1 + 2 TEST LINKED LIST =====
+    LinkedList l;
+    init(l);
+
+    addHead(l, 10);
+    addHead(l, 5);
+    addTail(l, 20);
+    addTail(l, 30);
+
+    cout << "Danh sach ban dau: ";
+    printList(l);
+
+    deleteHead(l);
+    cout << "Sau xoa dau: ";
+    printList(l);
+
+    deleteTail(l);
+    cout << "Sau xoa cuoi: ";
+    printList(l);
+
+    deleteValue(l, 20);
+    cout << "Sau xoa 20: ";
+    printList(l);
+
+    cout << "Tim 10: " << (search(l, 10) ? "Co" : "Khong") << endl;
+
+    // Reverse iterative
+    l.head = reverseIterative(l.head);
+    cout << "Dao nguoc (iterative): ";
+    printList(l);
+
+    // Reverse recursive
+    l.head = reverseRecursive(l.head);
+    cout << "Dao nguoc (recursive): ";
+    printList(l);
+
+    // ===== BÀI 3 TEST (cycle demo không tạo vòng để tránh crash) =====
+    cout << "Co cycle khong: " << (hasCycle(l.head) ? "Co" : "Khong") << endl;
+
+    // ===== BÀI 4 BROWSER =====
+    Browser b;
+
+    visit(b, "google.com");
+    visit(b, "facebook.com");
+    visit(b, "youtube.com");
+
+    show(b);
+
+    back(b);
+    show(b);
+
+    back(b);
+    show(b);
+
+    forward(b);
+    show(b);
+
+    return 0;
+}
