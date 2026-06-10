@@ -1,0 +1,261 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <string>
+using namespace std;
+using namespace chrono;
+
+/* =====================================================
+   BÀI 1: LINEAR SEARCH
+===================================================== */
+
+int linearSearchInt(const vector<int>& a, int x, int& steps) {
+    steps = 0;
+    for (int i = 0; i < (int)a.size(); i++) {
+        steps++;
+        if (a[i] == x) return i;
+    }
+    return -1;
+}
+
+int linearSearchString(const vector<string>& a, string x, int& steps) {
+    steps = 0;
+    for (int i = 0; i < (int)a.size(); i++) {
+        steps++;
+        if (a[i] == x) return i;
+    }
+    return -1;
+}
+
+/* =====================================================
+   BÀI 2: BINARY SEARCH
+===================================================== */
+
+int binarySearchIter(const vector<int>& a, int x) {
+    int l = 0, r = a.size() - 1;
+
+    while (l <= r) {
+        int m = (l + r) / 2;
+        if (a[m] == x) return m;
+        else if (a[m] < x) l = m + 1;
+        else r = m - 1;
+    }
+    return -1;
+}
+
+// First Occurrence
+int firstOcc(const vector<int>& a, int x) {
+    int l = 0, r = a.size() - 1, res = -1;
+
+    while (l <= r) {
+        int m = (l + r) / 2;
+        if (a[m] == x) {
+            res = m;
+            r = m - 1;
+        }
+        else if (a[m] < x) l = m + 1;
+        else r = m - 1;
+    }
+    return res;
+}
+
+// Last Occurrence
+int lastOcc(const vector<int>& a, int x) {
+    int l = 0, r = a.size() - 1, res = -1;
+
+    while (l <= r) {
+        int m = (l + r) / 2;
+        if (a[m] == x) {
+            res = m;
+            l = m + 1;
+        }
+        else if (a[m] < x) l = m + 1;
+        else r = m - 1;
+    }
+    return res;
+}
+
+/* =====================================================
+   BÀI 3: ĐO HIỆU NĂNG
+===================================================== */
+
+void measure(int n) {
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) a[i] = i;
+
+    int target = n - 1;
+
+    auto start = high_resolution_clock::now();
+    int steps = 0;
+    linearSearchInt(a, target, steps);
+    auto end = high_resolution_clock::now();
+
+    auto duration = duration_cast<microseconds>(end - start);
+
+    cout << "n = " << n << "\n";
+    cout << "Linear Search: " << duration.count() << " µs, steps = " << steps << "\n";
+
+    start = high_resolution_clock::now();
+    binarySearchIter(a, target);
+    end = high_resolution_clock::now();
+
+    duration = duration_cast<microseconds>(end - start);
+
+    cout << "Binary Search: " << duration.count() << " µs\n";
+    cout << "-----------------------------\n";
+}
+
+/* =====================================================
+   BÀI 4: SMART SEARCH ENGINE (PHONEBOOK)
+===================================================== */
+
+struct Contact {
+    string name;
+    string phone;
+};
+
+class PhoneBook {
+private:
+    vector<Contact> data;
+
+public:
+    void add(string name, string phone) {
+        data.push_back({ name, phone });
+    }
+    /* ---------------- LINEAR SEARCH (NAME) ---------------- */
+    vector<Contact> searchByName(string key, int& steps) {
+        vector<Contact> result;
+        steps = 0;
+
+        for (auto& c : data) {
+            steps++;
+            if (c.name.find(key) != string::npos) {
+                result.push_back(c);
+            }
+        }
+        return result;
+    }
+
+    /* ---------------- BINARY SEARCH (PHONE) ---------------- */
+    void sortByPhone() {
+        sort(data.begin(), data.end(),
+            [](const Contact& a, const Contact& b) {
+                return a.phone < b.phone;
+            });
+    }
+
+    int binarySearchPhone(string key, int& steps) {
+        steps = 0;
+        int l = 0, r = data.size() - 1;
+
+        while (l <= r) {
+            steps++;
+            int m = (l + r) / 2;
+
+            if (data[m].phone == key) return m;
+            else if (data[m].phone < key) l = m + 1;
+            else r = m - 1;
+        }
+        return -1;
+    }
+
+    /* ---------------- GỢI Ý TÊN GẦN ĐÚNG ---------------- */
+    vector<Contact> suggest(string key) {
+        vector<Contact> result;
+
+        for (auto& c : data) {
+            if (result.size() == 3) break;
+
+            if (c.name.find(key.substr(0, 1)) != string::npos)
+                result.push_back(c);
+        }
+        return result;
+    }
+
+    /* ---------------- IN KẾT QUẢ ---------------- */
+    void printContacts(const vector<Contact>& res) {
+        if (res.empty()) {
+            cout << "Không tìm thấy!\n";
+            return;
+        }
+
+        int i = 1;
+        for (auto& c : res) {
+            cout << i++ << ". " << c.name << " - " << c.phone << "\n";
+        }
+    }
+
+    Contact get(int idx) {
+        return data[idx];
+    }
+
+    int size() {
+        return data.size();
+    }
+};
+
+/* =====================================================
+   MAIN DEMO
+===================================================== */
+
+int main() {
+
+    cout << "===== BAI 1: LINEAR SEARCH =====\n";
+    vector<int> arr = { 1,2,3,4,5,6,7,8,9,10 };
+    int steps;
+
+    int idx = linearSearchInt(arr, 7, steps);
+    cout << "Found at: " << idx << ", steps = " << steps << "\n";
+
+    vector<string> names = { "An", "Binh", "Chi", "Dung" };
+    idx = linearSearchString(names, "Chi", steps);
+    cout << "String found at: " << idx << ", steps = " << steps << "\n\n";
+
+    cout << "===== BAI 2: BINARY SEARCH =====\n";
+    vector<int> a = { 1,2,2,2,3,4,5 };
+
+    cout << "First occ: " << firstOcc(a, 2) << "\n";
+    cout << "Last occ: " << lastOcc(a, 2) << "\n\n";
+
+    cout << "===== BAI 3: PERFORMANCE =====\n";
+    measure(10000);
+    measure(100000);
+    measure(1000000);
+
+    cout << "\n===== BAI 4: SMART PHONEBOOK =====\n";
+
+    PhoneBook pb;
+
+    pb.add("Nguyen Van Minh", "0901234567");
+    pb.add("Tran Thi Minh Anh", "0912345678");
+    pb.add("Le Minh Tuan", "0923456789");
+    pb.add("Pham Hoang An", "0931111111");
+    pb.add("Doan Minh Khoa", "0942222222");
+
+    int stepName;
+    auto res = pb.searchByName("Minh", stepName);
+
+    cout << "Tim theo ten 'Minh':\n";
+    pb.printContacts(res);
+    cout << "So so sanh: " << stepName << "\n\n";
+
+    pb.sortByPhone();
+
+    int stepPhone;
+    int pos = pb.binarySearchPhone("0912345678", stepPhone);
+
+    cout << "Tim theo so dien thoai:\n";
+    if (pos != -1)
+        cout << "Found: " << pb.get(pos).name << "\n";
+    else
+        cout << "Not found\n";
+
+    cout << "So so sanh: " << stepPhone << "\n";
+
+    cout << "\n===== GỢI Ý =====\n";
+    auto sug = pb.suggest("Minh");
+    pb.printContacts(sug);
+
+    return 0;
+}
