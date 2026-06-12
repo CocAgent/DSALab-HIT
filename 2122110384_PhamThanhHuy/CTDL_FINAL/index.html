@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 CineBook DSA</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:       #07080f;
+  --surface:  #0e1018;
+  --card:     #131623;
+  --border:   #1e2235;
+  --accent:   #e8b84b;
+  --accent2:  #ff4d6d;
+  --green:    #2ecc71;
+  --red:      #e74c3c;
+  --yellow:   #f39c12;
+  --text:     #e8eaf2;
+  --muted:    #5a6080;
+  --radius:   12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(232,184,75,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 10% 80%, rgba(255,77,109,.05) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LAYOUT ── */
+.wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* ── HEADER ── */
+header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+header span { font-size: .75rem; background: var(--accent2); color: #fff; padding: 3px 8px; border-radius: 99px; font-weight: 600; letter-spacing: .5px; }
+
+/* ── PANELS ── */
+.grid-main { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
+@media(max-width: 760px) { .grid-main { grid-template-columns: 1fr; } }
+
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── FORM CONTROLS ── */
+select, input[type=number], input[type=text] {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: .875rem;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border-color .2s;
+}
+select:focus, input:focus { border-color: var(--accent); }
+
+label { font-size: .75rem; color: var(--muted); display: block; margin-bottom: 4px; font-weight: 500; letter-spacing: .4px; text-transform: uppercase; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 8px;
+  font-family: inherit; font-size: .83rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all .18s; letter-spacing: .3px;
+  width: 100%; justify-content: center; margin-bottom: 7px;
+}
+.btn-primary { background: var(--accent); color: #07080f; }
+.btn-primary:hover { background: #f0c85a; transform: translateY(-1px); box-shadow: 0 4px 18px rgba(232,184,75,.3); }
+.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
+.btn-danger:hover { background: var(--accent2); color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-sm { padding: 5px 10px; font-size: .75rem; width: auto; margin-bottom: 0; }
+
+.btn-row { display: flex; gap: 8px; }
+.btn-row .btn { flex: 1; }
+
+/* ── SEAT MAP ── */
+.screen-wrap { margin: 0 auto 18px; text-align: center; }
+.screen-label {
+  display: block; margin: 0 auto 18px;
+  width: 70%; max-width: 380px;
+  background: linear-gradient(90deg, transparent, rgba(232,184,75,.25), transparent);
+  border-top: 2px solid var(--accent);
+  border-radius: 0;
+  padding: 5px;
+  font-size: .7rem; letter-spacing: 3px; color: var(--accent); text-transform: uppercase;
+}
+
+#seatMap {
+  display: grid;
+  grid-template-columns: repeat(10, 38px);
+  gap: 6px;
+  justify-content: center;
+}
+
+.seat {
+  width: 38px; height: 32px;
+  border-radius: 6px 6px 3px 3px;
+  background: #1a2a1f;
+  border: 1px solid #2ecc7140;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  font-size: 0;
+}
+.seat::after { content: ''; display: block; height: 4px; background: rgba(0,0,0,.3); border-radius: 0 0 3px 3px; position: absolute; bottom: 0; left: 4px; right: 4px; }
+.seat:hover:not(.booked) { background: #2d4a35; transform: scale(1.08); z-index: 1; }
+.seat.booked  { background: #3d1515; border-color: #e74c3c50; cursor: not-allowed; }
+.seat.selected { background: #4a3a00; border-color: var(--accent); box-shadow: 0 0 8px rgba(232,184,75,.4); }
+.seat.highlight { background: #003d2a; border-color: #2ecc71; box-shadow: 0 0 10px rgba(46,204,113,.5); animation: pulse-green .6s ease-in-out 3; }
+
+@keyframes pulse-green { 0%,100%{box-shadow:0 0 6px rgba(46,204,113,.4)} 50%{box-shadow:0 0 18px rgba(46,204,113,.8)} }
+
+.row-label {
+  grid-column: 1; font-size: .65rem; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 32px;
+}
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 18px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: .75rem; color: var(--muted); }
+.legend-dot { width: 14px; height: 12px; border-radius: 3px; }
+
+/* ── DSA LOG ── */
+#dsaLog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: .78rem;
+  font-family: 'Courier New', monospace;
+  color: #7ec8e3;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 14px;
+  line-height: 1.8;
+}
+#dsaLog .log-line { opacity: 0; animation: fadeIn .3s forwards; }
+@keyframes fadeIn { to { opacity: 1; } }
+#dsaLog .ok   { color: #2ecc71; }
+#dsaLog .warn { color: var(--accent); }
+#dsaLog .err  { color: var(--accent2); }
+#dsaLog .info { color: #7ec8e3; }
+
+/* ── QUEUE DISPLAY ── */
+.queue-display { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; margin-top: 8px; }
+.queue-tag {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: .75rem;
+  color: var(--accent);
+  animation: popIn .2s ease;
+}
+@keyframes popIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+
+/* ── STATS BAR ── */
+.stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat-card {
+  flex: 1; min-width: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+.stat-card .num { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--accent); line-height: 1; }
+.stat-card .lbl { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 3px; }
+
+/* ── ALGO TAG ── */
+.algo-tag {
+  display: inline-block;
+  background: rgba(232,184,75,.1);
+  border: 1px solid rgba(232,184,75,.3);
+  color: var(--accent);
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+/* ── BOOKING HISTORY ── */
+.history-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; margin-top: 4px; }
+.history-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: .78rem;
+  display: flex; flex-direction: column; gap: 4px;
+  animation: slideIn .25s ease;
+  position: relative;
+}
+@keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
+.history-item .h-name { font-weight: 600; color: var(--accent); font-size: .82rem; }
+.history-item .h-seats { color: var(--green); letter-spacing: .3px; }
+.history-item .h-meta { color: var(--muted); font-size: .72rem; }
+.history-item .h-cancel {
+  position: absolute; top: 8px; right: 8px;
+  background: none; border: 1px solid var(--border);
+  color: var(--muted); border-radius: 4px; cursor: pointer;
+  font-size: .65rem; padding: 2px 6px; transition: all .15s;
+}
+.history-item .h-cancel:hover { border-color: var(--accent2); color: var(--accent2); }
+.history-empty { color: var(--muted); font-size: .78rem; text-align: center; padding: 20px 0; }
+
+/* ── SEARCH RESULT ── */
+.search-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: .8rem;
+  display: none;
+}
+.search-result.visible { display: block; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <h1>CineBook</h1>
+    <span>DSA PROJECT</span>
+  </header>
+
+  <div class="grid-main">
+
+    <!-- ══ LEFT PANEL ══ -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- MOVIE SELECTION -->
+      <div class="panel">
+        <div class="panel-title">🎞 Chọn Phim</div>
+        <label>Phim</label>
+        <select id="movieSelect" onchange="loadShows()"></select>
+
+        <label>Suất chiếu <span class="algo-tag">Sort</span></label>
+        <select id="showSelect" onchange="resetHighlight()"></select>
+
+        <label>Họ tên</label>
+        <input type="text" id="userName" placeholder="Nguyễn Văn A" />
+
+        <label>Số ghế cần đặt (k)</label>
+        <input type="number" id="k" min="1" max="10" value="2" />
+      </div>
+
+      <!-- BOOKING ACTIONS -->
+      <div class="panel">
+        <div class="panel-title">⚡ Đặt Vé</div>
+        <button class="btn btn-primary" onclick="autoBook()">
+          🤖 Auto Đặt <span class="algo-tag">Greedy</span>
+        </button>
+        <button class="btn btn-secondary" onclick="findBestCenter()">
+          🎯 Gợi ý trung tâm <span class="algo-tag">Greedy</span>
+        </button>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="addQueue()">➕ Queue</button>
+          <button class="btn btn-green" onclick="processQueue()">▶ Xử lý</button>
+        </div>
+        <button class="btn btn-danger" onclick="clearSelected()">🗑 Xoá chọn</button>
+
+        <!-- QUEUE DISPLAY -->
+        <div style="margin-top:6px;">
+          <label>Queue hiện tại <span class="algo-tag">FIFO</span></label>
+          <div class="queue-display" id="queueDisplay"></div>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="panel">
+        <div class="panel-title">🔍 Tìm Kiếm <span class="algo-tag">Binary Search</span></div>
+        <label>Tìm ghế trống đầu tiên từ hàng</label>
+        <select id="bsearchRow">
+          <option value="1">Hàng A</option>
+          <option value="2">Hàng B</option>
+          <option value="3">Hàng C</option>
+          <option value="4">Hàng D</option>
+          <option value="5">Hàng E</option>
+        </select>
+        <button class="btn btn-secondary" onclick="binarySearch()">🔎 Tìm kiếm</button>
+        <div class="search-result" id="bsearchResult"></div>
+      </div>
+
+    </div>
+
+    <!-- ══ RIGHT PANEL ══ -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- STATS -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="num" id="statTotal">50</div>
+          <div class="lbl">Tổng ghế</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statBooked" style="color:var(--accent2)">0</div>
+          <div class="lbl">Đã đặt</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statAvail" style="color:var(--green)">50</div>
+          <div class="lbl">Còn trống</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statSelected" style="color:var(--accent)">0</div>
+          <div class="lbl">Đang chọn</div>
+        </div>
+      </div>
+
+      <!-- SEAT MAP -->
+      <div class="panel">
+        <div class="panel-title">🪑 Sơ đồ rạp <span class="algo-tag">Matrix 5×10</span></div>
+
+        <div class="screen-wrap">
+          <span class="screen-label">MÀN HÌNH</span>
+        </div>
+
+        <div id="seatMap"></div>
+
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1a2a1f;border:1px solid #2ecc7140"></div>Trống</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3d1515;border:1px solid #e74c3c50"></div>Đã đặt</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4a3a00;border:1px solid var(--accent)"></div>Đang chọn</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#003d2a;border:1px solid #2ecc71"></div>Gợi ý</div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <div class="btn-row">
+            <button class="btn btn-green btn-sm" onclick="confirmSelected()" style="flex:2;">✔ Xác nhận đặt ghế đã chọn</button>
+            <button class="btn btn-danger btn-sm" onclick="resetAll()">🔄 Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DSA LOG -->
+      <div class="panel">
+        <div class="panel-title">📋 DSA Log</div>
+        <div id="dsaLog"></div>
+      </div>
+
+      <!-- BOOKING HISTORY -->
+      <div class="panel">
+        <div class="panel-title">🎟 Lịch Sử Đặt Vé</div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">Chưa có lịch sử đặt vé</div>
+        </div>
+        <button class="btn btn-danger btn-sm" style="width:100%;margin-top:10px;" onclick="clearHistory()">🗑 Xoá lịch sử</button>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const movies = [
+  { name: "Avengers: Endgame",   shows: [{id:1,time:"10:00"},{id:2,time:"14:30"},{id:3,time:"19:00"}] },
+  { name: "Batman: Dark Knight", shows: [{id:4,time:"09:00"},{id:5,time:"13:00"},{id:6,time:"18:30"}] },
+  { name: "Spider-Man NWH",      shows: [{id:7,time:"11:00"},{id:8,time:"16:00"},{id:9,time:"20:00"}] },
+  { name: "Oppenheimer",         shows: [{id:10,time:"12:00"},{id:11,time:"17:00"}] },
+];
+
+const ROWS = 5, COLS = 10;
+const ROW_LABELS = ['A','B','C','D','E'];
+
+let seats = [];          // Matrix[5][10]: 0=empty,1=booked
+let selectedSeats = [];  // [[r,c],...]
+let highlightSeats = [];
+let queue = [];          // Queue DSA
+let bookingHistory = []; // Booking history
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+function initSeats() {
+  seats = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+}
+
+function loadMovies() {
+  const sel = document.getElementById('movieSelect');
+  sel.innerHTML = '';
+  movies.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = m.name;
+    sel.appendChild(o);
+  });
+  loadShows();
+}
+
+function loadShows() {
+  const sel = document.getElementById('showSelect');
+  sel.innerHTML = '';
+  const m = movies[document.getElementById('movieSelect').value];
+
+  // ── DSA: SORT (so sánh chuỗi thời gian) ──
+  const sorted = [...m.shows].sort((a, b) => a.time.localeCompare(b.time));
+  log(`Sort suất chiếu: [${sorted.map(s=>s.time).join(', ')}]`, 'info');
+
+  sorted.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.id; o.textContent = s.time;
+    sel.appendChild(o);
+  });
+  resetHighlight();
+}
+
+// ══════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════
+function render() {
+  const map = document.getElementById('seatMap');
+  map.innerHTML = '';
+
+  for (let i = 0; i < ROWS; i++) {
+    // Row label
+    const lbl = document.createElement('div');
+    lbl.className = 'row-label';
+    lbl.textContent = ROW_LABELS[i];
+    map.appendChild(lbl);
+
+    for (let j = 0; j < COLS; j++) {
+      const div = document.createElement('div');
+      div.className = 'seat';
+      div.title = `${ROW_LABELS[i]}${j+1}`;
+
+      if (seats[i][j] === 1) div.classList.add('booked');
+      if (selectedSeats.some(s => s[0]===i && s[1]===j)) div.classList.add('selected');
+      if (highlightSeats.some(s => s[0]===i && s[1]===j)) div.classList.add('highlight');
+
+      div.onclick = () => toggleSeat(i, j);
+      map.appendChild(div);
+    }
+  }
+
+  // Update grid to 11 cols (label + 10 seats)
+  map.style.gridTemplateColumns = `24px repeat(10, 38px)`;
+
+  updateStats();
+  renderQueue();
+}
+
+function updateStats() {
+  let booked = 0;
+  for (let i = 0; i < ROWS; i++)
+    for (let j = 0; j < COLS; j++)
+      if (seats[i][j] === 1) booked++;
+
+  document.getElementById('statTotal').textContent = ROWS * COLS;
+  document.getElementById('statBooked').textContent = booked;
+  document.getElementById('statAvail').textContent = ROWS * COLS - booked;
+  document.getElementById('statSelected').textContent = selectedSeats.length;
+}
+
+// ══════════════════════════════════════
+//  TOGGLE SEAT (click thủ công)
+// ══════════════════════════════════════
+function toggleSeat(i, j) {
+  if (seats[i][j] === 1) return;
+  highlightSeats = [];
+  const idx = selectedSeats.findIndex(s => s[0]===i && s[1]===j);
+  if (idx !== -1) selectedSeats.splice(idx, 1);
+  else selectedSeats.push([i, j]);
+  render();
+}
+
+// ══════════════════════════════════════
+//  DSA 1: TÌM GHÉP LIỀN NHAU (Sliding Window / Linear Scan)
+// ══════════════════════════════════════
+function findConsecutiveSeats(k) {
+  log(`findConsecutiveSeats(k=${k}) — quét ma trận...`, 'info');
+  for (let i = 0; i < ROWS; i++) {
+    let count = 0, start = 0;
+    for (let j = 0; j < COLS; j++) {
+      if (seats[i][j] === 0) {
+        if (count === 0) start = j;
+        count++;
+        if (count === k) {
+          log(`✔ Tìm thấy ${k} ghế liền: hàng ${ROW_LABELS[i]}, cột ${start+1}–${j+1}`, 'ok');
+          return [i, start];
+        }
+      } else {
+        count = 0;
+      }
+    }
+  }
+  log(`✘ Không có ${k} ghế liền nhau`, 'err');
+  return [-1, -1];
+}
+
+// ══════════════════════════════════════
+//  DSA 2: GREEDY — ghế gần trung tâm nhất
+// ══════════════════════════════════════
+function bestSingleSeat() {
+  const cx = (ROWS - 1) / 2, cy = (COLS - 1) / 2;
+  let best = null, minDist = Infinity;
+  for (let i = 0; i < ROWS; i++)
+    for (let j = 0; j < COLS; j++)
+      if (seats[i][j] === 0) {
+        const d = Math.sqrt((i - cx) ** 2 + (j - cy) ** 2);
+        if (d < minDist) { minDist = d; best = [i, j]; }
+      }
+  return best;
+}
+
+function findBestCenter() {
+  const k = parseInt(document.getElementById('k').value) || 1;
+  const cx = (ROWS - 1) / 2, cy = (COLS - 1) / 2;
+  let bestPos = null, minDist = Infinity;
+
+  for (let i = 0; i < ROWS; i++) {
+    let count = 0, start = 0;
+    for (let j = 0; j < COLS; j++) {
+      if (seats[i][j] === 0) {
+        if (count === 0) start = j;
+        count++;
+        if (count === k) {
+          const midCol = start + (k - 1) / 2;
+          const d = Math.sqrt((i - cx) ** 2 + (midCol - cy) ** 2);
+          if (d < minDist) { minDist = d; bestPos = [i, start]; }
+        }
+      } else count = 0;
+    }
+  }
+
+  highlightSeats = [];
+  if (bestPos) {
+    for (let j = bestPos[1]; j < bestPos[1] + k; j++) highlightSeats.push([bestPos[0], j]);
+    log(`🎯 Greedy gợi ý: ${k} ghế tại hàng ${ROW_LABELS[bestPos[0]]}, cột ${bestPos[1]+1}–${bestPos[1]+k} (dist=${minDist.toFixed(2)})`, 'ok');
+  } else {
+    log('Không tìm được vị trí phù hợp', 'err');
+  }
+  render();
+}
+
+// ══════════════════════════════════════
+//  DSA 3: QUEUE (FIFO)
+// ══════════════════════════════════════
+function addQueue() {
+  const k = parseInt(document.getElementById('k').value);
+  if (!k || k < 1) return;
+  queue.push(k);  // enqueue
+  log(`Enqueue: k=${k} | Queue=[${queue.join(', ')}]`, 'info');
+  renderQueue();
+}
+
+function processQueue() {
+  if (queue.length === 0) { log('Queue rỗng!', 'warn'); return; }
+  log(`Bắt đầu xử lý Queue (${queue.length} yêu cầu)...`, 'info');
+  let processed = 0;
+  while (queue.length > 0) {
+    const k = queue.shift();  // dequeue
+    const pos = findConsecutiveSeats(k);
+    if (pos[0] !== -1) {
+      bookRange(pos[0], pos[1], k);
+      processed++;
+      log(`Dequeue k=${k} → đặt thành công hàng ${ROW_LABELS[pos[0]]}`, 'ok');
+    } else {
+      log(`Dequeue k=${k} → không đủ ghế liền`, 'err');
+    }
+  }
+  log(`Queue hoàn tất: ${processed} đặt thành công`, 'ok');
+  save(); render();
+}
+
+// ══════════════════════════════════════
+//  BOOKING HISTORY
+// ══════════════════════════════════════
+function addHistory(name, seatList, movie, show) {
+  const entry = {
+    id: Date.now(),
+    name,
+    seats: seatList,
+    movie,
+    show,
+    time: new Date().toLocaleString('vi-VN')
+  };
+  bookingHistory.unshift(entry); // thêm vào đầu mảng
+  saveHistory();
+  renderHistory();
+}
+
+function cancelBooking(id) {
+  const entry = bookingHistory.find(e => e.id === id);
+  if (!entry) return;
+  if (!confirm(`Huỷ vé của ${entry.name} (${entry.seats.join(', ')})?`)) return;
+  // Giải phóng ghế
+  entry.seats.forEach(key => {
+    const row = ROW_LABELS.indexOf(key[0]);
+    const col = parseInt(key.slice(1)) - 1;
+    if (row >= 0 && col >= 0) seats[row][col] = 0;
+  });
+  bookingHistory = bookingHistory.filter(e => e.id !== id);
+  log(`Đã huỷ vé của ${entry.name}: ${entry.seats.join(', ')}`, 'warn');
+  saveHistory(); save(); render(); buildHeap();
+}
+
+function clearHistory() {
+  if (!confirm('Xoá toàn bộ lịch sử?')) return;
+  bookingHistory = [];
+  saveHistory();
+  renderHistory();
+  log('Đã xoá lịch sử đặt vé', 'warn');
+}
+
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  container.innerHTML = '';
+  if (bookingHistory.length === 0) {
+    container.innerHTML = '<div class="history-empty">Chưa có lịch sử đặt vé</div>';
+    return;
+  }
+  bookingHistory.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `
+      <div class="h-name">👤 ${entry.name}</div>
+      <div class="h-seats">🪑 ${entry.seats.join(' · ')}</div>
+      <div class="h-meta">🎬 ${entry.movie} &nbsp;|&nbsp; ⏰ ${entry.show} &nbsp;|&nbsp; 📅 ${entry.time}</div>
+      <button class="h-cancel" onclick="cancelBooking(${entry.id})">Huỷ</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function saveHistory() { localStorage.setItem('cinebook_history', JSON.stringify(bookingHistory)); }
+function loadHistory() {
+  const d = localStorage.getItem('cinebook_history');
+  if (d) bookingHistory = JSON.parse(d);
+}
+
+// ══════════════════════════════════════
+//  DSA 5: BINARY SEARCH (trên mảng trống)
+// ══════════════════════════════════════
+function binarySearch() {
+  const targetRow = parseInt(document.getElementById('bsearchRow').value) - 1;
+  const resultEl = document.getElementById('bsearchResult');
+  resultEl.classList.add('visible');
+
+  // Lấy danh sách ghế trống, sort theo hàng
+  const empties = [];
+  for (let i = 0; i < ROWS; i++)
+    for (let j = 0; j < COLS; j++)
+      if (seats[i][j] === 0) empties.push([i, j]);
+
+  log(`Binary Search: ${empties.length} ghế trống, tìm hàng ≥ ${ROW_LABELS[targetRow]}`, 'info');
+
+  // Binary search: tìm index đầu tiên mà row >= targetRow
+  let lo = 0, hi = empties.length - 1, ans = -1;
+  let steps = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    steps++;
+    if (empties[mid][0] >= targetRow) { ans = mid; hi = mid - 1; }
+    else lo = mid + 1;
+  }
+
+  log(`Binary Search hoàn tất sau ${steps} bước`, 'info');
+
+  if (ans !== -1) {
+    const [r, c] = empties[ans];
+    highlightSeats = [[r, c]];
+    resultEl.innerHTML = `Ghế trống đầu tiên từ hàng ${ROW_LABELS[targetRow]}: <strong style="color:var(--accent)">${ROW_LABELS[r]}${c+1}</strong> (${steps} bước)`;
+    log(`✔ Tìm thấy: ${ROW_LABELS[r]}${c+1}`, 'ok');
+    render();
+  } else {
+    resultEl.innerHTML = `<span style="color:var(--accent2)">Không còn ghế trống từ hàng ${ROW_LABELS[targetRow]}</span>`;
+    log('Không tìm thấy', 'err');
+  }
+}
+
+
+// ══════════════════════════════════════
+//  BOOK
+// ══════════════════════════════════════
+function bookRange(row, col, k) {
+  for (let j = col; j < col + k; j++) seats[row][j] = 1;
+}
+
+function autoBook() {
+  const k = parseInt(document.getElementById('k').value) || 1;
+  const name = document.getElementById('userName').value.trim() || 'Khách';
+  const pos = findConsecutiveSeats(k);
+  highlightSeats = [];
+
+  if (pos[0] !== -1) {
+    bookRange(pos[0], pos[1], k);
+    const bookedKeys = [];
+    for (let j = pos[1]; j < pos[1] + k; j++) bookedKeys.push(`${ROW_LABELS[pos[0]]}${j+1}`);
+    const movie = movies[document.getElementById('movieSelect').value].name;
+    const show = document.getElementById('showSelect').options[document.getElementById('showSelect').selectedIndex].text;
+    addHistory(name, bookedKeys, movie, show);
+    log(`✔ Auto đặt ${k} ghế: hàng ${ROW_LABELS[pos[0]]}, cột ${pos[1]+1}–${pos[1]+k}`, 'ok');
+  } else {
+    const b = bestSingleSeat();
+    if (b) {
+      highlightSeats = [b];
+      log(`⚠ Không đủ ghế liền. Greedy gợi ý: ${ROW_LABELS[b[0]]}${b[1]+1}`, 'warn');
+    } else {
+      log('Rạp đã đầy!', 'err');
+    }
+  }
+  save(); render();
+}
+
+function confirmSelected() {
+  if (selectedSeats.length === 0) { log('Chưa chọn ghế nào!', 'warn'); return; }
+  const name = document.getElementById('userName').value.trim() || 'Khách';
+  const bookedKeys = selectedSeats.map(([r,c]) => `${ROW_LABELS[r]}${c+1}`);
+  selectedSeats.forEach(([r, c]) => seats[r][c] = 1);
+  const movie = movies[document.getElementById('movieSelect').value].name;
+  const show = document.getElementById('showSelect').options[document.getElementById('showSelect').selectedIndex].text;
+  log(`✔ ${name} đặt ${bookedKeys.length} ghế: ${bookedKeys.join(', ')}`, 'ok');
+  addHistory(name, bookedKeys, movie, show);
+  selectedSeats = [];
+  highlightSeats = [];
+  save(); render();
+}
+
+function clearSelected() {
+  selectedSeats = [];
+  highlightSeats = [];
+  render();
+  log('Đã xoá các ghế đang chọn', 'warn');
+}
+
+function resetAll() {
+  if (!confirm('Reset toàn bộ sơ đồ ghế và lịch sử?')) return;
+  initSeats();
+  selectedSeats = []; highlightSeats = []; queue = [];
+  bookingHistory = [];
+  localStorage.removeItem('cinebook_seats');
+  localStorage.removeItem('cinebook_history');
+  renderQueue();
+  renderHistory();
+  render();
+  log('🔄 Reset hoàn tất', 'warn');
+}
+
+function resetHighlight() { highlightSeats = []; render(); }
+
+// ══════════════════════════════════════
+//  QUEUE RENDER
+// ══════════════════════════════════════
+function renderQueue() {
+  const container = document.getElementById('queueDisplay');
+  container.innerHTML = '';
+  queue.forEach((k, i) => {
+    const tag = document.createElement('div');
+    tag.className = 'queue-tag';
+    tag.textContent = `#${i+1}: k=${k}`;
+    container.appendChild(tag);
+  });
+  if (queue.length === 0) {
+    container.innerHTML = '<span style="font-size:.75rem;color:var(--muted)">Trống</span>';
+  }
+}
+
+// ══════════════════════════════════════
+//  LOG
+// ══════════════════════════════════════
+function log(msg, type = 'info') {
+  const logEl = document.getElementById('dsaLog');
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  const ts = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+  line.textContent = `[${ts}] ${msg}`;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+  if (logEl.children.length > 60) logEl.removeChild(logEl.firstChild);
+}
+
+// ══════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════
+function save() { localStorage.setItem('cinebook_seats', JSON.stringify(seats)); }
+function load() {
+  const d = localStorage.getItem('cinebook_seats');
+  if (d) seats = JSON.parse(d);
+}
+
+
+// ══════════════════════════════════════
+//  START
+// ══════════════════════════════════════
+initSeats();
+load();
+loadHistory();
+loadMovies();
+render();
+renderHistory();
+log('CineBook DSA khởi động thành công 🎬', 'ok');
+</script>
+</body>
+</html>
