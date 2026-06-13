@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Chương 2 – Tìm Kiếm & Sắp Xếp</title>
+<style>
+:root{
+  --blue:#185FA5;--blue-lt:#E6F1FB;--blue-dk:#0C447C;
+  --teal:#0F6E56;--teal-lt:#E1F5EE;--teal-md:#5DCAA5;
+  --amber:#854F0B;--amber-lt:#FAEEDA;--amber-md:#EF9F27;
+  --coral:#993C1D;--coral-lt:#FAECE7;--coral-md:#F0997B;
+  --pink:#D4537E;
+  --gray-bg:#F8F7F4;--gray-50:#F1EFE8;--gray-100:#D3D1C7;--gray-200:#B4B2A9;
+  --gray-600:#5F5E5A;--gray-800:#444441;
+  --surface:#fff;--border:rgba(0,0,0,0.09);
+  --tx:#1A1A1A;--tx2:#5F5E5A;--tx3:#9E9B94;
+  --sidebar:210px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color:var(--tx);display:flex;min-height:100vh;font-size:14px}
+
+/* ── SIDEBAR ── */
+.sb{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;z-index:50}
+.sb-logo{padding:16px 14px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.sb-logo .icon{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo .icon svg{width:15px;height:15px;fill:#fff}
+.sb-logo .title{font-size:12.5px;font-weight:700;color:var(--blue-dk);line-height:1.35}
+.sb-logo .sub{font-size:10px;color:var(--tx3);font-weight:400}
+.sb-sec{padding:10px 8px 2px}
+.sb-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);padding:0 8px 5px}
+.sb-item{display:block;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--tx2);transition:background .12s,color .12s;margin-bottom:1px;user-select:none}
+.sb-item:hover{background:var(--gray-50);color:var(--tx)}
+.sb-item.on{background:var(--blue-lt);color:var(--blue-dk);font-weight:600}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar);flex:1;padding:32px 40px;max-width:980px}
+.page{display:none}.page.on{display:block}
+
+/* ── PAGE HEADER ── */
+.ph h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.ph p{font-size:14px;line-height:1.75;color:var(--tx2);max-width:660px;margin-bottom:12px}
+.tags{margin-bottom:14px}
+.tag{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-right:5px}
+.tag-o{background:var(--amber-lt);color:var(--amber)}
+.tag-t{background:var(--blue-lt);color:var(--blue)}
+.tag-g{background:var(--teal-lt);color:var(--teal)}
+
+/* ── TIP BOX ── */
+.tip{background:var(--teal-lt);border-left:3px solid var(--teal-md);border-radius:0 8px 8px 0;padding:12px 15px;margin-bottom:20px}
+.tip-title{font-size:10.5px;font-weight:700;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.tip ul{list-style:none}.tip li{font-size:13px;color:var(--teal);padding-left:14px;position:relative;margin-bottom:4px;line-height:1.6}
+.tip li::before{content:'→';position:absolute;left:0;font-weight:700}
+
+/* ── SECTION LABEL ── */
+.slbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+/* ── PSEUDOCODE ── */
+.pseudo{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:10px;padding:14px 18px;font-family:'Consolas','JetBrains Mono',monospace;font-size:12.5px;line-height:1.9;color:var(--gray-800);white-space:pre;overflow-x:auto;margin-bottom:20px}
+.kw{color:var(--blue);font-weight:600}.fn{color:var(--coral)}.num{color:var(--amber)}.cm{color:var(--tx3);font-style:italic}
+
+/* ── VIZ PANEL ── */
+.vpanel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.vtb{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--gray-50);flex-wrap:wrap}
+.vtb label{font-size:12px;font-weight:600;color:var(--tx2)}
+.varr{font-family:'Consolas',monospace;font-size:12.5px;border:1px solid var(--gray-100);background:var(--surface);color:var(--tx);padding:5px 9px;border-radius:7px;width:220px;outline:none}
+.varr:focus{border-color:var(--blue-dk)}
+.vcanvas{padding:22px 18px 16px}
+.spd{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--tx3);margin-left:auto}
+.spd input{width:70px}
+
+/* ── BUTTONS ── */
+.btn{padding:6px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:opacity .12s;display:inline-flex;align-items:center;gap:5px}
+.btn:active{opacity:.8}
+.btn-play{background:var(--teal);color:#fff}.btn-play:hover{opacity:.88}
+.btn-rst{background:var(--surface);color:var(--tx);border:1px solid var(--gray-100)}.btn-rst:hover{background:var(--gray-50)}
+.btn-run{background:var(--blue);color:#fff}.btn-run:hover{opacity:.88}
+
+/* ── BARS ── */
+.bars{display:flex;align-items:flex-end;gap:5px;height:130px;margin-bottom:6px}
+.bw{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:height .3s ease,background .2s;min-width:16px}
+.bl{font-size:10.5px;font-family:'Consolas',monospace;color:var(--tx3)}
+.b-d{background:#85B7EB}.b-c{background:#EF9F27}.b-s{background:#F0997B}.b-ok{background:#5DCAA5}.b-pv{background:#D4537E}
+
+/* ── CELLS ── */
+.cells{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;font-family:'Consolas',monospace;border-radius:8px;border:2px solid var(--gray-100);background:var(--gray-50);color:var(--tx);transition:background .2s,border-color .2s,transform .18s}
+.c-chk{background:var(--amber-lt);border-color:var(--amber-md);transform:scale(1.1)}
+.c-ok{background:var(--teal-lt);border-color:var(--teal-md)}
+.c-out{opacity:.3}
+.c-rng{background:var(--blue-lt);border-color:#85B7EB}
+.c-mid{background:var(--coral-lt);border-color:var(--coral-md);transform:scale(1.08)}
+
+/* ── STATUS ── */
+.sbar{margin-top:10px;padding:9px 13px;background:var(--gray-50);border-radius:8px;font-size:12.5px;color:var(--tx2);min-height:36px;line-height:1.55}
+.hl{font-weight:700;color:var(--blue-dk)}.ok{color:var(--teal);font-weight:600}.err{color:var(--coral)}
+
+/* ── LEGEND ── */
+.leg{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.li{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tx3)}
+.ld{width:9px;height:9px;border-radius:2px}
+
+/* ── SEARCH INPUT ROW ── */
+.xrow{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.xrow label{font-size:12.5px;color:var(--tx2);font-weight:500}
+.xrow input{width:72px;font-family:'Consolas',monospace;font-size:12.5px;border:1px solid var(--gray-100);background:var(--surface);color:var(--tx);padding:5px 8px;border-radius:7px;outline:none}
+.xrow input:focus{border-color:var(--blue)}
+
+/* ── CODE RUNNER ── */
+.runner{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.runner-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1e1e2e;color:#cdd6f4}
+.runner-head span{font-size:12px;font-family:'Consolas',monospace;opacity:.7}
+.runner-head .rbtn{margin-left:auto}
+.runner-body{display:flex;gap:0}
+.code-pane{flex:1;background:#1e1e2e;padding:14px 16px;font-family:'Consolas',monospace;font-size:12px;line-height:1.8;overflow-x:auto;min-height:180px;color:#cdd6f4}
+.code-pane .ck{color:#89b4fa}.code-pane .cf{color:#fab387}.code-pane .cs{color:#a6e3a1}.code-pane .cn{color:#f9e2af}.code-pane .cc{color:#6c7086;font-style:italic}
+.output-pane{width:280px;background:#181825;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column}
+.output-head{padding:8px 12px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6c7086;border-bottom:1px solid rgba(255,255,255,.06)}
+.output-body{flex:1;padding:10px 12px;font-family:'Consolas',monospace;font-size:12px;line-height:1.75;color:#a6e3a1;white-space:pre-wrap;min-height:160px;overflow-y:auto}
+
+/* ── COMPLEXITY TABLE ── */
+.ctbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+.ctbl th{text-align:left;padding:8px 13px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tx3);background:var(--gray-50);border-bottom:1px solid var(--border)}
+.ctbl td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--tx2)}
+.ctbl tr:last-child td{border-bottom:none}
+.ctbl tr:hover td{background:var(--gray-50)}
+.ctbl td:first-child{font-weight:600;color:var(--tx)}
+.mono{font-family:'Consolas',monospace}
+.bg{background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.ba{background:var(--amber-lt);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.bb{background:var(--coral-lt);color:var(--coral);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+
+/* ── HOME GRID ── */
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.hcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.hcard:hover{border-color:#85B7EB;box-shadow:0 4px 18px rgba(24,95,165,.08)}
+.hcard .ctag{font-size:10.5px;font-weight:700;color:var(--blue);background:var(--blue-lt);padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.hcard h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.hcard p{font-size:12.5px;color:var(--tx2);line-height:1.6}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="icon"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></div>
+    <div><div class="title">Giải Thuật</div><div class="sub">CDCTTP.HCM – Chương 2</div></div>
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-lbl">Tổng quan</div>
+    <div class="sb-item on" onclick="nav('home',this)">🏠 Trang chủ</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Tìm kiếm</div>
+    <div class="sb-item" onclick="nav('linear',this)">🔍 Tìm tuần tự</div>
+    <div class="sb-item" onclick="nav('binary',this)">🔎 Tìm nhị phân</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Sắp xếp</div>
+    <div class="sb-item" onclick="nav('selection',this)">📋 Selection Sort</div>
+    <div class="sb-item" onclick="nav('insertion',this)">📌 Insertion Sort</div>
+    <div class="sb-item" onclick="nav('bubble',this)">🫧 Bubble Sort</div>
+    <div class="sb-item" onclick="nav('quick',this)">⚡ Quick Sort</div>
+    <div class="sb-item" onclick="nav('heap',this)">🌲 Heap Sort</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Bài tập</div>
+    <div class="sb-item" onclick="nav('baitap',this)">📝 Chạy Code C++</div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- HOME -->
+<div id="p-home" class="page on">
+  <div class="ph">
+    <h1>Tìm Kiếm &amp; Sắp Xếp</h1>
+    <p>Trực quan hóa toàn bộ giải thuật từ file <code>Chuong2_TimKiem_SapXep.cpp</code> — giáo trình CDCTTP.HCM. Chọn giải thuật từ sidebar để xem demo và chạy code.</p>
+  </div>
+  <div class="hgrid">
+    <div class="hcard" onclick="nav('linear',null)"><div class="ctag">TÌM KIẾM · O(N)</div><h3>Tìm tuần tự</h3><p>Duyệt từng phần tử đến khi tìm thấy hoặc hết mảng.</p></div>
+    <div class="hcard" onclick="nav('binary',null)"><div class="ctag">TÌM KIẾM · O(log N)</div><h3>Tìm nhị phân</h3><p>Chia đôi khoảng tìm kiếm trên mảng đã sắp xếp.</p></div>
+    <div class="hcard" onclick="nav('selection',null)"><div class="ctag">SẮP XẾP · O(N²)</div><h3>Selection Sort</h3><p>Chọn phần tử nhỏ nhất đưa về vị trí đúng.</p></div>
+    <div class="hcard" onclick="nav('insertion',null)"><div class="ctag">SẮP XẾP · O(N²)</div><h3>Insertion Sort</h3><p>Chèn từng phần tử vào đoạn đã sắp xếp.</p></div>
+    <div class="hcard" onclick="nav('bubble',null)"><div class="ctag">SẮP XẾP · O(N²)</div><h3>Bubble Sort</h3><p>Nổi bọt phần tử lớn về cuối mảng.</p></div>
+    <div class="hcard" onclick="nav('quick',null)"><div class="ctag">SẮP XẾP · O(N log N)</div><h3>Quick Sort</h3><p>Chia mảng quanh pivot, đệ quy sắp xếp.</p></div>
+    <div class="hcard" onclick="nav('heap',null)"><div class="ctag">SẮP XẾP · O(N log N)</div><h3>Heap Sort</h3><p>Xây max-heap, trích phần tử lớn nhất về cuối.</p></div>
+    <div class="hcard" onclick="nav('baitap',null)"><div class="ctag">BÀI TẬP · C++</div><h3>Chạy Code C++</h3><p>Nhập mảng, chạy thử từng bài tập theo sách.</p></div>
+  </div>
+</div>
+
+<!-- LINEAR SEARCH -->
+<div id="p-linear" class="page">
+  <div class="ph"><h1>Tìm Kiếm Tuần Tự</h1>
+  <div class="tags"><span class="tag tag-o">O(N)</span><span class="tag tag-t">Tìm kiếm</span></div>
+  <p>Duyệt từng phần tử từ đầu đến cuối. Không yêu cầu mảng đã sắp xếp.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Mỗi bước kiểm tra một phần tử, không bỏ qua.</li>
+    <li>Tốt nhất O(1) nếu phần tử ở đầu mảng.</li>
+    <li>Xấu nhất O(N) nếu ở cuối hoặc không tìm thấy.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">TimTuyenTinh</span>(a[], n, x):
+  i = <span class="num">0</span>
+  <span class="kw">while</span> a[i] != x <span class="kw">and</span> i &lt; n: i++
+  <span class="kw">if</span> i &lt; n: <span class="kw">return</span> i    <span class="cm">// tìm thấy tại vị trí i</span>
+  <span class="kw">return</span> <span class="num">-1</span>              <span class="cm">// không tìm thấy</span></div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng:</label>
+      <input class="varr" id="ln-a" value="64, 25, 12, 22, 11, 90, 45, 33"/>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="ln-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="xrow">
+        <label>Tìm x =</label><input type="number" id="ln-x" value="22"/>
+        <button class="btn btn-play" onclick="runLinear()">▶ PLAY</button>
+        <button class="btn btn-rst" onclick="resetLinear()">RESET</button>
+      </div>
+      <div class="cells" id="ln-cells"></div>
+      <div class="sbar" id="ln-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#D3D1C7"></div>Chưa xét</div>
+    <div class="li"><div class="ld" style="background:#EF9F27"></div>Đang kiểm tra</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Tìm thấy</div>
+  </div>
+</div>
+
+<!-- BINARY SEARCH -->
+<div id="p-binary" class="page">
+  <div class="ph"><h1>Tìm Kiếm Nhị Phân</h1>
+  <div class="tags"><span class="tag tag-o">O(log₂ N)</span><span class="tag tag-t">Tìm kiếm</span></div>
+  <p>Chia đôi khoảng tìm kiếm sau mỗi bước. Yêu cầu mảng <strong>đã sắp xếp tăng dần</strong>.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Xanh lam = khoảng [l, r] hiện tại. Cam = mid đang xét.</li>
+    <li>1000 phần tử → tối đa chỉ 10 bước so sánh.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">TimNhiPhan</span>(a[], n, x):
+  l = <span class="num">0</span>, r = n-<span class="num">1</span>
+  <span class="kw">while</span> l &lt;= r:
+    m = (l+r) / <span class="num">2</span>
+    <span class="kw">if</span> a[m] == x: <span class="kw">return</span> m
+    <span class="kw">else if</span> a[m] &gt; x: r = m-<span class="num">1</span>   <span class="cm">// tìm bên trái</span>
+    <span class="kw">else</span>: l = m+<span class="num">1</span>                <span class="cm">// tìm bên phải</span>
+  <span class="kw">return</span> <span class="num">-1</span></div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng (đã sắp xếp):</label>
+      <input class="varr" id="bn-a" value="11, 22, 33, 44, 55, 66, 77, 88, 99"/>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="bn-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="xrow">
+        <label>Tìm x =</label><input type="number" id="bn-x" value="66"/>
+        <button class="btn btn-play" onclick="runBinary()">▶ PLAY</button>
+        <button class="btn btn-rst" onclick="resetBinary()">RESET</button>
+      </div>
+      <div class="cells" id="bn-cells"></div>
+      <div class="sbar" id="bn-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#D3D1C7"></div>Ngoài khoảng</div>
+    <div class="li"><div class="ld" style="background:#85B7EB"></div>Khoảng [l,r]</div>
+    <div class="li"><div class="ld" style="background:#F0997B"></div>Mid</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Tìm thấy</div>
+  </div>
+</div>
+
+<!-- SELECTION SORT -->
+<div id="p-selection" class="page">
+  <div class="ph"><h1>Selection Sort – Chọn Trực Tiếp</h1>
+  <div class="tags"><span class="tag tag-o">O(N²)</span><span class="tag tag-t">Sắp xếp</span></div>
+  <p>Mỗi lượt tìm phần tử nhỏ nhất từ phần chưa sắp xếp rồi đưa vào vị trí đúng.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Đúng N-1 lần hoán vị — ít hơn Bubble Sort.</li>
+    <li>Không ổn định: thứ tự phần tử bằng nhau có thể đổi chỗ.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">SelectionSort</span>(a[], n):
+  <span class="kw">for</span> i = <span class="num">0</span> to n-<span class="num">2</span>:
+    vt = i
+    <span class="kw">for</span> j = i+<span class="num">1</span> to n-<span class="num">1</span>:
+      <span class="kw">if</span> a[j] &lt; a[vt]: vt = j
+    <span class="fn">HoanVi</span>(a[i], a[vt])</div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng:</label><input class="varr" id="sl-a" value="64, 25, 12, 22, 11, 90, 45, 33"/>
+      <button class="btn btn-play" onclick="runSort('sl')">▶ PLAY</button>
+      <button class="btn btn-rst" onclick="resetSort('sl')">RESET</button>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="sl-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="bars" id="sl-bars"></div>
+      <div class="sbar" id="sl-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#85B7EB"></div>Chưa sắp</div>
+    <div class="li"><div class="ld" style="background:#EF9F27"></div>So sánh</div>
+    <div class="li"><div class="ld" style="background:#F0997B"></div>Min hiện tại</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Đã sắp</div>
+  </div>
+  <hr class="divider"/>
+  <div class="slbl">Độ phức tạp</div>
+  <table class="ctbl"><tr><th>Trường hợp</th><th>Thời gian</th><th>Đánh giá</th></tr>
+  <tr><td>Tốt nhất / Xấu nhất</td><td class="mono">O(N²)</td><td><span class="bb">Chậm</span></td></tr>
+  <tr><td>Bộ nhớ</td><td class="mono">O(1)</td><td><span class="bg">Tốt</span></td></tr></table>
+</div>
+
+<!-- INSERTION SORT -->
+<div id="p-insertion" class="page">
+  <div class="ph"><h1>Insertion Sort – Chèn Trực Tiếp</h1>
+  <div class="tags"><span class="tag tag-o">O(N²)</span><span class="tag tag-t">Sắp xếp</span></div>
+  <p>Chèn từng phần tử vào đúng vị trí trong đoạn đã sắp xếp — như sắp bài trong tay.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Mảng gần sắp xếp → gần O(N), rất tốt trong thực tế.</li>
+    <li>Ổn định: giữ thứ tự phần tử bằng nhau.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">InsertionSort</span>(a[], n):
+  <span class="kw">for</span> i = <span class="num">1</span> to n-<span class="num">1</span>:
+    pos = i; x = a[i]
+    <span class="kw">while</span> pos &gt; <span class="num">0</span> <span class="kw">and</span> a[pos-<span class="num">1</span>] &gt; x:
+      a[pos] = a[pos-<span class="num">1</span>]   <span class="cm">// dịch phải</span>
+      pos--
+    a[pos] = x             <span class="cm">// chèn vào đúng chỗ</span></div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng:</label><input class="varr" id="is-a" value="64, 25, 12, 22, 11, 90, 45, 33"/>
+      <button class="btn btn-play" onclick="runSort('is')">▶ PLAY</button>
+      <button class="btn btn-rst" onclick="resetSort('is')">RESET</button>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="is-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="bars" id="is-bars"></div>
+      <div class="sbar" id="is-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#85B7EB"></div>Chưa xét</div>
+    <div class="li"><div class="ld" style="background:#EF9F27"></div>Đang chèn</div>
+    <div class="li"><div class="ld" style="background:#F0997B"></div>Dịch phải</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Đã sắp</div>
+  </div>
+  <hr class="divider"/>
+  <table class="ctbl"><tr><th>Trường hợp</th><th>Thời gian</th><th>Đánh giá</th></tr>
+  <tr><td>Tốt nhất (đã sắp)</td><td class="mono">O(N)</td><td><span class="bg">Rất tốt</span></td></tr>
+  <tr><td>Trung bình / Xấu nhất</td><td class="mono">O(N²)</td><td><span class="bb">Chậm</span></td></tr></table>
+</div>
+
+<!-- BUBBLE SORT -->
+<div id="p-bubble" class="page">
+  <div class="ph"><h1>Bubble Sort – Nổi Bọt</h1>
+  <div class="tags"><span class="tag tag-o">O(N²)</span><span class="tag tag-t">Sắp xếp</span></div>
+  <p>Mỗi lượt duyệt từ phải sang trái, hoán vị hai phần tử kề sai thứ tự. Phần tử lớn "nổi" về cuối.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Sau lượt i, phần tử lớn thứ i+1 đã về đúng vị trí cuối mảng.</li>
+    <li>Tối ưu: dừng sớm nếu không có hoán vị nào trong một lượt.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">BubbleSort</span>(a[], n):
+  <span class="kw">for</span> i = <span class="num">0</span> to n-<span class="num">2</span>:
+    <span class="kw">for</span> j = n-<span class="num">1</span> downto i+<span class="num">1</span>:
+      <span class="kw">if</span> a[j] &lt; a[j-<span class="num">1</span>]:
+        <span class="fn">HoanVi</span>(a[j], a[j-<span class="num">1</span>])</div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng:</label><input class="varr" id="bb-a" value="64, 25, 12, 22, 11, 90, 45, 33"/>
+      <button class="btn btn-play" onclick="runSort('bb')">▶ PLAY</button>
+      <button class="btn btn-rst" onclick="resetSort('bb')">RESET</button>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="bb-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="bars" id="bb-bars"></div>
+      <div class="sbar" id="bb-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#85B7EB"></div>Chưa sắp</div>
+    <div class="li"><div class="ld" style="background:#EF9F27"></div>So sánh</div>
+    <div class="li"><div class="ld" style="background:#F0997B"></div>Hoán vị</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Đã sắp</div>
+  </div>
+</div>
+
+<!-- QUICK SORT -->
+<div id="p-quick" class="page">
+  <div class="ph"><h1>Quick Sort – Sắp Xếp Nhanh</h1>
+  <div class="tags"><span class="tag tag-o">O(N log N) TB</span><span class="tag tag-t">Chia để trị</span></div>
+  <p>Chọn pivot, phân hoạch trái &lt; pivot &lt; phải, đệ quy hai nửa. Nhanh nhất trong thực tế.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Pivot lấy ở giữa <code>a[(l+r)/2]</code> — như code gốc trong file .cpp.</li>
+    <li>Xấu nhất O(N²) khi mảng đã sắp và pivot luôn là min/max.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">QuickSort</span>(a[], l, r):
+  i=l; j=r; x=a[(l+r)/<span class="num">2</span>]   <span class="cm">// pivot giữa</span>
+  <span class="kw">do</span>:
+    <span class="kw">while</span> a[i] &lt; x: i++
+    <span class="kw">while</span> a[j] &gt; x: j--
+    <span class="kw">if</span> i &lt;= j: <span class="fn">HoanVi</span>(a[i],a[j]); i++; j--
+  <span class="kw">while</span> i &lt;= j
+  <span class="kw">if</span> l &lt; j: <span class="fn">QuickSort</span>(a,l,j)
+  <span class="kw">if</span> i &lt; r: <span class="fn">QuickSort</span>(a,i,r)</div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng:</label><input class="varr" id="qk-a" value="64, 25, 12, 22, 11, 90, 45, 33"/>
+      <button class="btn btn-play" onclick="runSort('qk')">▶ PLAY</button>
+      <button class="btn btn-rst" onclick="resetSort('qk')">RESET</button>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="qk-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="bars" id="qk-bars"></div>
+      <div class="sbar" id="qk-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#85B7EB"></div>Chưa xét</div>
+    <div class="li"><div class="ld" style="background:#D4537E"></div>Pivot</div>
+    <div class="li"><div class="ld" style="background:#EF9F27"></div>So sánh</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Đã sắp</div>
+  </div>
+  <hr class="divider"/>
+  <table class="ctbl"><tr><th>Trường hợp</th><th>Thời gian</th><th>Đánh giá</th></tr>
+  <tr><td>Tốt nhất / Trung bình</td><td class="mono">O(N log N)</td><td><span class="bg">Rất nhanh</span></td></tr>
+  <tr><td>Xấu nhất</td><td class="mono">O(N²)</td><td><span class="ba">Cần chú ý</span></td></tr></table>
+</div>
+
+<!-- HEAP SORT -->
+<div id="p-heap" class="page">
+  <div class="ph"><h1>Heap Sort – Vun Đống</h1>
+  <div class="tags"><span class="tag tag-o">O(N log N)</span><span class="tag tag-t">Sắp xếp · Heap</span></div>
+  <p>Xây max-heap, liên tục trích phần tử lớn nhất ra cuối. Đảm bảo O(N log N) mọi trường hợp.</p></div>
+  <div class="tip"><div class="tip-title">Điểm quan sát</div><ul>
+    <li>Giai đoạn 1 — Xây heap từ node n/2-1 về 0: O(N).</li>
+    <li>Giai đoạn 2 — Đổi gốc với cuối rồi Shift lại: O(log N) mỗi bước.</li>
+  </ul></div>
+  <div class="slbl">Pseudocode (từ file .cpp)</div>
+  <div class="pseudo"><span class="fn">HeapSort</span>(a[], n):
+  <span class="cm">// Giai đoạn 1: xây heap</span>
+  <span class="kw">for</span> k = n/<span class="num">2</span>-<span class="num">1</span> downto <span class="num">0</span>: <span class="fn">Shift</span>(a,k,n-<span class="num">1</span>)
+  <span class="cm">// Giai đoạn 2: sắp xếp</span>
+  <span class="kw">for</span> r = n-<span class="num">1</span> downto <span class="num">1</span>:
+    <span class="fn">HoanVi</span>(a[<span class="num">0</span>],a[r]); <span class="fn">Shift</span>(a,<span class="num">0</span>,r-<span class="num">1</span>)</div>
+  <div class="slbl">Trực quan hóa</div>
+  <div class="vpanel">
+    <div class="vtb">
+      <label>Mảng:</label><input class="varr" id="hp-a" value="64, 25, 12, 22, 11, 90, 45, 33"/>
+      <button class="btn btn-play" onclick="runSort('hp')">▶ PLAY</button>
+      <button class="btn btn-rst" onclick="resetSort('hp')">RESET</button>
+      <div class="spd"><span>Tốc độ:</span><input type="range" id="hp-spd" min="1" max="5" value="3" step="1"/></div>
+    </div>
+    <div class="vcanvas">
+      <div class="bars" id="hp-bars"></div>
+      <div class="sbar" id="hp-st">Nhấn PLAY để bắt đầu.</div>
+    </div>
+  </div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#85B7EB"></div>Heap</div>
+    <div class="li"><div class="ld" style="background:#D4537E"></div>Gốc heap</div>
+    <div class="li"><div class="ld" style="background:#EF9F27"></div>Đang vun</div>
+    <div class="li"><div class="ld" style="background:#5DCAA5"></div>Đã sắp</div>
+  </div>
+  <hr class="divider"/>
+  <table class="ctbl"><tr><th>Trường hợp</th><th>Thời gian</th><th>Đánh giá</th></tr>
+  <tr><td>Mọi trường hợp</td><td class="mono">O(N log N)</td><td><span class="bg">Bảo đảm</span></td></tr>
+  <tr><td>Bộ nhớ</td><td class="mono">O(1)</td><td><span class="bg">Tốt</span></td></tr></table>
+</div>
+
+<!-- BÀI TẬP – CHẠY CODE -->
+<div id="p-baitap" class="page">
+  <div class="ph"><h1>Chạy Code C++ – Bài Tập Chương 2</h1>
+  <p>Nhập mảng và giá trị x, nhấn nút để chạy từng bài tập theo sách — kết quả hiện ngay bên phải như console C++.</p></div>
+
+  <div class="slbl">Nhập dữ liệu</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end">
+    <div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">Mảng a[]:</div>
+      <input class="varr" id="bt-arr" value="5, 3, 8, 3, 1, 9, 3, 7, 2, 5" style="width:260px"/>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">Giá trị x:</div>
+      <input type="number" id="bt-x" value="3" style="width:70px;font-family:'Consolas',monospace;font-size:13px;border:1px solid var(--gray-100);background:var(--surface);color:var(--tx);padding:5px 8px;border-radius:7px;outline:none"/>
+    </div>
+    <button class="btn btn-rst" onclick="clearOutput()">🗑 Xóa output</button>
+  </div>
+
+  <!-- BT1 -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>BT1 – Tim kiem tren mang nguyen (TimTuyenTinh)</span>
+      <button class="btn btn-run rbtn" onclick="runBT1()">▶ Chạy</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="ck">int</span> <span class="cf">BT1_TimXDauTien</span>(<span class="ck">const int</span> a[], <span class="ck">int</span> n, <span class="ck">int</span> x) {
+    <span class="ck">int</span> i = <span class="cn">0</span>;
+    <span class="ck">while</span> (a[i] != x && i &lt; n) i++;
+    <span class="ck">if</span> (i &lt; n) <span class="ck">return</span> i;
+    <span class="ck">return</span> <span class="cn">-1</span>;
+}</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-bt1">Nhấn Chạy...</div></div>
+    </div>
+  </div>
+
+  <!-- BT2 -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>BT2 – Tim vi tri phan tu lon nhat</span>
+      <button class="btn btn-run rbtn" onclick="runBT2()">▶ Chạy</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="ck">int</span> <span class="cf">BT2_TimMax</span>(<span class="ck">const int</span> a[], <span class="ck">int</span> n) {
+    <span class="ck">int</span> vtmax = <span class="cn">0</span>;
+    <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">1</span>; i &lt; n; i++)
+        <span class="ck">if</span> (a[i] &gt; a[vtmax]) vtmax = i;
+    <span class="ck">return</span> vtmax;
+}</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-bt2">Nhấn Chạy...</div></div>
+    </div>
+  </div>
+
+  <!-- BT3 -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>BT3 – Dem so lan xuat hien cua x</span>
+      <button class="btn btn-run rbtn" onclick="runBT3()">▶ Chạy</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="ck">int</span> <span class="cf">BT3_DemXuatHien</span>(<span class="ck">const int</span> a[], <span class="ck">int</span> n, <span class="ck">int</span> x) {
+    <span class="ck">int</span> dem = <span class="cn">0</span>;
+    <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i &lt; n; i++)
+        <span class="ck">if</span> (a[i] == x) dem++;
+    <span class="ck">return</span> dem;
+}</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-bt3">Nhấn Chạy...</div></div>
+    </div>
+  </div>
+
+  <!-- BT4 -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>BT4 – Sap xep tang + Tim nhi phan</span>
+      <button class="btn btn-run rbtn" onclick="runBT4()">▶ Chạy</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="cc">// Sap xep mang roi tim x bang nhi phan</span>
+<span class="cf">QuickSort</span>(a, <span class="cn">0</span>, n-<span class="cn">1</span>);
+<span class="ck">int</span> vt = <span class="cf">TimNhiPhan</span>(a, n, x);
+<span class="ck">if</span> (vt == <span class="cn">-1</span>) cout &lt;&lt; x &lt;&lt; <span class="cs">" khong co trong mang"</span>;
+<span class="ck">else</span> cout &lt;&lt; x &lt;&lt; <span class="cs">" o vi tri "</span> &lt;&lt; vt;</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-bt4">Nhấn Chạy...</div></div>
+    </div>
+  </div>
+
+  <!-- BT5 -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>BT5 – Sap xep giam dan (Bubble Sort)</span>
+      <button class="btn btn-run rbtn" onclick="runBT5()">▶ Chạy</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="ck">void</span> <span class="cf">BT5_BubbleSortGiam</span>(<span class="ck">int</span> a[], <span class="ck">int</span> n) {
+    <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i &lt; n-<span class="cn">1</span>; i++)
+        <span class="ck">for</span> (<span class="ck">int</span> j = n-<span class="cn">1</span>; j &gt; i; j--)
+            <span class="ck">if</span> (a[j] &gt; a[j-<span class="cn">1</span>])
+                <span class="cf">HoanVi</span>(a[j], a[j-<span class="cn">1</span>]);
+}</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-bt5">Nhấn Chạy...</div></div>
+    </div>
+  </div>
+
+  <!-- BT6 -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>BT6 – Phan tu xuat hien nhieu nhat</span>
+      <button class="btn btn-run rbtn" onclick="runBT6()">▶ Chạy</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="ck">void</span> <span class="cf">BT6_PhanTuXuatHienNhieuNhat</span>(<span class="ck">int</span> a[], <span class="ck">int</span> n) {
+    <span class="ck">int</span> maxDem = <span class="cn">0</span>, maxVal = a[<span class="cn">0</span>];
+    <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i &lt; n; i++) {
+        <span class="ck">int</span> dem = <span class="cn">0</span>;
+        <span class="ck">for</span> (<span class="ck">int</span> j = <span class="cn">0</span>; j &lt; n; j++)
+            <span class="ck">if</span> (a[j] == a[i]) dem++;
+        <span class="ck">if</span> (dem &gt; maxDem) { maxDem=dem; maxVal=a[i]; }
+    }
+    cout &lt;&lt; maxVal &lt;&lt; <span class="cs">" (xuat hien "</span> &lt;&lt; maxDem &lt;&lt; <span class="cs">" lan)"</span>;
+}</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-bt6">Nhấn Chạy...</div></div>
+    </div>
+  </div>
+
+  <!-- DEMO SẮP XẾP ALL -->
+  <div class="runner">
+    <div class="runner-head">
+      <span>Demo – Chạy tất cả 5 giải thuật sắp xếp</span>
+      <button class="btn btn-run rbtn" onclick="runAllSort()">▶ Chạy tất cả</button>
+    </div>
+    <div class="runner-body">
+      <div class="code-pane"><span class="cc">// DemoSapXep() từ file .cpp</span>
+<span class="cf">SelectionSort</span>(a, n); <span class="cc">// In ket qua</span>
+<span class="cf">InsertionSort</span>(a, n);
+<span class="cf">BubbleSort</span>(a, n);
+<span class="cf">QuickSort</span>(a, <span class="cn">0</span>, n-<span class="cn">1</span>);
+<span class="cf">HeapSort</span>(a, n);</div>
+      <div class="output-pane"><div class="output-head">Output</div><div class="output-body" id="out-all">Nhấn Chạy tất cả...</div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('on'));
+  document.getElementById('p-' + id).classList.add('on');
+  if (el) el.classList.add('on');
+  else document.querySelectorAll('.sb-item').forEach(s => {
+    if (s.getAttribute('onclick') && s.getAttribute('onclick').includes("'" + id + "'")) s.classList.add('on');
+  });
+  running = false;
+  // init visualizers
+  const mp = { linear:'ln', binary:'bn', selection:'sl', insertion:'is', bubble:'bb', quick:'qk', heap:'hp' };
+  const p = mp[id];
+  if (p && ['sl','is','bb','qk','hp'].includes(p)) renderBars(p, parseA(p + '-a'));
+  if (p === 'ln') renderCells('ln-cells', parseA('ln-a'), -1, -1);
+  if (p === 'bn') { const a = parseA('bn-a'); renderBCells('bn-cells', a, 0, a.length-1, -1, -1); }
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function parseA(id) {
+  return document.getElementById(id).value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+}
+function delay(sid) { return [750, 500, 320, 180, 80][parseInt(document.getElementById(sid).value) - 1]; }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+let running = false;
+async function stop() { running = false; await sleep(55); }
+function st(id, html) { const e = document.getElementById(id); if (e) e.innerHTML = html; }
+function fmtArr(a) { return '[ ' + a.join(', ') + ' ]'; }
+
+// ══════════════════════════════════════════
+//  BARS
+// ══════════════════════════════════════════
+function renderBars(p, arr, cmp=[], swp=[], sf=9999, pv=-1) {
+  const c = document.getElementById(p + '-bars'); if (!c) return;
+  const mx = Math.max(...arr, 1);
+  c.innerHTML = arr.map((v, i) => {
+    let cls = 'b-d';
+    if (i >= sf) cls = 'b-ok';
+    if (swp.includes(i)) cls = 'b-s';
+    else if (i === pv) cls = 'b-pv';
+    else if (cmp.includes(i)) cls = 'b-c';
+    const h = Math.max(12, Math.round(v / mx * 115));
+    return `<div class="bw"><div class="bar ${cls}" style="height:${h}px"></div><div class="bl">${v}</div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  SORT ENGINE
+// ══════════════════════════════════════════
+const SC = {
+  sl:{a:'sl-a',s:'sl-spd',st:'sl-st'}, is:{a:'is-a',s:'is-spd',st:'is-st'},
+  bb:{a:'bb-a',s:'bb-spd',st:'bb-st'}, qk:{a:'qk-a',s:'qk-spd',st:'qk-st'},
+  hp:{a:'hp-a',s:'hp-spd',st:'hp-st'}
+};
+function resetSort(p) { running=false; renderBars(p, parseA(SC[p].a)); st(SC[p].st,'Nhấn PLAY để bắt đầu.'); }
+async function runSort(p) {
+  await stop(); running=true;
+  let a = parseA(SC[p].a);
+  const {s, st:stId} = SC[p];
+  if (p==='sl') await aSel(a,p,s,stId);
+  else if(p==='is') await aIns(a,p,s,stId);
+  else if(p==='bb') await aBub(a,p,s,stId);
+  else if(p==='qk') await aQk(a,p,s,stId);
+  else if(p==='hp') await aHp(a,p,s,stId);
+}
+
+async function aSel(a,p,s,stId){
+  for(let i=0;i<a.length-1&&running;i++){
+    let vt=i;
+    for(let j=i+1;j<a.length&&running;j++){
+      renderBars(p,a,[j,vt],[],i); st(stId,`Lượt ${i+1}: a[${j}]=${a[j]} vs min=a[${vt}]=${a[vt]}`);
+      await sleep(delay(s)); if(a[j]<a[vt]) vt=j;
+    }
+    if(vt!==i){renderBars(p,a,[],[i,vt],i);st(stId,`Hoán vị a[${i}]=${a[i]} ↔ a[${vt}]=${a[vt]}`);await sleep(delay(s));[a[i],a[vt]]=[a[vt],a[i]];}
+    renderBars(p,a,[],[],i+1); await sleep(delay(s)*.4);
+  }
+  renderBars(p,a,[],[],0); st(stId,'<span class="ok">✓ Hoàn thành! '+fmtArr(a)+'</span>');
+}
+
+async function aIns(a,p,s,stId){
+  for(let i=1;i<a.length&&running;i++){
+    let x=a[i],pos=i;
+    renderBars(p,a,[i],[],i); st(stId,`Chèn a[${i}]=${x}`); await sleep(delay(s));
+    while(pos>0&&a[pos-1]>x&&running){
+      renderBars(p,a,[pos],[pos-1],i); st(stId,`a[${pos-1}]=${a[pos-1]}>${x} → dịch phải`);
+      a[pos]=a[pos-1]; pos--; renderBars(p,a,[pos],[],i); await sleep(delay(s));
+    }
+    a[pos]=x; renderBars(p,a,[],[],i+1); await sleep(delay(s)*.35);
+  }
+  renderBars(p,a,[],[],0); st(stId,'<span class="ok">✓ Hoàn thành! '+fmtArr(a)+'</span>');
+}
+
+async function aBub(a,p,s,stId){
+  for(let i=0;i<a.length-1&&running;i++){
+    for(let j=a.length-1;j>i&&running;j--){
+      renderBars(p,a,[j,j-1],[],a.length-i); st(stId,`So sánh a[${j}]=${a[j]} và a[${j-1}]=${a[j-1]}`);
+      await sleep(delay(s));
+      if(a[j]<a[j-1]){renderBars(p,a,[],[j,j-1],a.length-i);st(stId,`Hoán vị!`);[a[j],a[j-1]]=[a[j-1],a[j]];await sleep(delay(s)*.6);}
+    }
+    renderBars(p,a,[],[],a.length-i-1); await sleep(delay(s)*.25);
+  }
+  renderBars(p,a,[],[],0); st(stId,'<span class="ok">✓ Hoàn thành! '+fmtArr(a)+'</span>');
+}
+
+let qSteps=[];
+function qCol(a,l,r){
+  if(l>=r)return;
+  let i=l,j=r,pv=Math.floor((l+r)/2),x=a[pv];
+  qSteps.push({t:'pv',arr:[...a],pv,l,r});
+  do{
+    while(a[i]<x)i++; while(a[j]>x)j--;
+    if(i<=j){qSteps.push({t:'cm',arr:[...a],i,j,pv});if(i!==j)[a[i],a[j]]=[a[j],a[i]];qSteps.push({t:'sw',arr:[...a],i,j});i++;j--;}
+  }while(i<=j);
+  if(l<j)qCol(a,l,j); if(i<r)qCol(a,i,r);
+}
+async function aQk(a,p,s,stId){
+  qSteps=[]; qCol([...a],0,a.length-1);
+  for(let step of qSteps){
+    if(!running)break;
+    if(step.t==='pv'){renderBars(p,step.arr,[],[],step.arr.length,step.pv);st(stId,`Pivot=a[${step.pv}]=${step.arr[step.pv]}, phân hoạch [${step.l}..${step.r}]`);}
+    else if(step.t==='cm'){renderBars(p,step.arr,[step.i,step.j],[],step.arr.length,step.pv);st(stId,`So sánh a[${step.i}]=${step.arr[step.i]} và a[${step.j}]=${step.arr[step.j]}`);}
+    else{renderBars(p,step.arr,[],[step.i,step.j],step.arr.length);st(stId,`Hoán vị a[${step.i}] ↔ a[${step.j}]`);}
+    await sleep(delay(s));
+  }
+  const sorted=[...a].sort((x,y)=>x-y);
+  renderBars(p,sorted,[],[],0); st(stId,'<span class="ok">✓ Hoàn thành! '+fmtArr(sorted)+'</span>');
+}
+
+function shift(a,l,r){let i=l,j=2*i+1,x=a[i];while(j<=r){if(j<r&&a[j]<a[j+1])j++;if(x>=a[j])break;a[i]=a[j];i=j;j=2*i+1;}a[i]=x;}
+async function aHp(a,p,s,stId){
+  const n=a.length;
+  for(let k=Math.floor(n/2)-1;k>=0&&running;k--){
+    st(stId,`Xây heap: vun node ${k}`);renderBars(p,a,[k],[],n,0);await sleep(delay(s));shift(a,k,n-1);renderBars(p,a,[],[],n,0);await sleep(delay(s)*.4);
+  }
+  for(let r=n-1;r>0&&running;r--){
+    renderBars(p,a,[],[0,r],r+1,0);st(stId,`Đổi gốc a[0]=${a[0]} ↔ a[${r}]=${a[r]}`);await sleep(delay(s));
+    [a[0],a[r]]=[a[r],a[0]];shift(a,0,r-1);renderBars(p,a,[0],[],r,0);await sleep(delay(s));
+  }
+  renderBars(p,a,[],[],0); st(stId,'<span class="ok">✓ Hoàn thành! '+fmtArr(a)+'</span>');
+}
+
+// ══════════════════════════════════════════
+//  SEARCH CELLS
+// ══════════════════════════════════════════
+function renderCells(id, arr, chk, fnd){
+  const c=document.getElementById(id); if(!c)return;
+  c.innerHTML=arr.map((v,i)=>{
+    let cls='';
+    if(fnd===i)cls='c-ok'; else if(chk===i)cls='c-chk';
+    return`<div class="cell ${cls}">${v}</div>`;
+  }).join('');
+}
+function renderBCells(id,arr,l,r,mid,fnd){
+  const c=document.getElementById(id); if(!c)return;
+  c.innerHTML=arr.map((v,i)=>{
+    let cls='c-out';
+    if(fnd===i)cls='c-ok'; else if(i===mid)cls='c-mid'; else if(i>=l&&i<=r)cls='c-rng';
+    return`<div class="cell ${cls}">${v}</div>`;
+  }).join('');
+}
+
+async function runLinear(){
+  await stop(); running=true;
+  const arr=parseA('ln-a'), x=parseInt(document.getElementById('ln-x').value);
+  for(let i=0;i<arr.length&&running;i++){
+    renderCells('ln-cells',arr,i,-1);
+    st('ln-st',`Kiểm tra vị trí <span class="hl">${i}</span>: a[${i}]=${arr[i]} ${arr[i]===x?'= '+x+' ✓':'≠ '+x}`);
+    await sleep(delay('ln-spd'));
+    if(arr[i]===x){renderCells('ln-cells',arr,-1,i);st('ln-st',`<span class="ok">✓ Tìm thấy ${x} tại vị trí ${i}!</span>`);return;}
+  }
+  if(running){renderCells('ln-cells',arr,-1,-1);st('ln-st',`<span class="err">✗ Không tìm thấy ${x}.</span>`);}
+}
+function resetLinear(){running=false;renderCells('ln-cells',parseA('ln-a'),-1,-1);st('ln-st','Nhấn PLAY để bắt đầu.');}
+
+async function runBinary(){
+  await stop(); running=true;
+  const arr=parseA('bn-a'), x=parseInt(document.getElementById('bn-x').value);
+  let l=0, r=arr.length-1, step=0;
+  while(l<=r&&running){
+    step++; const m=Math.floor((l+r)/2);
+    renderBCells('bn-cells',arr,l,r,m,-1);
+    st('bn-st',`Bước ${step}: l=${l} r=${r} mid=${m} → a[mid]=${arr[m]} ${arr[m]===x?'= '+x:arr[m]>x?'> '+x+' → tìm trái':'< '+x+' → tìm phải'}`);
+    await sleep(delay('bn-spd'));
+    if(arr[m]===x){renderBCells('bn-cells',arr,l,r,-1,m);st('bn-st',`<span class="ok">✓ Tìm thấy ${x} tại vị trí ${m} sau ${step} bước!</span>`);return;}
+    if(arr[m]>x)r=m-1; else l=m+1;
+    await sleep(delay('bn-spd')*.25);
+  }
+  if(running){renderBCells('bn-cells',arr,-1,-1,-1,-1);st('bn-st',`<span class="err">✗ Không tìm thấy ${x}.</span>`);}
+}
+function resetBinary(){running=false;const a=parseA('bn-a');renderBCells('bn-cells',a,0,a.length-1,-1,-1);st('bn-st','Nhấn PLAY để bắt đầu.');}
+
+// ══════════════════════════════════════════
+//  BÀI TẬP – CHẠY CODE (JavaScript dịch y từ C++)
+// ══════════════════════════════════════════
+function getBTArr(){ return parseA('bt-arr'); }
+function getBTX(){ return parseInt(document.getElementById('bt-x').value)||0; }
+function clearOutput(){
+  ['bt1','bt2','bt3','bt4','bt5','bt6','all'].forEach(id=>st('out-'+id,'Nhấn Chạy...'));
+}
+
+// BT1
+function runBT1(){
+  const a=getBTArr(), x=getBTX(), n=a.length;
+  let i=0;
+  while(i<n && a[i]!==x) i++;
+  const vt = i<n ? i : -1;
+  const lines=[
+    `Mảng: ${fmtArr(a)}`,
+    `Tìm x = ${x}`,
+    `---`,
+    vt===-1 ? `Không tìm thấy ${x}` : `Tìm thấy ${x} tại vị trí ${vt}`
+  ];
+  st('out-bt1', lines.join('\n'));
+}
+
+// BT2
+function runBT2(){
+  const a=getBTArr(), n=a.length;
+  let vtmax=0;
+  for(let i=1;i<n;i++) if(a[i]>a[vtmax]) vtmax=i;
+  st('out-bt2',[`Mảng: ${fmtArr(a)}`,`---`,`Phần tử lớn nhất: ${a[vtmax]}`,`Tại vị trí: ${vtmax}`].join('\n'));
+}
+
+// BT3
+function runBT3(){
+  const a=getBTArr(), x=getBTX(), n=a.length;
+  let dem=0;
+  for(let i=0;i<n;i++) if(a[i]===x) dem++;
+  st('out-bt3',[`Mảng: ${fmtArr(a)}`,`Tìm x = ${x}`,`---`,`${x} xuất hiện ${dem} lần`].join('\n'));
+}
+
+// BT4
+function runBT4(){
+  const a=[...getBTArr()], x=getBTX(), n=a.length;
+  // QuickSort
+  function qs(arr,l,r){
+    let i=l,j=r,pv=arr[Math.floor((l+r)/2)];
+    do{while(arr[i]<pv)i++;while(arr[j]>pv)j--;if(i<=j){[arr[i],arr[j]]=[arr[j],arr[i]];i++;j--;}}while(i<=j);
+    if(l<j)qs(arr,l,j);if(i<r)qs(arr,i,r);
+  }
+  qs(a,0,n-1);
+  // Binary Search
+  let l=0,r=n-1,vt=-1;
+  while(l<=r){const m=Math.floor((l+r)/2);if(a[m]===x){vt=m;break;}else if(a[m]>x)r=m-1;else l=m+1;}
+  st('out-bt4',[
+    `Mảng gốc: ${fmtArr(getBTArr())}`,
+    `Sau QuickSort: ${fmtArr(a)}`,
+    `Tìm x = ${x}`,`---`,
+    vt===-1?`${x} không có trong mảng`:`${x} ở vị trí ${vt} (sau sắp xếp)`
+  ].join('\n'));
+}
+
+// BT5
+function runBT5(){
+  const a=[...getBTArr()], n=a.length;
+  for(let i=0;i<n-1;i++) for(let j=n-1;j>i;j--) if(a[j]>a[j-1])[a[j],a[j-1]]=[a[j-1],a[j]];
+  st('out-bt5',[`Mảng gốc: ${fmtArr(getBTArr())}`,`---`,`Sắp xếp giảm dần:`,fmtArr(a)].join('\n'));
+}
+
+// BT6
+function runBT6(){
+  const a=getBTArr(), n=a.length;
+  let maxDem=0, maxVal=a[0];
+  for(let i=0;i<n;i++){
+    let dem=0;
+    for(let j=0;j<n;j++) if(a[j]===a[i]) dem++;
+    if(dem>maxDem){maxDem=dem;maxVal=a[i];}
+  }
+  st('out-bt6',[`Mảng: ${fmtArr(a)}`,`---`,`Phần tử xuất hiện nhiều nhất: ${maxVal}`,`Số lần: ${maxDem}`].join('\n'));
+}
+
+// ALL SORT
+function runAllSort(){
+  const goc=getBTArr();
+  function cp(a){return[...a];}
+  function qs(a,l,r){let i=l,j=r,pv=a[Math.floor((l+r)/2)];do{while(a[i]<pv)i++;while(a[j]>pv)j--;if(i<=j){[a[i],a[j]]=[a[j],a[i]];i++;j--;}}while(i<=j);if(l<j)qs(a,l,j);if(i<r)qs(a,i,r);}
+  function sh(a,l,r){let i=l,j=2*i+1,x=a[i];while(j<=r){if(j<r&&a[j]<a[j+1])j++;if(x>=a[j])break;a[i]=a[j];i=j;j=2*i+1;}a[i]=x;}
+
+  let a1=cp(goc); for(let i=0;i<a1.length-1;i++){let vt=i;for(let j=i+1;j<a1.length;j++)if(a1[j]<a1[vt])vt=j;[a1[i],a1[vt]]=[a1[vt],a1[i]];}
+  let a2=cp(goc); for(let i=1;i<a2.length;i++){let x=a2[i],pos=i;while(pos>0&&a2[pos-1]>x){a2[pos]=a2[pos-1];pos--;}a2[pos]=x;}
+  let a3=cp(goc); for(let i=0;i<a3.length-1;i++)for(let j=a3.length-1;j>i;j--)if(a3[j]<a3[j-1])[a3[j],a3[j-1]]=[a3[j-1],a3[j]];
+  let a4=cp(goc); qs(a4,0,a4.length-1);
+  let a5=cp(goc); const n=a5.length; for(let k=Math.floor(n/2)-1;k>=0;k--)sh(a5,k,n-1); for(let r=n-1;r>0;r--){[a5[0],a5[r]]=[a5[r],a5[0]];sh(a5,0,r-1);}
+
+  st('out-all',[
+    `Mảng gốc  : ${fmtArr(goc)}`,`---`,
+    `Selection : ${fmtArr(a1)}`,
+    `Insertion : ${fmtArr(a2)}`,
+    `Bubble    : ${fmtArr(a3)}`,
+    `Quick     : ${fmtArr(a4)}`,
+    `Heap      : ${fmtArr(a5)}`
+  ].join('\n'));
+}
+
+// Init
+nav('home', document.querySelector('.sb-item'));
+</script>
+</body>
+</html>
