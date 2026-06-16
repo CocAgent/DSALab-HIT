@@ -1,0 +1,17 @@
+body {
+    font-family: Arial;
+    margin: 30px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    background: #333;
+    color: white;
+}
+
+a {
+    text-decoration: none;
+}
