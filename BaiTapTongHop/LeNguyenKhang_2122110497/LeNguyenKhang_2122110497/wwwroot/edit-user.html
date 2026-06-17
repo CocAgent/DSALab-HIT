@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Sửa Người Dùng</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+    <div class="container p-t-100">
+        <div class="card p-4 shadow-sm">
+            <h3 class="ltext-103 cl5 p-b-20">CẬP NHẬT TÀI KHOẢN</h3>
+
+            <div class="form-group p-b-15">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="editUsername" class="form-control" readonly>
+            </div>
+            <div class="form-group p-b-15">
+                <label>Họ và tên</label>
+                <input type="text" id="editFullName" class="form-control">
+            </div>
+            <div class="form-group p-b-15">
+                <label>Quyền hạn</label>
+                <select id="editRole" class="form-control">
+                    <option value="Customer">Customer</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <button class="btn btn-success" onclick="updateUser()">Lưu thay đổi</button>
+            <a href="admin.html" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        async function loadUserData() {
+            const response = await fetch(`https://localhost:7064/api/User/${userId}`);
+            const u = await response.json();
+            document.getElementById('editUsername').value = u.username;
+            document.getElementById('editFullName').value = u.fullName;
+            document.getElementById('editRole').value = u.role;
+            // Lưu lại pass cũ để gửi đi (vì trang này không đổi pass)
+            window.oldPassword = u.password;
+        }
+        loadUserData();
+
+        async function updateUser() {
+            const userData = {
+                Id: parseInt(userId),
+                Username: document.getElementById('editUsername').value,
+                FullName: document.getElementById('editFullName').value,
+                Role: document.getElementById('editRole').value,
+                Password: window.oldPassword
+            };
+
+            const response = await fetch(`https://localhost:7064/api/User/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (response.ok) {
+                alert("Cập nhật thành công!");
+                window.location.href = "admin.html";
+            }
+        }
+    </script>
+</body>
+</html>

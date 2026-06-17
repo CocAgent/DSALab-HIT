@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Đăng ký - Coza Store</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/util.css">
+</head>
+<body class="animsition">
+    <div class="container p-t-100">
+        <div class="card p-4 shadow-sm mx-auto" style="max-width: 450px; border-radius: 15px;">
+            <h3 class="ltext-103 cl5 p-b-30 text-center">ĐĂNG KÝ</h3>
+
+            <div class="m-b-20">
+                <label class="stext-110 cl2">Họ và tên</label>
+                <input type="text" id="regFullName" class="form-control" placeholder="Nhập tên của Khang">
+            </div>
+
+            <div class="m-b-20">
+                <label class="stext-110 cl2">Tên đăng nhập</label>
+                <input type="text" id="regUser" class="form-control" placeholder="Username">
+            </div>
+
+            <div class="m-b-20">
+                <label class="stext-110 cl2">Mật khẩu</label>
+                <input type="password" id="regPass" class="form-control" placeholder="******">
+            </div>
+
+            <button class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer" onclick="handleRegister()">
+                ĐĂNG KÝ NGAY
+            </button>
+
+            <div class="text-center p-t-20">
+                <span class="stext-109 cl4">Đã có tài khoản?</span>
+                <a href="login.html" class="stext-109 cl1">Đăng nhập ngay</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function handleRegister() {
+            const newUser = {
+                FullName: document.getElementById('regFullName').value,
+                Username: document.getElementById('regUser').value,
+                Password: document.getElementById('regPass').value,
+                Role: "Customer"
+            };
+
+            const response = await fetch('https://localhost:7064/api/User', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            });
+
+            if (response.ok) {
+                alert("Đăng ký thành công! Quay lại đăng nhập nhé Khang.");
+                window.location.href = "login.html";
+            } else {
+                alert("Lỗi rồi, Username này có thể đã tồn tại!");
+            }
+        }
+    </script>
+</body>
+</html>

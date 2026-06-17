@@ -1,0 +1,19 @@
+## Thư mục rác của Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+out/
+
+## Thư mục rác của trình duyệt/tool
+.idea/
+.vscode/
+
+## Các file cấu hình cá nhân hoặc file tạm
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## File database tạm (nếu có)
+*.mdf
+*.ldf
