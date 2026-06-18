@@ -1,0 +1,729 @@
+# Tuần 8: Stack & Ứng Dụng — Bài tập
+
+## 🎯 Mục tiêu tuần này
+Cài đặt Stack bằng mảng và Linked List. Ứng dụng Stack trong bài toán thực tế.
+
+---
+
+### Bài 1: Cài đặt Stack ⭐⭐
+Cài đặt Stack bằng mảng (array-based) và bằng Linked List. So sánh ưu nhược điểm.
+
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+// ====================== STACK BANG MANG (ARRAY-BASED) ======================
+template <typename T>
+class StackArray {
+private:
+    T* data;
+    int capacity;
+    int topIndex; // chi so phan tu dinh stack, -1 neu rong
+
+public:
+    StackArray(int cap = 100) {
+        capacity = cap;
+        data = new T[capacity];
+        topIndex = -1;
+    }
+
+    ~StackArray() {
+        delete[] data;
+    }
+
+    bool isEmpty() const { return topIndex == -1; }
+    bool isFull()  const { return topIndex == capacity - 1; }
+
+    void push(T value) {
+        if (isFull()) throw overflow_error("Stack (array) da day, khong the push them!");
+        data[++topIndex] = value;
+    }
+
+    T pop() {
+        if (isEmpty()) throw underflow_error("Stack (array) rong, khong the pop!");
+        return data[topIndex--];
+    }
+
+    T top() const {
+        if (isEmpty()) throw underflow_error("Stack (array) rong, khong co phan tu dinh!");
+        return data[topIndex];
+    }
+
+    int size() const { return topIndex + 1; }
+
+    void display() const {
+        cout << "[ ";
+        for (int i = 0; i <= topIndex; i++) cout << data[i] << " ";
+        cout << "]  (dinh stack o ben phai)" << endl;
+    }
+};
+
+// ====================== STACK BANG LINKED LIST ======================
+template <typename T>
+class StackLinkedList {
+private:
+    struct Node {
+        T value;
+        Node* next;
+        Node(T v, Node* n = nullptr) : value(v), next(n) {}
+    };
+
+    Node* topNode;
+    int count;
+
+public:
+    StackLinkedList() : topNode(nullptr), count(0) {}
+
+    ~StackLinkedList() {
+        while (!isEmpty()) pop();
+    }
+
+    bool isEmpty() const { return topNode == nullptr; }
+
+    void push(T value) {
+        topNode = new Node(value, topNode);
+        count++;
+    }
+
+    T pop() {
+        if (isEmpty()) throw underflow_error("Stack (linked list) rong, khong the pop!");
+        Node* temp = topNode;
+        T value = temp->value;
+        topNode = topNode->next;
+        delete temp;
+        count--;
+        return value;
+    }
+
+    T top() const {
+        if (isEmpty()) throw underflow_error("Stack (linked list) rong, khong co phan tu dinh!");
+        return topNode->value;
+    }
+
+    int size() const { return count; }
+
+    void display() const {
+        // dao thu tu de in tu day len dinh, giong kieu hien thi cua StackArray
+        T* temp = new T[count > 0 ? count : 1];
+        int idx = count - 1;
+        Node* p = topNode;
+        while (p) {
+            temp[idx--] = p->value;
+            p = p->next;
+        }
+        cout << "[ ";
+        for (int i = 0; i < count; i++) cout << temp[i] << " ";
+        delete[] temp;
+        cout << "]  (dinh stack o ben phai)" << endl;
+    }
+};
+
+int main() {
+    cout << "===== DEMO: STACK BANG MANG (ARRAY) =====\n";
+    StackArray<int> sa(5);
+    sa.push(10);
+    sa.push(20);
+    sa.push(30);
+    sa.display();
+    cout << "Pop ra: " << sa.pop() << endl;
+    sa.display();
+    cout << "Phan tu dinh hien tai: " << sa.top() << endl;
+    cout << "Kich thuoc hien tai: " << sa.size() << "\n\n";
+
+    cout << "===== DEMO: STACK BANG LINKED LIST =====\n";
+    StackLinkedList<int> sl;
+    sl.push(10);
+    sl.push(20);
+    sl.push(30);
+    sl.display();
+    cout << "Pop ra: " << sl.pop() << endl;
+    sl.display();
+    cout << "Phan tu dinh hien tai: " << sl.top() << endl;
+    cout << "Kich thuoc hien tai: " << sl.size() << endl;
+
+    return 0;
+}
+
+/*
+ ============================================================
+ SO SANH UU / NHUOC DIEM: STACK BANG MANG vs LINKED LIST
+ ============================================================
+
+ STACK BANG MANG (ARRAY):
+   Uu diem:
+     - Truy cap phan tu nhanh (O(1)), du lieu nam lien tuc trong bo nho
+       -> tan dung tot cache CPU, chay nhanh hon trong thuc te.
+     - Code don gian, khong can quan ly con tro/cap phat dong cho tung phan tu.
+   Nhuoc diem:
+     - Phai khai bao truoc kich thuoc (capacity) -> co the bi "day" (overflow)
+       neu du lieu vuot qua, hoac lang phi bo nho neu cap phat du thua.
+     - Neu dung mang dong (vd. vector) de tu resize, thinh thoang se ton chi phi
+       O(n) khi phai cap phat lai va sao chep toan bo du lieu (amortized O(1)).
+
+ STACK BANG LINKED LIST:
+   Uu diem:
+     - Kich thuoc linh hoat, khong gioi han truoc, push/pop luon la O(1) that su
+       (khong co chi phi resize bat ngo).
+     - Khong lang phi bo nho cho cac o chua dung.
+   Nhuoc diem:
+     - Moi phan tu can them bo nho cho con tro "next" -> ton bo nho hon mang.
+     - Du lieu nam roi rac trong bo nho (khong lien tuc) -> cache miss nhieu hon,
+       thuc te thuong CHAM HON mang du cung do phuc tap O(1).
+     - Code phuc tap hon: phai cap phat/giai phong (new/delete) dung cach,
+       de gay loi ro ri bo nho neu quen delete.
+
+ KHI NAO DUNG CAI NAO?
+   - Biet truoc gioi han kich thuoc, can toc do truy cap cao -> dung MANG.
+   - Kich thuoc thay doi lien tuc, kho du doan truoc -> dung LINKED LIST.
+*/
+
+
+
+### Bài 2: Kiểm tra ngoặc hợp lệ ⭐⭐
+Kiểm tra chuỗi có đóng mở ngoặc `()`, `[]`, `{}` hợp lệ không. Xử lý cả chuỗi code thực tế.
+#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+// ====== KIEM TRA NGOAC DON GIAN (bo qua moi ky tu khong phai ngoac) ======
+bool isValidBrackets(const string& s) {
+    stack<char> st;
+    for (char c : s) {
+        if (c == '(' || c == '[' || c == '{') {
+            st.push(c);
+        }
+        else if (c == ')' || c == ']' || c == '}') {
+            if (st.empty()) return false;
+            char top = st.top();
+            if ((c == ')' && top != '(') ||
+                (c == ']' && top != '[') ||
+                (c == '}' && top != '{')) {
+                return false;
+            }
+            st.pop();
+        }
+        // cac ky tu khac (chu, so, khoang trang...) deu bo qua
+    }
+    return st.empty();
+}
+
+// ====== KIEM TRA NGOAC TRONG CHUOI CODE THUC TE ======
+// Bo qua ngoac nam trong: chuoi "...", ky tu '...', comment // va /* ... */
+bool isValidBracketsInCode(const string& code) {
+    stack<char> st;
+    int n = (int)code.size();
+    int i = 0;
+
+    while (i < n) {
+        char c = code[i];
+
+        // Comment dong: // ... den het dong
+        if (c == '/' && i + 1 < n && code[i + 1] == '/') {
+            while (i < n && code[i] != '\n') i++;
+            continue;
+        }
+
+        // Comment khoi: /* ... */
+        if (c == '/' && i + 1 < n && code[i + 1] == '*') {
+            i += 2;
+            while (i + 1 < n && !(code[i] == '*' && code[i + 1] == '/')) i++;
+            i += 2;
+            continue;
+        }
+
+        // Chuoi "..."
+        if (c == '"') {
+            i++;
+            while (i < n && code[i] != '"') {
+                if (code[i] == '\\') i++; // bo qua ky tu escape (vd \")
+                i++;
+            }
+            i++;
+            continue;
+        }
+
+        // Ky tu '...'
+        if (c == '\'') {
+            i++;
+            while (i < n && code[i] != '\'') {
+                if (code[i] == '\\') i++;
+                i++;
+            }
+            i++;
+            continue;
+        }
+
+        // Ngoac thuc su trong code
+        if (c == '(' || c == '[' || c == '{') {
+            st.push(c);
+        }
+        else if (c == ')' || c == ']' || c == '}') {
+            if (st.empty()) return false;
+            char top = st.top();
+            if ((c == ')' && top != '(') ||
+                (c == ']' && top != '[') ||
+                (c == '}' && top != '{')) {
+                return false;
+            }
+            st.pop();
+        }
+
+        i++;
+    }
+
+    return st.empty();
+}
+
+void test(const string& s, bool codeMode) {
+    bool result = codeMode ? isValidBracketsInCode(s) : isValidBrackets(s);
+    cout << "----------------------------------------\n";
+    cout << s << "\n=> " << (result ? "HOP LE" : "KHONG HOP LE") << "\n\n";
+}
+
+int main() {
+    cout << "===== KIEM TRA NGOAC CHUOI THUONG =====\n\n";
+    test("(a + b) * [c - d]", false);
+    test("{[()]}", false);
+    test("(]", false);
+    test("((a+b)", false);
+
+    cout << "===== KIEM TRA NGOAC TRONG CHUOI CODE THUC TE =====\n\n";
+
+    string code1 =
+        "int main() {\n"
+        "    string s = \"(unbalanced (((\";   // ngoac trong chuoi -> bo qua\n"
+        "    char c = '(';                     // ngoac trong ky tu -> bo qua\n"
+        "    if (x > 0) { // check (this) la comment -> bo qua\n"
+        "        arr[0] = (a + b);\n"
+        "    }\n"
+        "    return 0;\n"
+        "}\n";
+    test(code1, true); // mong doi: HOP LE
+
+    string code2 =
+        "void foo() {\n"
+        "    /* comment co ngoac ( [ { khong dong -> van bo qua */\n"
+        "    int a[10];\n"
+        "    a[0] = (1 + 2;\n"   // loi thuc su: thieu ')'
+        "}\n";
+    test(code2, true); // mong doi: KHONG HOP LE
+
+    return 0;
+}
+
+
+### Bài 3: Chuyển đổi biểu thức ⭐⭐⭐
+Chuyển biểu thức Infix → Postfix → Prefix. In từng bước.
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cctype>
+#include <algorithm>
+using namespace std;
+
+// ====================== HAM TIEN ICH ======================
+int precedence(const string& op) {
+    if (op == "^") return 3;
+    if (op == "*" || op == "/") return 2;
+    if (op == "+" || op == "-") return 1;
+    return 0;
+}
+
+bool isRightAssociative(const string& op) {
+    return op == "^"; // ^ tinh tu phai sang trai: 2^3^2 = 2^(3^2)
+}
+
+bool isNumberToken(const string& token) {
+    return isdigit((unsigned char)token[0]) || token[0] == '.';
+}
+
+// Tach bieu thuc infix thanh danh sach token (so thuc, toan tu, ngoac)
+vector<string> tokenize(const string& expr) {
+    vector<string> tokens;
+    int i = 0, n = (int)expr.size();
+    while (i < n) {
+        char c = expr[i];
+        if (isspace((unsigned char)c)) { i++; continue; }
+
+        if (isdigit((unsigned char)c) || c == '.') {
+            string num;
+            while (i < n && (isdigit((unsigned char)expr[i]) || expr[i] == '.')) {
+                num += expr[i];
+                i++;
+            }
+            tokens.push_back(num);
+        }
+        else if (c == '(' || c == ')' || c == '+' || c == '-' ||
+            c == '*' || c == '/' || c == '^') {
+            tokens.push_back(string(1, c));
+            i++;
+        }
+        else {
+            i++; // bo qua ky tu la
+        }
+    }
+    return tokens;
+}
+
+void printTokens(const vector<string>& tokens) {
+    for (auto& t : tokens) cout << t << " ";
+    cout << "\n";
+}
+
+// In trang thai stack toan tu + output hien tai sau moi buoc
+void printStep(const string& token, const string& action,
+    const vector<string>& opStack, const vector<string>& output) {
+    cout << "  Token '" << token << "'  ->  " << action << "\n";
+    cout << "      Stack toan tu : [ ";
+    for (auto& s : opStack) cout << s << " ";
+    cout << "]\n";
+    cout << "      Output        : [ ";
+    for (auto& s : output) cout << s << " ";
+    cout << "]\n";
+}
+
+// ====================== INFIX -> POSTFIX ======================
+vector<string> infixToPostfix(const vector<string>& tokens, bool verbose) {
+    vector<string> opStack;
+    vector<string> output;
+
+    for (auto& token : tokens) {
+        if (isNumberToken(token)) {
+            output.push_back(token);
+            if (verbose) printStep(token, "la toan hang -> day vao output", opStack, output);
+        }
+        else if (token == "(") {
+            opStack.push_back(token);
+            if (verbose) printStep(token, "day vao stack toan tu", opStack, output);
+        }
+        else if (token == ")") {
+            while (!opStack.empty() && opStack.back() != "(") {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            if (!opStack.empty()) opStack.pop_back(); // bo '('
+            if (verbose) printStep(token, "pop den khi gap '(' roi bo '('", opStack, output);
+        }
+        else { // toan tu
+            while (!opStack.empty() && opStack.back() != "(" &&
+                (precedence(opStack.back()) > precedence(token) ||
+                    (precedence(opStack.back()) == precedence(token) && !isRightAssociative(token)))) {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            opStack.push_back(token);
+            if (verbose) printStep(token, "pop cac toan tu uu tien cao hon/bang, roi day vao stack", opStack, output);
+        }
+    }
+
+    while (!opStack.empty()) {
+        output.push_back(opStack.back());
+        opStack.pop_back();
+    }
+    return output;
+}
+
+// ====================== INFIX -> PREFIX ======================
+// Ky thuat: dao nguoc thu tu token + doi cho ( <-> ), chay thuat toan postfix
+// "phien ban dao" (chi pop khi do uu tien dinh stack LON HON, khong xet bang),
+// roi dao nguoc ket qua thu duoc.
+vector<string> infixToPrefix(const vector<string>& tokens, bool verbose) {
+    vector<string> reversedTokens(tokens.rbegin(), tokens.rend());
+    for (auto& t : reversedTokens) {
+        if (t == "(") t = ")";
+        else if (t == ")") t = "(";
+    }
+
+    if (verbose) {
+        cout << "  [Buoc trung gian] Dao nguoc token + doi ngoac: ";
+        printTokens(reversedTokens);
+        cout << "\n";
+    }
+
+    vector<string> opStack;
+    vector<string> output;
+
+    for (auto& token : reversedTokens) {
+        if (isNumberToken(token)) {
+            output.push_back(token);
+            if (verbose) printStep(token, "la toan hang -> day vao output", opStack, output);
+        }
+        else if (token == "(") {
+            opStack.push_back(token);
+            if (verbose) printStep(token, "day vao stack toan tu", opStack, output);
+        }
+        else if (token == ")") {
+            while (!opStack.empty() && opStack.back() != "(") {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            if (!opStack.empty()) opStack.pop_back();
+            if (verbose) printStep(token, "pop den khi gap '(' roi bo '('", opStack, output);
+        }
+        else {
+            // CHI pop khi uu tien dinh stack LON HON (khong xet bang) -> diem
+            // khac biet then chot so voi infixToPostfix o tren
+            while (!opStack.empty() && opStack.back() != "(" &&
+                precedence(opStack.back()) > precedence(token)) {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            opStack.push_back(token);
+            if (verbose) printStep(token, "pop neu dinh stack uu tien cao hon (so sanh chat), roi day vao stack", opStack, output);
+        }
+    }
+
+    while (!opStack.empty()) {
+        output.push_back(opStack.back());
+        opStack.pop_back();
+    }
+
+    reverse(output.begin(), output.end());
+    return output;
+}
+
+int main() {
+    string expr;
+    cout << "Nhap bieu thuc infix: ";
+    getline(cin, expr);
+
+    vector<string> tokens = tokenize(expr);
+
+    cout << "\n=== Token cua bieu thuc ===\n";
+    printTokens(tokens);
+
+    cout << "\n=== CHUYEN INFIX -> POSTFIX (tung buoc) ===\n";
+    vector<string> postfix = infixToPostfix(tokens, true);
+    cout << "\n>> Postfix: ";
+    printTokens(postfix);
+
+    cout << "\n=== CHUYEN INFIX -> PREFIX (tung buoc) ===\n";
+    vector<string> prefix = infixToPrefix(tokens, true);
+    cout << "\n>> Prefix: ";
+    printTokens(prefix);
+
+    cout << "\n=== TOM TAT ===\n";
+    cout << "Infix  : " << expr << "\n";
+    cout << "Postfix: "; printTokens(postfix);
+    cout << "Prefix : "; printTokens(prefix);
+
+    return 0;
+}
+
+
+
+### Bài 4: 🔥 Dự Án Mini — Máy Tính Biểu Thức ⭐⭐⭐
+> **Cảm hứng:** [Pilha_Expressão_A — DanielSantDev/Projects-with-Cpp](https://github.com/DanielSantDev/Projects-with-Cpp)
+
+Xây dựng máy tính tính biểu thức toán học bằng Stack:
+```
+=== 🧮 MÁY TÍNH BIỂU THỨC ===
+Nhập biểu thức: (3 + 4) * 2 - 8 / 4
+
+Bước 1 — Chuyển sang Postfix: 3 4 + 2 * 8 4 / -
+Bước 2 — Tính toán:
+  Push 3 → Stack: [3]
+  Push 4 → Stack: [3, 4]
+  '+' → Pop 4, Pop 3 → Push 7 → Stack: [7]
+  Push 2 → Stack: [7, 2]
+  '*' → Pop 2, Pop 7 → Push 14 → Stack: [14]
+  ...
+
+✅ Kết quả: (3 + 4) * 2 - 8 / 4 = 12
+```
+**Yêu cầu:** hỗ trợ +, -, *, /, ^, ngoặc đơn, số thập phân, hiển thị từng bước stack.
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cctype>
+#include <cmath>
+#include <sstream>
+#include <iomanip>
+#include <stdexcept>
+using namespace std;
+
+// ====================== HAM TIEN ICH ======================
+int precedence(const string& op) {
+    if (op == "^") return 3;
+    if (op == "*" || op == "/") return 2;
+    if (op == "+" || op == "-") return 1;
+    return 0;
+}
+
+bool isRightAssociative(const string& op) {
+    return op == "^";
+}
+
+bool isNumberToken(const string& token) {
+    return isdigit((unsigned char)token[0]) || token[0] == '.';
+}
+
+// In so dep: bo so 0 thua sau dau cham (12.000000 -> 12, 12.500000 -> 12.5)
+string formatNumber(double value) {
+    ostringstream oss;
+    oss << fixed << setprecision(6) << value;
+    string s = oss.str();
+    size_t dotPos = s.find('.');
+    if (dotPos != string::npos) {
+        size_t lastNonZero = s.find_last_not_of('0');
+        if (lastNonZero == dotPos) lastNonZero--; // la so nguyen -> bo luon dau cham
+        s = s.substr(0, lastNonZero + 1);
+    }
+    return s;
+}
+
+// ====================== TOKENIZE ======================
+vector<string> tokenize(const string& expr) {
+    vector<string> tokens;
+    int i = 0, n = (int)expr.size();
+    while (i < n) {
+        char c = expr[i];
+        if (isspace((unsigned char)c)) { i++; continue; }
+
+        if (isdigit((unsigned char)c) || c == '.') {
+            string num;
+            while (i < n && (isdigit((unsigned char)expr[i]) || expr[i] == '.')) {
+                num += expr[i];
+                i++;
+            }
+            tokens.push_back(num);
+        }
+        else if (c == '(' || c == ')' || c == '+' || c == '-' ||
+            c == '*' || c == '/' || c == '^') {
+            tokens.push_back(string(1, c));
+            i++;
+        }
+        else {
+            i++; // bo qua ky tu la
+        }
+    }
+    return tokens;
+}
+
+// ====================== INFIX -> POSTFIX ======================
+vector<string> infixToPostfix(const vector<string>& tokens) {
+    vector<string> opStack;
+    vector<string> output;
+
+    for (auto& token : tokens) {
+        if (isNumberToken(token)) {
+            output.push_back(token);
+        }
+        else if (token == "(") {
+            opStack.push_back(token);
+        }
+        else if (token == ")") {
+            while (!opStack.empty() && opStack.back() != "(") {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            if (opStack.empty()) throw runtime_error("Bieu thuc sai: thieu dau '(' tuong ung!");
+            opStack.pop_back();
+        }
+        else {
+            while (!opStack.empty() && opStack.back() != "(" &&
+                (precedence(opStack.back()) > precedence(token) ||
+                    (precedence(opStack.back()) == precedence(token) && !isRightAssociative(token)))) {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            opStack.push_back(token);
+        }
+    }
+
+    while (!opStack.empty()) {
+        if (opStack.back() == "(") throw runtime_error("Bieu thuc sai: thieu dau ')' tuong ung!");
+        output.push_back(opStack.back());
+        opStack.pop_back();
+    }
+    return output;
+}
+
+// ====================== TINH TOAN POSTFIX (co in tung buoc) ======================
+string stackToString(const vector<double>& st) {
+    string s = "[";
+    for (size_t i = 0; i < st.size(); i++) {
+        s += formatNumber(st[i]);
+        if (i + 1 < st.size()) s += ", ";
+    }
+    s += "]";
+    return s;
+}
+
+double applyOp(double a, double b, const string& op) {
+    if (op == "+") return a + b;
+    if (op == "-") return a - b;
+    if (op == "*") return a * b;
+    if (op == "/") {
+        if (b == 0) throw runtime_error("Loi: chia cho 0!");
+        return a / b;
+    }
+    if (op == "^") return pow(a, b);
+    throw runtime_error("Toan tu khong hop le: " + op);
+}
+
+double evaluatePostfix(const vector<string>& postfix) {
+    vector<double> st;
+
+    cout << "Buoc 2 - Tinh toan:\n";
+    for (auto& token : postfix) {
+        if (isNumberToken(token)) {
+            double val = stod(token);
+            st.push_back(val);
+            cout << "  Push " << formatNumber(val) << " -> Stack: " << stackToString(st) << "\n";
+        }
+        else {
+            if (st.size() < 2) throw runtime_error("Bieu thuc khong hop le (thieu toan hang)!");
+            double b = st.back(); st.pop_back();
+            double a = st.back(); st.pop_back();
+            double result = applyOp(a, b, token);
+            st.push_back(result);
+            cout << "  '" << token << "' -> Pop " << formatNumber(b) << ", Pop " << formatNumber(a)
+                << " -> Push " << formatNumber(result) << " -> Stack: " << stackToString(st) << "\n";
+        }
+    }
+
+    if (st.size() != 1) throw runtime_error("Bieu thuc khong hop le (du toan hang)!");
+    return st.back();
+}
+
+int main() {
+    cout << "=== MAY TINH BIEU THUC (dung Stack) ===\n";
+    cout << "Ho tro: + - * / ^ , dau ngoac (), so thap phan\n";
+    cout << "Nhap \"exit\" de thoat.\n\n";
+
+    string expr;
+    while (true) {
+        cout << "Nhap bieu thuc: ";
+        if (!getline(cin, expr)) break;
+        if (expr == "exit" || expr == "EXIT") break;
+        if (expr.empty()) continue;
+
+        try {
+            vector<string> tokens = tokenize(expr);
+            vector<string> postfix = infixToPostfix(tokens);
+
+            cout << "\nBuoc 1 - Chuyen sang Postfix: ";
+            for (auto& t : postfix) cout << t << " ";
+            cout << "\n\n";
+
+            double result = evaluatePostfix(postfix);
+
+            cout << "\nKet qua: " << expr << " = " << formatNumber(result) << "\n\n";
+        }
+        catch (exception& e) {
+            cout << "\nLoi: " << e.what() << "\n\n";
+        }
+    }
+
+    cout << "Tam biet!\n";
+    return 0;
+}
+
+
+
+---
+📁 Tham khảo: `Chuong3_DanhSachLienKet/Chuong3_DanhSachLienKet.cpp`
