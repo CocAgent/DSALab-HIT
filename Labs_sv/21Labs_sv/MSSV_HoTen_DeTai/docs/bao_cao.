@@ -1,0 +1,27 @@
+BÁO CÁO ĐỒ ÁN MÔN HỌC
+Đề tài: Game Sút Phạt AI (C++)
+1. Giới thiệu
+Đề tài xây dựng một trò chơi sút phạt đơn giản bằng ngôn ngữ C++ với AI thủ môn có khả năng dự đoán hướng sút.
+2. Mục tiêu
+- Mô phỏng game sút phạt
+- Xây dựng AI thủ môn
+- Kiểm thử và phân tích kết quả
+3. Cấu trúc chương trình
+Gồm các file:
+- main.cpp
+- structures.h
+- functions.cpp
+- test_case.cpp
+4. Phân tích thuật toán AI
+Khung thành được chia thành 3 vùng: trái, giữa, phải.
+AI có xác suất 60% đoán đúng hướng sút.
+5. Kết quả thực nghiệm
+Sau khi chạy 20,000 lần thử:
+- Tỷ lệ ghi bàn: ~30-40%
+- Tỷ lệ bị cản: ~60%
+6. Kết luận
+AI hoạt động đúng như thiết kế. Có thể cải tiến bằng cách học hành vi người chơi.
+7. Hướng phát triển
+- Thêm đồ họa (SFML)
+- Thêm hiệu ứng bóng cong
+- Nâng cấp AI
