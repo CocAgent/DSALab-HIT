@@ -1,0 +1,200 @@
+# Tuần 1: Tổng Quan C++ & Big-O — Bài tập
+
+## 🎯 Mục tiêu tuần này
+Hiểu Big-O, phân tích độ phức tạp, ôn tập C++ cơ bản.
+
+### Bài 1: Phân tích Big-O ⭐
+Xác định Big-O của 10 đoạn code C++ cho trước. Giải thích tại sao.
+1. Phép toán cơ bản
+void printFirstElement(int arr[])
+{
+  cout << arr[0] << endl;
+}
+- Độ phức tạp: O(1) (Hằng số - Constant time)
+- Giải thích: Hàm chỉ thực hiện duy nhất một thao tác là truy xuất và in phần tử đầu tiên của mảng. Dù mảng có 10 phần tử hay 1 triệu phần tử, thời gian thực thi vẫn không thay đổi.
+
+2. Vòng lặp đơn
+void printAllElements(int arr[], int n)
+{
+  for (int i = 0; i < n; i++)
+   {
+     cout << arr[i] << endl;
+   }
+}
+- Độ phức tạp: O(n) (Tuyến tính - Linear time)
+- Giải thích: Vòng lặp for chạy đúng n lần. Số lượng thao tác tỉ lệ thuận trực tiếp với kích thước đầu vào n.
+
+3. Hai vòng lặp lồng nhau (Độc lập)
+void printPairs(int arr[], int n)
+{
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+    {
+      cout << arr[i] << ", " << arr[j] << endl;
+    }
+  }
+}
+
+- Độ phức tạp: O(n^2) (Bậc hai - Quadratic time)
+- Giải thích: Có hai vòng lặp lồng nhau. Vòng lặp bên ngoài chạy n lần, và với mỗi lần chạy đó, vòng lặp bên trong cũng chạy n lần. Tổng số thao tác là n * n = n^2.
+
+4. Vòng lặp với bước nhảy nhân đôi
+void logarithmicLoop(int n)
+{
+  for (int i = 1; i < n; i = i * 2)
+    {
+      cout << i << endl;
+    }
+}
+- Độ phức tạp: O(log n) (Logarit - Logarithmic time)
+- Giải thích: Biến đếm i bắt đầu từ 1 và nhân đôi sau mỗi vòng lặp (1, 2, 4, 8, 16,...). Số lần lặp là số k sao cho 2^k >= n, tương đương với k = log2(n). Ta bỏ qua cơ số trong Big-O nên kết quả là O(log n).
+
+5. Vòng lặp lồng nhau kết hợp
+void linearithmicLoop(int n)
+{
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 1; j < n; j = j * 2)
+    {
+      cout << i << " " << j << endl;
+    }
+  }
+}
+- Độ phức tạp: O(n log n) (Tuyến tính logarit - Linearithmic time)
+- Giải thích: Vòng lặp ngoài chạy tuyến tính n lần. Vòng lặp trong chạy theo cấp số nhân với độ phức tạp O(log n). Nhân chúng lại với nhau ta có độ phức tạp tổng thể là O(n log n). Đây là độ phức tạp phổ biến của các thuật toán sắp xếp tối ưu như Merge Sort hoặc Quick Sort.
+
+6. Hai vòng lặp tuần tự (Không lồng nhau)
+void twoLoops(int arrA[], int n, int arrB[], int m)
+{
+  for (int i = 0; i < n; i++)
+  {
+    cout << arrA[i] << endl;
+  }
+  for (int j = 0; j < m; j++)
+  {
+    cout << arrB[j] << endl;
+  }
+}
+- Độ phức tạp: O(n + m)
+- Giải thích: Đoạn code thực hiện hai vòng lặp hoàn toàn tách biệt. Vòng đầu tiên tốn O(n) thời gian, vòng thứ hai tốn O(m) thời gian. Vì ta không biết kích thước của n và m cái nào lớn hơn, ta phải giữ nguyên cả hai biến số trong công thức.
+
+7. Hai vòng lặp lồng nhau (Phụ thuộc)
+void printDependentPairs(int arr[], int n)
+{
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < i; j++)
+    {
+      cout << arr[i] << ", " << arr[j] << endl;
+    }
+  }
+}
+- Độ phức tạp: O(n^2)
+- Giải thích: Vòng lặp trong chỉ chạy đến i thay vì n. Tổng số lần chạy sẽ là 0 + 1 + 2 + ... + (n-1) = (n(n-1))/2 = n^2/2 - n/2. Khi tính Big-O, ta loại bỏ các hằng số và các bậc thấp hơn, chỉ giữ lại bậc cao nhất là n^2.
+
+8. Vòng lặp dựa trên căn bậc hai
+bool isPrime(int n)
+{
+  if (n <= 1) return false;
+  for (int i = 2; i * i <= n; i++)
+  {
+    if (n % i == 0) return false;
+  }
+  return true;
+}
+- Độ phức tạp: O(sqrt{n}) (Căn bậc hai - Square root time)
+- Giải thích: Điều kiện dừng của vòng lặp là i * i <= n, tương đương với i <= sqrt(n). Vòng lặp sẽ lặp tối đa sqrt(n) lần, rất phổ biến trong các thuật toán kiểm tra số nguyên tố.
+
+9. Thuật toán đệ quy nhánh (Cấp số nhân)
+int fibonacci(int n)
+{
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+- Độ phức tạp: O(2^n) (Hàm mũ - Exponential time)
+- Giải thích: Với mỗi lần gọi hàm, thuật toán lại tách ra làm 2 hàm đệ quy mới. Cây đệ quy sẽ có độ sâu là n và tại mỗi tầng, số lượng nhánh tăng lên gấp đôi. Điều này khiến số thao tác bùng nổ rất nhanh.
+
+10. Vòng lặp giới hạn hằng số
+void constantLoop(int n)
+{
+  for (int i = 0; i < 1000; i++)
+  {
+    cout << n * i << endl;
+  }
+}
+- Độ phức tạp: O(1) (Hằng số - Constant time)
+- Giải thích: Mặc dù đây là một vòng lặp và nó chạy 1000 lần, nhưng con số 1000 là một hằng số cố định. Nó không hề thay đổi dựa vào kích thước của dữ liệu đầu vào n. Theo quy tắc của Big-O, O(1000) được rút gọn về O(1).
+
+### Bài 2: Đo thời gian thực tế ⭐⭐
+Dùng `chrono` đo thời gian chạy của O(n), O(n²), O(log n) với n = 1.000 → 100.000. In bảng kết quả.
+#include <iostream>
+#include <chrono>
+
+using namespace std;
+using namespace std::chrono;
+
+void o_log_n(long long n) 
+{
+  volatile int c = 0;
+  for (long long i = 1; i < n; i *= 2) c++;
+}
+
+void o_n(long long n) 
+{
+  volatile int c = 0;
+  for (long long i = 0; i < n; i++) c++;
+}
+
+void o_n2(long long n) 
+{
+  volatile int c = 0;
+  for (long long i = 0; i < n; i++) 
+    for (long long j = 0; j < n; j++) c++;
+}
+
+long long measure(void (*func)(long long), long long n) 
+{
+  auto start = high_resolution_clock::now();
+  func(n);
+  auto stop = high_resolution_clock::now();
+  return duration_cast<microseconds>(stop - start).count(); // Trả về microgiây
+}
+
+int main() 
+{
+  long long test_cases[] = {1000, 5000, 10000, 50000, 100000};
+  printf("%-10s %-15s %-15s %-15s\n", "n", "O(log n) [us]", "O(n) [us]", "O(n^2) [us]");
+  printf("----------------------------------------------------------\n");
+  for (long long n : test_cases) 
+  {
+    long long t_log = measure(o_log_n, n);
+    long long t_n   = measure(o_n, n);
+    long long t_n2  = measure(o_n2, n);
+    printf("%-10lld %-15lld %-15lld %-15lld\n", n, t_log, t_n, t_n2);
+  }
+  return 0;
+}
+
+### Bài 3: Tối ưu hàm ⭐⭐
+Cho 3 hàm O(n²) — tối ưu xuống O(n) hoặc O(n log n). Chứng minh bằng cách đo thời gian.
+
+### Bài 4: 🔥 Dự Án Mini — Big-O Benchmark Tool ⭐⭐⭐
+> **Cảm hứng:** [algorithm-visualizer.org](https://algorithm-visualizer.org)
+
+Viết chương trình **BenchmarkTool** hiển thị bảng so sánh tốc độ các thuật toán:
+```
+╔══════════════╦══════════╦══════════╦══════════╗
+║   Thuật toán ║  n=1000  ║  n=10000 ║ n=100000 ║
+╠══════════════╬══════════╬══════════╬══════════╣
+║    O(1)      ║  0.001ms ║  0.001ms ║  0.001ms ║
+║    O(log n)  ║  0.003ms ║  0.004ms ║  0.005ms ║
+║    O(n)      ║  0.12ms  ║  1.2ms   ║  12ms    ║
+║    O(n²)     ║  8ms     ║  800ms   ║  80000ms ║
+╚══════════════╩══════════╩══════════╩══════════╝
+```
+
+**Yêu cầu:** dùng `std::chrono`, hiển thị bảng căn chỉnh đẹp, xuất ra file `benchmark.txt`.
+
+---
+📁 Tham khảo: `Chuong1_TongQuan/Chuong1_TongQuan.cpp`
