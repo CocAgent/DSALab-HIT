@@ -1,0 +1,197 @@
+Main.cpp
+#include <iostream>
+#include <ctime>
+#include "structures.h"
+
+using namespace std;
+
+// Khai báo function
+void update(Target&, Goalkeeper&, Ball&, GameState&, Goal);
+void checkGoal(Ball&, Goalkeeper&, Goal, int&);
+void resetGame(Ball&, GameState&);
+void shoot(Target, Goalkeeper&, Ball&, Goal);
+
+int main() {
+    srand(time(0));
+
+    Goal goal = {100, 50, 200, 60};
+
+    Target target = {200, 80, 5, 1};
+
+    Goalkeeper gk = {
+        175, 60,
+        50, 40,
+        8,
+        175
+    };
+
+    Ball ball = {
+        200, 420,
+        200, 420,
+        0
+    };
+
+    GameState state = AIMING;
+    int score = 0;
+
+    char input;
+
+    while (true) {
+        cout << "\nĐiểm: " << score << endl;
+
+        if (state == AIMING) {
+            cout << "Nhấn SPACE (s) để sút: ";
+            cin >> input;
+
+            if (input == 's') {
+                state = SHOOTING;
+                shoot(target, gk, ball, goal);
+            }
+        }
+
+        update(target, gk, ball, state, goal);
+
+        if (state == RESULT) {
+            checkGoal(ball, gk, goal, score);
+            resetGame(ball, state);
+        }
+    }
+
+    return 0;
+}
+
+Structures.h
+#ifndef STRUCTURES_H
+#define STRUCTURES_H
+
+struct Goal {
+    int x, y, width, height;
+};
+
+struct Target {
+    float x, y;
+    float speed;
+    int direction;
+};
+
+struct Goalkeeper {
+    float x, y;
+    float width, height;
+    float speed;
+    float targetX;
+};
+
+struct Ball {
+    float startX, startY;
+    float x, y;
+    float targetX;
+};
+
+enum GameState {
+    AIMING,
+    SHOOTING,
+    RESULT
+};
+
+#endif
+
+functions.cpp
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include "structures.h"
+
+using namespace std;
+
+void update(Target &target, Goalkeeper &gk, Ball &ball, GameState &state, Goal goal) {
+    if (state == AIMING) {
+        target.x += target.speed * target.direction;
+
+        if (target.x >= goal.x + goal.width || target.x <= goal.x) {
+            target.direction *= -1;
+        }
+
+        gk.x = goal.x + goal.width / 2 - gk.width / 2;
+    }
+    else if (state == SHOOTING) {
+        ball.y -= 8;
+
+        float distanceY = ball.startY - target.y;
+        float distanceX = ball.targetX - ball.startX;
+
+        ball.x += (distanceX / (distanceY / 8));
+
+        if (gk.x < gk.targetX - 5) gk.x += gk.speed;
+        else if (gk.x > gk.targetX + 5) gk.x -= gk.speed;
+
+        if (ball.y <= target.y) {
+            state = RESULT;
+        }
+    }
+}
+
+void checkGoal(Ball &ball, Goalkeeper &gk, Goal goal, int &score) {
+    bool isHitGK = (ball.x >= gk.x && ball.x <= gk.x + gk.width);
+    bool isInGoal = (ball.x >= goal.x && ball.x <= goal.x + goal.width);
+
+    if (isHitGK) {
+        score = 0;
+        cout << "THỦ MÔN CẢN PHÁ!\n";
+    }
+    else if (isInGoal) {
+        score++;
+        cout << "VÀO!!!\n";
+    }
+    else {
+        score = 0;
+        cout << "SÚT RA NGOÀI!\n";
+    }
+}
+
+void resetGame(Ball &ball, GameState &state) {
+    ball.x = ball.startX;
+    ball.y = ball.startY;
+    state = AIMING;
+}
+
+void shoot(Target target, Goalkeeper &gk, Ball &ball, Goal goal) {
+    ball.targetX = target.x;
+
+    string huongSut;
+
+    if (target.x < goal.x + goal.width / 3)
+        huongSut = "trai";
+    else if (target.x > goal.x + goal.width * 2 / 3)
+        huongSut = "phai";
+    else
+        huongSut = "giua";
+
+    float tyLeDoanTrung = 0.6;
+    float phanDoan = (float)rand() / RAND_MAX;
+
+    if (phanDoan <= tyLeDoanTrung) {
+        if (huongSut == "trai") gk.targetX = goal.x;
+        else if (huongSut == "phai") gk.targetX = goal.x + goal.width - gk.width;
+        else gk.targetX = goal.x + goal.width / 2 - gk.width / 2;
+    }
+    else {
+        float huongSai = (float)rand() / RAND_MAX;
+
+        if (huongSut == "trai") {
+            gk.targetX = (huongSai < 0.5)
+                ? (goal.x + goal.width / 2 - gk.width / 2)
+                : (goal.x + goal.width - gk.width);
+        }
+        else if (huongSut == "phai") {
+            gk.targetX = (huongSai < 0.5)
+                ? goal.x
+                : (goal.x + goal.width / 2 - gk.width / 2);
+        }
+        else {
+            gk.targetX = (huongSai < 0.5)
+                ? goal.x
+                : (goal.x + goal.width - gk.width);
+        }
+    }
+}
