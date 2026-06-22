@@ -1,0 +1,89 @@
+# ⚽ Game Sút Phạt - AI Thủ Môn (C++)
+
+## 📌 Giới thiệu
+
+Dự án này mô phỏng game sút phạt với AI thủ môn thông minh.\
+AI có khả năng đoán hướng sút với xác suất \~60%.
+
+------------------------------------------------------------------------
+
+## 🗂️ Cấu trúc project
+
+-   `main.cpp` → Chạy game chính (console)
+-   `structures.h` → Khai báo struct dữ liệu
+-   `functions.cpp` → Xử lý logic game
+-   `test_case.cpp` → Test AI và thống kê
+-   `bao_cao.pdf` → Báo cáo kết quả
+
+------------------------------------------------------------------------
+
+## 🚀 Cách chạy
+
+### 1. Compile
+
+``` bash
+g++ main.cpp functions.cpp -o game
+```
+
+### 2. Run
+
+``` bash
+./game
+```
+
+------------------------------------------------------------------------
+
+## 🎮 Cách chơi
+
+-   Nhấn `s` để sút
+-   Canh thời điểm target
+-   Tránh thủ môn AI
+
+------------------------------------------------------------------------
+
+## 🧠 Logic AI
+
+-   60% đoán đúng hướng
+-   40% đoán sai
+-   Chia khung thành thành 3 vùng:
+    -   Trái
+    -   Giữa
+    -   Phải
+
+------------------------------------------------------------------------
+
+## 🧪 Test AI
+
+Compile:
+
+``` bash
+g++ test_case.cpp functions.cpp -o test
+```
+
+Run:
+
+``` bash
+./test
+```
+
+------------------------------------------------------------------------
+
+## 📊 Kết quả mẫu
+
+-   Tỷ lệ ghi bàn: \~30--40%
+-   Tỷ lệ bị cản: \~60%
+
+------------------------------------------------------------------------
+
+## 🔥 Nâng cấp đề xuất
+
+-   SFML (đồ họa)
+-   Bóng cong (curve shot)
+-   AI học hành vi người chơi
+-   Âm thanh & hiệu ứng
+
+------------------------------------------------------------------------
+
+## 👨‍💻 Tác giả
+
+Huỳnh Khôi
