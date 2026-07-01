@@ -1,15 +1,13 @@
-# 🧠 DSALab — Cấu Trúc Dữ Liệu & Giải Thuật (C++)
+# 🧩 CLI MazeGame — Hệ Thống Sinh Và Giải Mê Cung Tự Động (C++)
 
 <div align="center">
 
-![C++](https://img.shields.io/badge/C++-17-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+![C++](https://img.shields.io/badge/C++-11%20%7C%2017-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)
-![Chapters](https://img.shields.io/badge/Chapters-6-blueviolet?style=for-the-badge)
+![Features](https://img.shields.io/badge/Features-7-blueviolet?style=for-the-badge)
 
-**Dự án học liệu C++ toàn diện về Cấu trúc Dữ liệu và Giải thuật**  
-
-[📖 Lý thuyết](#-nội-dung-từng-chương) · [💻 Cài đặt](#️-cài-đặt--chạy) · [🗂 Cấu trúc](#-cấu-trúc-dự-án) · [🤝 Đóng góp](#-đóng-góp)
+**Ứng dụng Console tương tác trực quan về giải thuật xây dựng và tìm đường trên đồ thị lưới** [📖 Tính Năng](#-nội-dung-tính-năng) · [🕹️ Điều Khiển](#️-hướng-dẫn-điều-khiển) · [🗂 Cấu Trúc](#-cấu-trúc-dự-án) · [📊 Giải Thuật](#-tóm-tắt-giải-thuật--độ-phức-tạp)
 
 </div>
 
@@ -17,174 +15,54 @@
 
 ## 📌 Giới Thiệu
 
-**DSALab** là kho học liệu mã nguồn mở về **Cấu trúc Dữ liệu và Giải thuật (DSA)** viết bằng C++17, gồm:
+**CLI MazeGame** là một dự án C++ hoàn chỉnh minh họa trực quan các thuật toán duyệt đồ thị kinh điển (`DFS`, `BFS`) thông qua bài toán xây dựng và giải mê cung ô vuông. 
 
-- ✅ **6 chương** với lý thuyết chi tiết + code mẫu đầy đủ comment
-- ✅ **Bài tập có lời giải** từ cơ bản đến nâng cao
-- ✅ **5 ứng dụng thực tế** minh họa cách dùng DSA
-- ✅ Chuẩn GitHub: cấu trúc rõ ràng, Makefile, README đầy đủ
+- ✅ **Sinh ngẫu nhiên hoàn hảo**: Sử dụng thuật toán DFS cải tiến để tạo mê cung không chu trình, luôn có lối thoát.
+- ✅ **Đồ họa ASCII tối ưu**: Kỹ thuật hiển thị ký tự kép chống méo tỷ lệ trên màn hình Console.
+- ✅ **Tương tác thời gian thực**: Trải nghiệm di chuyển mượt mà không cần nhấn Enter.
+- ✅ **Đối sánh hiệu năng**: Báo cáo trực quan, so sánh chi tiết số bước chân thực tế giữa BFS và DFS.
 
 ---
 
 ## 🗂 Cấu Trúc Dự Án
-
-```
-DSALab/
 │
 ├── 📁 src/
-│   ├── Utils/                         # Hàm tiện ích dùng chung
-│   ├── Chapter1_Overview/             # Tổng quan CTDL & GT
-│   ├── Chapter2_SearchSort/           # Tìm kiếm & Sắp xếp
-│   ├── Chapter3_LinkedList/           # Danh sách liên kết, Stack, Queue
-│   ├── Chapter4_Tree/                 # Cây nhị phân, BST
-│   ├── Chapter5_Graph/                # Đồ thị (BFS, DFS, Dijkstra, ...)
-│   └── Chapter6_DynamicProgramming/   # Quy hoạch động
+│   ├── KB.h              # Thư viện bổ trợ (bắt phím _getch() không chặn màn hình)
+│   ├── MazeGame.h        # Khai báo lớp, cấu trúc Point và hằng số cấu hình
+│   └── MazeGame.cpp      # Hiện thực hóa logic trò chơi và các thuật toán đồ thị
 │
-├── 📁 docs/                           # Tài liệu lý thuyết Markdown
-│   ├── Chapter1_Theory.md
-│   ├── Chapter2_Theory.md
-│   ├── Chapter3_Theory.md
-│   ├── Chapter4_Theory.md
-│   ├── Chapter5_Theory.md
-│   └── Chapter6_Theory.md
-│
-├── 📁 tests/                          # Test cases
-├── 📁 assets/                         # Hình ảnh, diagram
-├── Makefile
+├── 📁 assets/            # Chứa sơ đồ minh họa, hình ảnh demo giải thuật
+├── main.cpp              # Điểm khởi chạy ứng dụng (Hệ thống điều hướng Menu chính)
 └── README.md
-```
-
 ---
 
-## 📖 Nội Dung Từng Chương
+## 📖 Nội Dung Tính Năng
 
-| # | Chương | Nội Dung Chính | Độ Phức Tạp |
-|---|--------|----------------|-------------|
-| 1 | [Tổng Quan](docs/Chapter1_Theory.md) | Kiểu dữ liệu, CTDL, BigO | O(1) → O(2ᴺ) |
-| 2 | [Tìm Kiếm & Sắp Xếp](docs/Chapter2_Theory.md) | Linear/Binary Search, 5 Sort | O(N) → O(N log N) |
-| 3 | [Danh Sách Liên Kết](docs/Chapter3_Theory.md) | DSLK đơn, Stack, Queue | O(1) → O(N) |
-| 4 | [Cấu Trúc Cây](docs/Chapter4_Theory.md) | Binary Tree, BST, Traversal | O(log N) → O(N) |
-| 5 | [Đồ Thị](docs/Chapter5_Theory.md) | BFS, DFS, Dijkstra, MST | O(V+E) → O(V²) |
-| 6 | [Quy Hoạch Động](docs/Chapter6_Theory.md) | Memoization, Tabulation | O(N) → O(N²) |
+| Chức Năng | Tên Hàm Xử Lý | Thuật Toán / Cơ Chế | Đặc Điểm Kỹ Thuật |
+|---|---|---|---|
+| **1. Tạo mê cung** | `generate()`, `dfsGenerate()` | Recursive Backtracker (DFS) | Đảm bảo mê cung hoàn hảo, không có chu trình. |
+| **2. Hiển thị ASCII** | `display()`, `displayCurrent()` | Khớp ma trận đồ họa cổ điển | In ký tự kép `##` thay thế tường để tạo tỷ lệ ô vuông cân đối. |
+| **3. Người chơi tự giải** | `play()` | Bắt phím thời gian thực `_getch()` | Di chuyển liên tục bằng cụm `W/A/S/D`, cập nhật tọa độ động. |
+| **4. Tự động giải BFS** | `solveBFS()` | Breadth-First Search (Queue) | Tìm kiếm theo lớp (gợn sóng), **luôn tối ưu ngắn nhất**. |
+| **5. Tự động giải DFS** | `solveDFS()` | Depth-First Search (Stack) | Đâm sâu tìm đường nhanh, truy vết qua mảng `parent`. |
+| **6. So sánh hiệu năng** | `compareAlgorithms()` | Phân tích biến đếm hiệu năng | In bảng đối sánh định lượng số bước chân của 2 thuật toán. |
+| **7. Điều chỉnh độ khó** | `setDifficulty()` | Chuẩn hóa lưới toán học | Ép kích thước chẵn về số lẻ để thuật toán đào đường chuẩn xác. |
 
 ---
 
 ## ⚙️ Cài Đặt & Chạy
 
-### Yêu cầu
-- **Compiler:** g++ 9+ (C++17) hoặc MSVC / Clang
-- **OS:** Linux, macOS, Windows (MinGW/WSL)
-- **IDE gợi ý:** VS Code, CLion, Dev-C++, Code::Blocks
+### Yêu cầu hệ thống
+- **Compiler:** g++ 9+ hỗ trợ tiêu chuẩn C++11 hoặc tốt nhất là C++17.
+- **Hệ điều hành:** Ưu tiên **Windows** (vì dự án sử dụng các hàm hệ thống Windows đặc trưng như `<conio.h>` và `system("cls")`).
 
-### Clone dự án
-```bash
-git clone https://github.com/CocAgent/DSALab.git
-cd DSALab
-```
-
-### Biên dịch bằng Makefile
-```bash
-make all        # Biên dịch tất cả chương
-make ch1        # Biên dịch chương 1
-make ch2        # Biên dịch chương 2
-make ch3        # Biên dịch chương 3
-make ch4        # Biên dịch chương 4
-make ch5        # Biên dịch chương 5
-make ch6        # Biên dịch chương 6
-make apps       # Biên dịch ứng dụng tổng hợp
-make clean      # Xóa file binary
-make test       # Chạy tất cả
-```
-
-### Biên dịch thủ công
-```bash
-# Ví dụ biên dịch chương 5
-g++ -std=c++17 -Wall src/Chapter5_Graph/Chapter5_Graph.cpp -o bin/ch5
-./bin/ch5
-```
-
-### Dùng IDE
-1. Mở từng file `.cpp` trong IDE
-2. Nhấn **Build & Run** (F9 / F5 / Ctrl+F5)
-
----
-
-## 🚀 Nhanh Bắt Đầu
+### Biên dịch thủ công qua Terminal
+Mở Command Prompt hoặc PowerShell tại thư mục gốc dự án và thực hiện:
 
 ```bash
-# Chạy thử demo tất cả
-make test
+# Biên dịch tất cả các file nguồn
+g++ -std=c++17 main.cpp src/MazeGame.cpp -I src/ -o bin/MazeGame.exe
 
-# Hoặc từng chương
-./bin/ch1    # Tổng quan CTDL & GT
-./bin/ch2    # Tìm kiếm & Sắp xếp  
-./bin/ch3    # Danh sách liên kết
-./bin/ch4    # Cây nhị phân & BST
-./bin/ch5    # Đồ thị
-./bin/ch6    # Quy hoạch động
-./bin/apps   # Ứng dụng tổng hợp
-```
-
----
-
-## 🧩 Tóm Tắt Giải Thuật
-
-### ⏱ Bảng So Sánh Độ Phức Tạp
-
-| Giải Thuật | Best | Average | Worst | Space |
-|------------|------|---------|-------|-------|
-| Linear Search | O(1) | O(N) | O(N) | O(1) |
-| Binary Search | O(1) | O(log N) | O(log N) | O(1) |
-| Bubble Sort | O(N) | O(N²) | O(N²) | O(1) |
-| Selection Sort | O(N²) | O(N²) | O(N²) | O(1) |
-| Insertion Sort | O(N) | O(N²) | O(N²) | O(1) |
-| Quick Sort | O(N log N) | O(N log N) | O(N²) | O(log N) |
-| Heap Sort | O(N log N) | O(N log N) | O(N log N) | O(1) |
-| BFS / DFS | — | O(V+E) | O(V+E) | O(V) |
-| Dijkstra | — | O((V+E) log V) | O(V²) | O(V) |
-| DP Fibonacci | — | O(N) | O(N) | O(N) |
-| DP Knapsack | — | O(N·W) | O(N·W) | O(N·W) |
-
----
-
-## 🤝 Đóng Góp
-
-Mọi đóng góp đều được chào đón!
-
-1. Fork dự án
-2. Tạo branch mới: `git checkout -b feature/ten-tinh-nang`
-3. Commit: `git commit -m "feat: thêm tính năng X"`
-4. Push: `git push origin feature/ten-tinh-nang`
-5. Tạo Pull Request
-
-### Convention đặt tên
-- **Branch:** `feature/`, `fix/`, `docs/`
-- **Commit:** `feat:`, `fix:`, `docs:`, `refactor:`
-- **Hàm C++:** PascalCase — `TimKiemNhiPhan()`
-- **Biến:** camelCase — `soNut`, `chieuCao`
-
----
-
-## 📚 Tài Liệu Tham Khảo
-
-- 📘 *Introduction to Algorithms* — CLRS (Cormen et al.)
-- 📗 *Data Structures and Algorithm Analysis* — Mark Allen Weiss  
-- 📙 *Competitive Programmer's Handbook* — Antti Laaksonen  
-- 📕 Giáo trình *Cấu trúc Dữ liệu & Giải thuật* — ThS. Trần Anh Khoa, ThS. Hồ Diên Lợi
-
----
-
-## 📄 Giấy Phép
-
-Dự án sử dụng **[MIT License](LICENSE)** — Tự do sử dụng, chia sẻ và chỉnh sửa với điều kiện giữ nguyên thông tin tác giả.
-
----
-
-<div align="center">
-
-Made with ❤️ · DSALab · 2025
-
-*"Bad programmers worry about the code. Good programmers worry about data structures."*  
-— Linus Torvalds
-
-</div>
+# Chạy ứng dụng
+./bin/MazeGame.exe
+🕹️ Hướng Dẫn Điều KhiểnKhi tham gia vào chế độ Chức năng 3: Người chơi tự giải, giao diện trò chơi sẽ hiển thị và chấp nhận các lệnh điều hướng sau:🔼 W / w: Di chuyển nhân vật lên trên một ô.🔽 S / s: Di chuyển nhân vật xuống dưới một ô.◀️ A / a: Di chuyển nhân vật sang trái một ô.▶️ D / d: Di chuyển nhân vật sang phải một ô.❌ Q / q: Bỏ cuộc giữa chừng, thoát ngay lập tức về Menu chính.💡 Mẹo: Hệ thống tự động chặn di chuyển va chạm (Collision Detection), bạn không thể đi xuyên qua các bức tường ##.🧩 Tóm Tắt Giải Thuật & Độ Phức TạpDưới đây là bảng thống kê đánh giá hiệu năng lý thuyết áp dụng trên lưới ma trận kích thước $W \times H$ (với $V = W \times H$ là số đỉnh, $E \le 4V$ là số cạnh):Thuật ToánThời Gian (Best)Thời Gian (Worst)Không Gian (Space)Mục Tiêu Cốt LõiDFS Sinh Mê CungO(V)O(V)O(V)Phá tường ngẫu nhiên để tạo bản đồ duy nhấtBFS Tìm ĐườngO(1)O(V + E)O(V)Bắt buộc tìm ra lộ trình ngắn nhất (Ký hiệu: .)DFS Tìm ĐườngO(1)O(V + E)O(V)Khám phá sâu, đường đi phụ thuộc thứ tự duyệt (Ký hiệu: *)📌 Kết luận thực nghiệm: > * BFS hoạt động theo cơ chế loang đều như làn sóng, do đó khi chạm đích lần đầu tiên, độ dài đường đi luôn là ngắn nhất.DFS đi theo thiên hướng mò mẫm một nhánh cho tới khi gặp ngõ cụt rồi mới quay lui (Backtrack), do đó độ dài đường đi thường dài hơn hoặc bằng BFS nhưng tốn ít bộ nhớ lưu trữ phần tử biên hơn trong đồ thị lớn.🤝 Đóng GópDự án mở rộng mã nguồn nhằm mục đích giáo dục, mọi đóng góp đều được trân trọng!Fork dự án này về tài khoản cá nhân.Tạo nhánh tính năng mới: git checkout -b feature/tinh-nang-moiThực hiện thay đổi và commit theo chuẩn: feat: phát triển tính năng hiển thị màu sắcPush nhánh lên GitHub và tạo một Pull Request.Quy ước viết mã (Coding Conventions)Biến cục bộ / Tham số: Định dạng camelCase (Ví dụ: tempGrid, showVisual).Thuộc tính lớp / Hàm thành viên: Định dạng camelCase hoặc theo mã gốc (grid, start, solveBFS()).Tên lớp: Định dạng PascalCase (MazeGame).📚 Tài Liệu Tham Khảo📘 Introduction to Algorithms (4th Edition) — Thomas H. Cormen (Thuật toán BFS/DFS cơ bản).📗 Maze Generation Algorithms — Jamis Buck (Tổng quan kỹ thuật sinh mê cung ngẫu nhiên).📙 Giáo trình Cấu trúc Dữ liệu & Giải thuật — Trường Đại học Công nghệ Thông tin.
