@@ -1,0 +1,251 @@
+﻿#include <iostream>
+#include "BST.h"
+#include "UndoStack.h"
+#include "History.h"
+#include <windows.h>
+#include <iomanip>
+#include <vector>
+#include "Trash.h"
+
+using namespace std;
+
+Contact inputContact() {
+    Contact c;
+    cout << "Nhap ten: ";
+    getline(cin, c.name);
+
+    do {
+        cout << "Nhap SDT: ";
+        getline(cin, c.phone);
+    } while (!isOnlyNumbers(c.phone));
+
+    return c;
+}
+void pauseScreen() {
+    cout << "\nNhan Enter de tiep tuc...";
+    cin.get();
+}
+void drawMenu() {
+    system("cls"); // clear màn hình (VS2022 OK)
+
+    cout << "+======================================+\n";
+    cout << "|        HE THONG QUAN LY DANH BA      |\n";
+    cout << "+======================================+\n";
+    cout << "| 1. Them lien he                      |\n";
+    cout << "| 2. Xem danh ba                       |\n";
+    cout << "| 3. Tim kiem                          |\n";
+    cout << "| 4. Xoa lien he                       |\n";
+    cout << "| 5. Undo xoa                          |\n";
+    cout << "| 6. Lich su tim kiem                  |\n";
+    cout << "| 7. Luu file                          |\n";
+    cout << "| 8. Thung rac                         |\n";
+    cout << "| 0. Thoat                             |\n";
+    cout << "+======================================+\n";
+    cout << "Chon: ";
+}
+void drawTableHeader() {
+    cout << "+-----+----------------------+--------------+\n";
+    cout << "| STT | Ten                  | So dien thoai|\n";
+    cout << "+-----+----------------------+--------------+\n";
+}
+
+void drawTableFooter() {
+    cout << "+-----+----------------------+--------------+\n";
+}
+
+int main() {
+    Node* root = loadContacts("contacts.txt");
+
+    // Nếu chưa có file thì tạo dữ liệu demo
+    if (!root) {
+        root = insert(root, { "Anh Tuan", "0901234567" });
+        root = insert(root, { "An Nhien", "0988111222" });
+        root = insert(root, { "Bao Nam", "0911555666" });
+    }
+    UndoStack undo;
+    History history;
+    Trash trash;
+    trash.loadFromFile("trash.txt");
+
+    int choice;
+
+    while (true) {
+        drawMenu();
+        cin >> choice;
+        cin.ignore();        
+
+        if (choice == 1) {
+            root = insert(root, inputContact());
+        }
+        else if (choice == 2) {
+            if (!root) {
+                cout << "=> Danh ba rong!\n";
+            }
+            else {
+                vector<Node*> list;
+                int index = 1;
+
+                drawTableHeader();
+                displayTable(root, index, list);
+                drawTableFooter();
+            }
+
+            pauseScreen(); // 💥 THÊM DÒNG NÀY
+        }
+        else if (choice == 3) {
+            string s;
+            cout << "Nhap ten: ";
+            getline(cin, s);
+
+            history.add(s);
+
+            bool found = false;
+            searchAutocomplete(root, s, found);
+            if (!found) cout << "Khong tim thay\n";
+            pauseScreen();
+        }
+        else if (choice == 4) {
+            if (!root) {
+                cout << "=> Danh ba rong!\n";
+                continue;
+            }
+
+            vector<Node*> list;
+            int index = 1;
+
+            drawTableHeader();
+            displayTable(root, index, list);
+            drawTableFooter();
+
+            cout << "Chon STT de xoa (0 de huy): ";
+            int choiceDel;
+            cin >> choiceDel;
+            cin.ignore();
+
+            if (choiceDel <= 0 || choiceDel > list.size()) {
+                cout << "=> Da huy.\n";
+            }
+            else {
+                Node* target = list[choiceDel - 1];
+
+                cout << "Ban co chac muon xoa "
+                    << target->data.name << "? (y/n): ";
+                char confirm;
+                cin >> confirm;
+                cin.ignore();
+
+                if (confirm == 'y' || confirm == 'Y') {
+                    Contact temp = target->data;
+
+                    temp.deletedTime = time(nullptr); // 💥 lấy thời gian hiện tại
+
+                    undo.push(temp);
+                    trash.add(temp);
+                    trash.saveToFile("trash.txt");
+
+                    root = removeNode(root, target->data.name);
+
+                    cout << "=> Da xoa (luu 30 ngay trong thung rac)!\n";
+                }
+                else {
+                    cout << "=> Da huy xoa.\n";
+                }
+            }
+            pauseScreen();
+        }
+        else if (choice == 5) {
+            if (!undo.empty()) {
+                Contact c = undo.pop();
+                root = insert(root, c);
+                cout << "=> Da khoi phuc: " << c.name << endl;
+            }
+            else {
+                cout << "=> Khong co gi de undo!\n";
+            }
+            pauseScreen();
+        }
+        else if (choice == 6) {
+            history.show();
+            pauseScreen();
+        }
+        else if (choice == 7) {
+            saveContacts(root, "contacts.txt");
+            pauseScreen();
+        }
+        else if (choice == 8) {
+            if (trash.empty()) {
+                trash.show();
+                pauseScreen();
+                continue;
+            }
+
+            trash.show();
+
+            cout << "\n1. Khoi phuc\n2. Xoa vinh vien\n0. Quay lai\nChon: ";
+            int t;
+            cin >> t;
+            cin.ignore();
+
+            if (t == 1) {
+                cout << "Chon STT de khoi phuc (0 de huy): ";
+                int idx;
+                cin >> idx;
+                cin.ignore();
+
+                if (idx > 0 && idx <= trash.size()) {
+                    Contact c = trash.get(idx - 1);
+                    root = insert(root, c);
+                    trash.remove(idx - 1);
+                    trash.saveToFile("trash.txt");
+
+                    cout << "=> Da khoi phuc!\n";
+                }
+                else {
+                    cout << "=> Da huy.\n";
+                }
+            }
+
+            else if (t == 2) {
+                cout << "Chon STT de xoa vinh vien (0 de huy): ";
+                int idx;
+                cin >> idx;
+                cin.ignore();
+
+                if (idx > 0 && idx <= trash.size()) {
+                    cout << "Ban co chac muon xoa? (y/n): ";
+                    char confirm;
+                    cin >> confirm;
+                    cin.ignore();
+
+                    if (confirm == 'y' || confirm == 'Y') {
+                        trash.remove(idx - 1);
+                        trash.saveToFile("trash.txt");
+                        cout << "=> Da xoa vinh vien!\n";
+                    }
+                    else {
+                        cout << "=> Da huy.\n";
+                    }
+                }
+                else {
+                    cout << "=> Da huy.\n";
+                }
+            }
+
+            pauseScreen();
+        }
+        else if (choice == 0) {
+            saveContacts(root, "contacts.txt");
+            trash.saveToFile("trash.txt");
+
+            cout << "=> Da luu du lieu truoc khi thoat!\n";
+            break;
+            }
+        else {
+                cout << "=> Lua chon khong hop le!\n";
+                pauseScreen();
+        }    
+    }
+
+    freeTree(root);
+    return 0;
+}
