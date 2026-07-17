@@ -1,0 +1,218 @@
+// ============================================================
+//  UngDung_QuanLySinhVien.cpp
+//  Noi dung: Quan ly danh sach sinh vien bang DSLK don
+// ============================================================
+#include <iostream>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+// ============================================================
+//  1. CAU TRUC DU LIEU SINH VIEN & NODE
+// ============================================================
+struct SinhVien {
+    string maSV;
+    string hoTen;
+    float diemTB;
+};
+
+struct Node {
+    SinhVien data;
+    Node *next;
+};
+
+struct List {
+    Node *head;
+    Node *tail;
+};
+
+// ============================================================
+//  2. KHOI TAO VA TIEN ICH
+// ============================================================
+void KhoiTaoDS(List &L) {
+    L.head = L.tail = nullptr;
+}
+
+Node* TaoNode(SinhVien sv) {
+    Node *p = new Node;
+    p->data = sv;
+    p->next = nullptr;
+    return p;
+}
+
+bool DanhSachRong(const List &L) {
+    return L.head == nullptr;
+}
+
+// ============================================================
+//  3. CAC THAO TAC TREN DANH SACH SINH VIEN
+// ============================================================
+
+// Nhập thông tin 1 sinh viên
+SinhVien NhapMotSinhVien() {
+    SinhVien sv;
+    cout << "  Nhap Ma SV: ";
+    cin >> ws; // Xóa khoảng trắng thừa
+    getline(cin, sv.maSV);
+    cout << "  Nhap Ho Ten: ";
+    getline(cin, sv.hoTen);
+    cout << "  Nhap Diem TB: ";
+    cin >> sv.diemTB;
+    return sv;
+}
+
+// Thêm sinh viên vào cuối danh sách
+void ThemSinhVienCuoi(List &L) {
+    SinhVien sv = NhapMotSinhVien();
+    Node *p = TaoNode(sv);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    } else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+    cout << "  -> Da them sinh vien thanh cong!\n";
+}
+
+// In danh sách sinh viên
+void InDanhSach(const List &L) {
+    if (DanhSachRong(L)) {
+        cout << "  [Danh sach sinh vien rong]\n";
+        return;
+    }
+    cout << string(60, '-') << "\n";
+    cout << left << setw(15) << "Ma SV" << setw(30) << "Ho va Ten" << setw(10) << "Diem TB" << "\n";
+    cout << string(60, '-') << "\n";
+    
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        cout << left << setw(15) << cur->data.maSV 
+             << setw(30) << cur->data.hoTen 
+             << setw(10) << fixed << setprecision(2) << cur->data.diemTB << "\n";
+        cur = cur->next;
+    }
+    cout << string(60, '-') << "\n";
+}
+
+// Tìm sinh viên theo Mã SV
+void TimSinhVien(const List &L, string maCachTim) {
+    Node *cur = L.head;
+    bool timThay = false;
+    while (cur != nullptr) {
+        if (cur->data.maSV == maCachTim) {
+            cout << "  -> Thong tin SV: " << cur->data.hoTen << " | Diem TB: " << cur->data.diemTB << "\n";
+            timThay = true;
+            break;
+        }
+        cur = cur->next;
+    }
+    if (!timThay) cout << "  -> Khong tim thay sinh vien co ma: " << maCachTim << "\n";
+}
+
+// Xóa sinh viên theo Mã SV
+bool XoaSinhVien(List &L, string maCanXoa) {
+    if (DanhSachRong(L)) return false;
+    
+    Node *cur = L.head, *prev = nullptr;
+    while (cur != nullptr && cur->data.maSV != maCanXoa) {
+        prev = cur; 
+        cur = cur->next;
+    }
+    
+    if (cur == nullptr) return false; // Không tìm thấy
+    
+    if (prev == nullptr) { // Xóa đầu
+        L.head = L.head->next;
+        if (L.head == nullptr) L.tail = nullptr;
+    } else { // Xóa giữa hoặc cuối
+        prev->next = cur->next;
+        if (cur == L.tail) L.tail = prev;
+    }
+    
+    delete cur;
+    return true;
+}
+
+// Sắp xếp sinh viên theo Điểm TB (Giảm dần)
+void SapXepTheoDiem(List &L) {
+    for (Node *i = L.head; i != nullptr && i->next != nullptr; i = i->next) {
+        for (Node *j = i->next; j != nullptr; j = j->next) {
+            if (i->data.diemTB < j->data.diemTB) {
+                // Hoán vị data (SinhVien)
+                SinhVien temp = i->data;
+                i->data = j->data;
+                j->data = temp;
+            }
+        }
+    }
+    cout << "  -> Da sap xep danh sach theo diem TB giam dan!\n";
+}
+
+// ============================================================
+//  MAIN & MENU
+// ============================================================
+int main() {
+    List L; 
+    KhoiTaoDS(L);
+    int luaChon;
+
+    do {
+        cout << "\n================ QUAN LY SINH VIEN ================\n";
+        cout << "1. Them sinh vien vao danh sach\n";
+        cout << "2. Hien thi danh sach sinh vien\n";
+        cout << "3. Tim kiem sinh vien theo Ma SV\n";
+        cout << "4. Xoa sinh vien theo Ma SV\n";
+        cout << "5. Sap xep sinh vien theo Diem TB (Giam dan)\n";
+        cout << "0. Thoat chuong trinh\n";
+        cout << "===================================================\n";
+        cout << "Nhap lua chon cua ban: ";
+        cin >> luaChon;
+
+        switch (luaChon) {
+            case 1:
+                cout << "\n--- THEM SINH VIEN ---\n";
+                ThemSinhVienCuoi(L);
+                break;
+            case 2:
+                cout << "\n--- DANH SACH SINH VIEN ---\n";
+                InDanhSach(L);
+                break;
+            case 3: {
+                cout << "\n--- TIM KIEM SINH VIEN ---\n";
+                string ma;
+                cout << "  Nhap Ma SV can tim: ";
+                cin >> ws; getline(cin, ma);
+                TimSinhVien(L, ma);
+                break;
+            }
+            case 4: {
+                cout << "\n--- XOA SINH VIEN ---\n";
+                string ma;
+                cout << "  Nhap Ma SV can xoa: ";
+                cin >> ws; getline(cin, ma);
+                if (XoaSinhVien(L, ma)) cout << "  -> Da xoa thanh cong!\n";
+                else cout << "  -> Khong tim thay Ma SV de xoa!\n";
+                break;
+            }
+            case 5:
+                cout << "\n--- SAP XEP SINH VIEN ---\n";
+                SapXepTheoDiem(L);
+                break;
+            case 0:
+                cout << "Thoat chuong trinh. Tam biet!\n";
+                break;
+            default:
+                cout << "Lua chon khong hop le. Vui long thu lai!\n";
+        }
+    } while (luaChon != 0);
+
+    // Giải phóng bộ nhớ trước khi thoát (Best practice)
+    while (!DanhSachRong(L)) {
+        Node *temp = L.head;
+        L.head = L.head->next;
+        delete temp;
+    }
+
+    return 0;
+}
