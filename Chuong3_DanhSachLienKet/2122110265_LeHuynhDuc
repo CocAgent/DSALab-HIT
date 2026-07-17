@@ -1,0 +1,215 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ================== STRUCT ==================
+struct SinhVien {
+    string maSV;
+    string ten;
+    float diem;
+};
+
+struct Node {
+    SinhVien data;
+    Node* next;
+};
+
+struct List {
+    Node* head;
+    Node* tail;
+};
+
+// ================== KHOI TAO ==================
+void KhoiTao(List& L) {
+    L.head = L.tail = nullptr;
+}
+
+Node* TaoNode(SinhVien sv) {
+    Node* p = new Node;
+    p->data = sv;
+    p->next = nullptr;
+    return p;
+}
+
+bool Rong(List L) {
+    return L.head == nullptr;
+}
+
+// ================== THEM ==================
+void ThemCuoi(List& L, SinhVien sv) {
+    Node* p = TaoNode(sv);
+    if (Rong(L)) {
+        L.head = L.tail = p;
+    }
+    else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+}
+
+// ================== NHAP ==================
+SinhVien NhapSV() {
+    SinhVien sv;
+    cout << "Ma SV: ";
+    cin >> sv.maSV;
+    cin.ignore();
+    cout << "Ten: ";
+    getline(cin, sv.ten);
+    cout << "Diem: ";
+    cin >> sv.diem;
+    return sv;
+}
+
+// ================== XUAT ==================
+void XuatSV(SinhVien sv) {
+    cout << sv.maSV << " | " << sv.ten << " | " << sv.diem << endl;
+}
+
+void XuatDS(List L) {
+    if (Rong(L)) {
+        cout << "Danh sach rong!\n";
+        return;
+    }
+    for (Node* p = L.head; p != nullptr; p = p->next) {
+        XuatSV(p->data);
+    }
+}
+
+// ================== TIM ==================
+Node* TimTheoMa(List L, string ma) {
+    for (Node* p = L.head; p != nullptr; p = p->next) {
+        if (p->data.maSV == ma) return p;
+    }
+    return nullptr;
+}
+
+// ================== XOA ==================
+void XoaTheoMa(List& L, string ma) {
+    Node* p = L.head, * prev = nullptr;
+
+    while (p != nullptr && p->data.maSV != ma) {
+        prev = p;
+        p = p->next;
+    }
+
+    if (p == nullptr) {
+        cout << "Khong tim thay!\n";
+        return;
+    }
+
+    if (prev == nullptr) { // xoa dau
+        L.head = L.head->next;
+        if (L.head == nullptr) L.tail = nullptr;
+    }
+    else {
+        prev->next = p->next;
+        if (p == L.tail) L.tail = prev;
+    }
+
+    delete p;
+    cout << "Da xoa!\n";
+}
+
+// ================== SAP XEP ==================
+void SapXep(List& L) {
+    for (Node* i = L.head; i != nullptr; i = i->next) {
+        for (Node* j = i->next; j != nullptr; j = j->next) {
+            if (i->data.diem > j->data.diem) {
+                swap(i->data, j->data);
+            }
+        }
+    }
+}
+
+// ================== LIET KE ==================
+void LietKeRot(List L) {
+    cout << "Sinh vien rot (<5):\n";
+    for (Node* p = L.head; p != nullptr; p = p->next) {
+        if (p->data.diem < 5) {
+            XuatSV(p->data);
+        }
+    }
+}
+
+// ================== MAX ==================
+void SVMax(List L) {
+    if (Rong(L)) return;
+    float mx = L.head->data.diem;
+
+    for (Node* p = L.head; p != nullptr; p = p->next) {
+        if (p->data.diem > mx) mx = p->data.diem;
+    }
+
+    cout << "Sinh vien diem cao nhat:\n";
+    for (Node* p = L.head; p != nullptr; p = p->next) {
+        if (p->data.diem == mx) {
+            XuatSV(p->data);
+        }
+    }
+}
+
+// ================== MENU ==================
+void Menu() {
+    cout << "\n===== QUAN LY SINH VIEN =====\n";
+    cout << "1. Them sinh vien\n";
+    cout << "2. Xuat danh sach\n";
+    cout << "3. Tim sinh vien\n";
+    cout << "4. Xoa sinh vien\n";
+    cout << "5. Sap xep theo diem\n";
+    cout << "6. Liet ke SV rot\n";
+    cout << "7. SV diem cao nhat\n";
+    cout << "0. Thoat\n";
+}
+
+// ================== MAIN ==================
+int main() {
+    List L;
+    KhoiTao(L);
+
+    int chon;
+    do {
+        Menu();
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+        case 1: {
+            SinhVien sv = NhapSV();
+            ThemCuoi(L, sv);
+            break;
+        }
+        case 2:
+            XuatDS(L);
+            break;
+        case 3: {
+            string ma;
+            cout << "Nhap ma SV: ";
+            cin >> ma;
+            Node* p = TimTheoMa(L, ma);
+            if (p) XuatSV(p->data);
+            else cout << "Khong tim thay!\n";
+            break;
+        }
+        case 4: {
+            string ma;
+            cout << "Nhap ma SV can xoa: ";
+            cin >> ma;
+            XoaTheoMa(L, ma);
+            break;
+        }
+        case 5:
+            SapXep(L);
+            cout << "Da sap xep!\n";
+            break;
+        case 6:
+            LietKeRot(L);
+            break;
+        case 7:
+            SVMax(L);
+            break;
+        }
+
+    } while (chon != 0);
+
+    return 0;
+}
