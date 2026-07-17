@@ -1,0 +1,277 @@
+/////index.html////
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hill Climb Racing Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="ui-container">
+        <div class="stats">Khoảng cách: <span id="score">0</span>m</div>
+        <div class="stats">Xăng: <span id="fuel">100</span>%</div>
+        <div class="stats">Tiền xu: <span id="coins">0</span></div>
+    </div>
+
+    <canvas id="game" width="900" height="400"></canvas>
+
+    <div class="controls">
+        <button id="leftBtn">⬅ PHANH</button>
+        <button id="rightBtn">GA ➡</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
+
+
+//////game.js//////
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const fuelEl = document.getElementById("fuel");
+const coinsEl = document.getElementById("coins");
+
+let terrain = [];
+let fuelCans = []; 
+let coins = [];
+let cameraX = 0;
+let coinCount = 0;
+
+let car = {
+    x: 100, y: 0, vx: 0, vy: 0,
+    angle: 0, fuel: 100,
+    width: 50, height: 25
+};
+
+// 1. TẠO ĐỊA HÌNH VÀ VẬT PHẨM
+function generateTerrain() {
+    let h = 250;
+    let freq = 0.01;
+    let amp = 60;
+    terrain = []; fuelCans = []; coins = [];
+
+    for (let i = 0; i < 50000; i++) {
+        h = 250 + Math.sin(i * freq) * amp + Math.sin(i * 0.05) * 10;
+        terrain[i] = h;
+
+        // Bình xăng hiếm (Cách nhau ~2500 đơn vị)
+        if (i > 800 && i % 2500 === 0) {
+            fuelCans.push({ x: i, y: h - 15, collected: false });
+        }
+
+        // Đồng xu nằm rải trên mặt đường (Cách nhau ~500 đơn vị)
+        if (i > 300 && i % 500 === 0) {
+            for(let j = 0; j < 5; j++) {
+                let coinX = i + (j * 40);
+                let coinY = terrain[Math.floor(coinX)] || h; 
+                coins.push({ x: coinX, y: coinY - 10, collected: false });
+            }
+        }
+    }
+}
+
+// 2. ĐIỀU KHIỂN
+let left = false;
+let right = false;
+
+const setupInput = (id, setVar) => {
+    const btn = document.getElementById(id);
+    if(btn) {
+        btn.onmousedown = btn.ontouchstart = (e) => { e.preventDefault(); setVar(true); };
+        btn.onmouseup = btn.ontouchend = () => setVar(false);
+    }
+};
+setupInput("leftBtn", (v) => left = v);
+setupInput("rightBtn", (v) => right = v);
+
+// 3. LOGIC CẬP NHẬT
+function update() {
+    car.vy += 0.25; 
+
+    if (right && car.fuel > 0) {
+        car.vx += 0.12; 
+        car.fuel -= 0.18; 
+    }
+    if (left) car.vx -= 0.08;
+
+    car.vx *= 0.98; 
+    car.x += car.vx;
+    car.y += car.vy;
+
+    if (car.x < 0) car.x = 0;
+
+    let index = Math.floor(car.x);
+    let groundY = terrain[index] || 300;
+    let nextGroundY = terrain[index + 10] || groundY;
+    let targetY = groundY - car.height;
+
+    if (car.y > targetY) {
+        car.y = targetY;
+        car.vy = 0;
+        let targetAngle = Math.atan2(nextGroundY - groundY, 10);
+        car.angle += (targetAngle - car.angle) * 0.1;
+    } else {
+        car.angle += car.vx * 0.01;
+    }
+
+    // Kiểm tra nhặt Bình xăng
+    fuelCans.forEach(f => {
+        if (!f.collected && Math.abs(car.x - f.x) < 40 && Math.abs(car.y - f.y) < 50) {
+            f.collected = true; 
+            car.fuel = Math.min(100, car.fuel + 40);
+        }
+    });
+
+    // Kiểm tra nhặt Đồng xu
+    coins.forEach(c => {
+        if (!c.collected && Math.abs(car.x - c.x) < 40 && Math.abs(car.y - c.y) < 60) {
+            c.collected = true; 
+            coinCount++;
+            coinsEl.innerText = coinCount;
+        }
+    });
+
+    scoreEl.innerText = Math.floor(car.x / 10);
+    fuelEl.innerText = Math.max(0, Math.ceil(car.fuel));
+
+    if (car.fuel <= 0 && Math.abs(car.vx) < 0.1) {
+        alert("Hết xăng! Điểm: " + scoreEl.innerText + " - Xu: " + coinCount);
+        resetGame();
+    }
+
+    cameraX += (car.x - 150 - cameraX) * 0.1;
+}
+
+// 4. HÀM VẼ
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Vẽ địa hình
+    ctx.fillStyle = "#27ae60";
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    for (let i = 0; i < canvas.width; i++) {
+        let worldX = Math.floor(i + cameraX);
+        ctx.lineTo(i, terrain[worldX] || 300);
+    }
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.fill();
+
+    // Vẽ Bình xăng
+    ctx.font = "20px Arial";
+    fuelCans.forEach(f => {
+        if (!f.collected) {
+            ctx.fillText("⛽", f.x - cameraX, f.y);
+        }
+    });
+
+    // Vẽ Đồng xu (Vàng Gold)
+    coins.forEach(c => {
+        if (!c.collected) {
+            let sx = c.x - cameraX;
+            if (sx > -20 && sx < canvas.width + 20) {
+                ctx.fillStyle = "#f1c40f";
+                ctx.beginPath();
+                ctx.arc(sx, c.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#b8860b";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+    });
+
+    // Vẽ xe
+    ctx.save();
+    ctx.translate(car.x - cameraX, car.y);
+    ctx.rotate(car.angle);
+    ctx.fillStyle = "#e74c3c";
+    ctx.fillRect(0, 0, car.width, car.height);
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(8, car.height, 8, 0, Math.PI*2);
+    ctx.arc(car.width-8, car.height, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function resetGame() {
+    car.x = 100; car.y = 0; car.vx = 0; car.fuel = 100;
+    coinCount = 0; coinsEl.innerText = "0";
+    generateTerrain();
+}
+
+function gameLoop() {
+    update(); 
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+generateTerrain();
+gameLoop();
+
+
+/////style.css////
+body {
+  margin: 0;
+  background: #1a1a1a;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  touch-action: none; /* Ngăn chặn cuộn trang trên điện thoại */
+}
+
+#ui-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none; /* Để không chặn chuột khi chơi */
+  z-index: 100;
+}
+
+.stats {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px 15px;
+  border-radius: 20px;
+}
+
+canvas {
+  background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+  display: block;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.controls {
+  margin-top: 30px;
+  z-index: 100;
+}
+
+button {
+  font-size: 24px;
+  padding: 15px 45px;
+  margin: 0 15px;
+  cursor: pointer;
+  border-radius: 15px;
+  border: none;
+  background: #ff9800;
+  color: white;
+  box-shadow: 0 6px #e65100;
+  font-weight: bold;
+  transition: 0.1s;
+}
+
+button:active {
+  box-shadow: 0 2px #e65100;
+  transform: translateY(4px);
+}
