@@ -1,0 +1,28 @@
+//con tro la mot bien dung de luu dia chi cu mot bien khac hoac cua 1 vung nho trong bo nho
+// con tro khong luu gia tri truc tiep ma luu vi tri (dia chi) cua du lieu trong ram, nho do chuong trinh co the truy cap hoac thay doi du lieu thong qua dia chi do
+// cu phap khai bao:
+// <tencontro>;
+#include <iostream>
+using namespace std;
+
+int main() {
+    int x = 10;
+    int *p = &x;
+
+    cout << *p << endl;  // output: 10
+    cout << p << endl;   // output: địa chỉ của x
+
+    *p = 20;
+    cout << *p << endl;  // output: 20
+    cout << x << endl;   // output: 20, cùng giá trị với *p
+
+    // con trỏ với mảng
+    int a[3] = {2, 3, 5};
+    p = a; 
+    for (int i = 0; i < 3; i++) {
+        cout << *(p + i) << " ";
+    }
+    // output: 2 3 5
+
+    return 0;
+}
