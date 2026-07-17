@@ -1,0 +1,153 @@
+#include <iostream>
+using namespace std;
+
+char board[3][3] = {
+    {'1','2','3'},
+    {'4','5','6'},
+    {'7','8','9'}
+};
+
+// In bàn cờ
+void printBoard() {
+    cout << "\n";
+    for (int i = 0; i < 3; i++) {
+        cout << " " << board[i][0] << " | " << board[i][1] << " | " << board[i][2] << "\n";
+        if (i < 2) cout << "---+---+---\n";
+    }
+    cout << "\n";
+}
+
+// Kiểm tra thắng
+bool checkWin(char player) {
+    for (int i = 0; i < 3; i++) {
+        if (board[i][0] == player && board[i][1] == player && board[i][2] == player) return true;
+        if (board[0][i] == player && board[1][i] == player && board[2][i] == player) return true;
+    }
+    if (board[0][0] == player && board[1][1] == player && board[2][2] == player) return true;
+    if (board[0][2] == player && board[1][1] == player && board[2][0] == player) return true;
+
+    return false;
+}
+
+// Kiểm tra hòa
+bool isDraw() {
+    for (int i = 0;i < 3;i++)
+        for (int j = 0;j < 3;j++)
+            if (board[i][j] != 'X' && board[i][j] != 'O')
+                return false;
+    return true;
+}
+
+// Minimax
+int minimax(bool isMax) {
+    if (checkWin('O')) return 1;
+    if (checkWin('X')) return -1;
+    if (isDraw()) return 0;
+
+    if (isMax) {
+        int best = -1000;
+        for (int i = 0;i < 3;i++) {
+            for (int j = 0;j < 3;j++) {
+                if (board[i][j] != 'X' && board[i][j] != 'O') {
+                    char temp = board[i][j];
+                    board[i][j] = 'O';
+                    best = max(best, minimax(false));
+                    board[i][j] = temp;
+                }
+            }
+        }
+        return best;
+    }
+    else {
+        int best = 1000;
+        for (int i = 0;i < 3;i++) {
+            for (int j = 0;j < 3;j++) {
+                if (board[i][j] != 'X' && board[i][j] != 'O') {
+                    char temp = board[i][j];
+                    board[i][j] = 'X';
+                    best = min(best, minimax(true));
+                    board[i][j] = temp;
+                }
+            }
+        }
+        return best;
+    }
+}
+
+// AI chọn nước đi tốt nhất
+void aiMove() {
+    int bestVal = -1000;
+    int bestRow = -1, bestCol = -1;
+
+    for (int i = 0;i < 3;i++) {
+        for (int j = 0;j < 3;j++) {
+            if (board[i][j] != 'X' && board[i][j] != 'O') {
+                char temp = board[i][j];
+                board[i][j] = 'O';
+
+                int moveVal = minimax(false);
+
+                board[i][j] = temp;
+
+                if (moveVal > bestVal) {
+                    bestRow = i;
+                    bestCol = j;
+                    bestVal = moveVal;
+                }
+            }
+        }
+    }
+
+    board[bestRow][bestCol] = 'O';
+}
+
+int main() {
+    int choice;
+
+    while (true) {
+        printBoard();
+
+        // Người chơi
+        cout << "Ban (X), chon o (1-9): ";
+        cin >> choice;
+
+        int row = (choice - 1) / 3;
+        int col = (choice - 1) % 3;
+
+        if (board[row][col] == 'X' || board[row][col] == 'O') {
+            cout << "O da duoc chon! Thu lai.\n";
+            continue;
+        }
+
+        board[row][col] = 'X';
+
+        if (checkWin('X')) {
+            printBoard();
+            cout << "🎉 Ban thang!\n";
+            break;
+        }
+
+        if (isDraw()) {
+            printBoard();
+            cout << "Hoa!\n";
+            break;
+        }
+
+        // AI đánh
+        aiMove();
+
+        if (checkWin('O')) {
+            printBoard();
+            cout << "🤖 AI thang!\n";
+            break;
+        }
+
+        if (isDraw()) {
+            printBoard();
+            cout << "Hoa!\n";
+            break;
+        }
+    }
+
+    return 0;
+}
