@@ -355,3 +355,11 @@ int main() {
     cout << "============================================================\n";
     return 0;
 }
+
+//Nhận xét
+//Tổ chức code sạch sẽ
+//Ứng dụng thực tế chuẩn mẫu
+//Quản lý bộ nhớ tốt ở Ứng dụng 5
+//Sử dụng kỹ thuật C++ hiện đại
+//Cần tối ưu
+//
