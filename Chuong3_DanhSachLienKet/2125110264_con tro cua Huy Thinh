@@ -1,0 +1,176 @@
+Con trỏ dùng để:
+Lưu địa chỉ
+Sửa dữ liệu trực tiếp
+Quản lý bộ nhớ động
+Con trỏ là nền tảng của DSLK
+CTDL (mảng, DSLK…) ảnh hưởng mạnh đến giải thuật
+
+#include <iostream>
+using namespace std;
+
+// 1. Hiển thị địa chỉ và giá trị
+void hienThiConTro() {
+    int x = 10;
+    int* p = &x;
+
+    cout << "Gia tri x: " << x << endl;
+    cout << "Dia chi x: " << &x << endl;
+    cout << "Con tro p tro toi: " << p << endl;
+    cout << "Gia tri ma p tro toi: " << *p << endl;
+}
+
+// 2. Thay đổi giá trị qua con trỏ
+void thayDoiGiaTri() {
+    int x = 5;
+    int* p = &x;
+
+    cout << "Truoc: x = " << x << endl;
+    *p = 20;
+    cout << "Sau: x = " << x << endl;
+}
+
+// 3. Swap bằng con trỏ
+void swapPointer(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void chucNangSwap() {
+    int a = 3, b = 7;
+    cout << "Truoc swap: a = " << a << ", b = " << b << endl;
+
+    swapPointer(&a, &b);
+
+    cout << "Sau swap: a = " << a << ", b = " << b << endl;
+}
+
+// 4. Duyệt mảng bằng con trỏ
+void duyetMang() {
+    int arr[] = { 1, 2, 3, 4, 5 };
+    int* p = arr;
+
+    cout << "Duyet mang bang con tro: ";
+    for (int i = 0; i < 5; i++) {
+        cout << *(p + i) << " ";
+    }
+    cout << endl;
+}
+
+// 5. Cấp phát động
+void capPhatDong() {
+    int n;
+    cout << "Nhap so phan tu: ";
+    cin >> n;
+
+    int* arr = new int[n];
+
+    for (int i = 0; i < n; i++) {
+        cout << "Nhap arr[" << i << "] = ";
+        cin >> arr[i];
+    }
+
+    cout << "Mang vua nhap: ";
+    for (int i = 0; i < n; i++) {
+        cout << *(arr + i) << " ";
+    }
+
+    delete[] arr;
+}
+
+// MENU
+int main() {
+    int choice;
+
+    do {
+        cout << "\n===== MENU CON TRO =====\n";
+        cout << "1. Hien thi con tro\n";
+        cout << "2. Thay doi gia tri\n";
+        cout << "3. Swap 2 so\n";
+        cout << "4. Duyet mang\n";
+        cout << "5. Cap phat dong\n";
+        cout << "0. Thoat\n";
+        cout << "Chon: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: hienThiConTro(); break;
+        case 2: thayDoiGiaTri(); break;
+        case 3: chucNangSwap(); break;
+        case 4: duyetMang(); break;
+        case 5: capPhatDong(); break;
+        case 0: cout << "Thoat chuong trinh!\n"; break;
+        default: cout << "Nhap sai!\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
+===== MENU CON TRO =====
+1. Hien thi con tro
+2. Thay doi gia tri
+3. Swap 2 so
+4. Duyet mang
+5. Cap phat dong
+0. Thoat
+Chon: 1
+Gia tri x: 10
+Dia chi x: 000000733F0FF7F4
+Con tro p tro toi: 000000733F0FF7F4
+Gia tri ma p tro toi: 10
+
+===== MENU CON TRO =====
+1. Hien thi con tro
+2. Thay doi gia tri
+3. Swap 2 so
+4. Duyet mang
+5. Cap phat dong
+0. Thoat
+Chon: 2
+Truoc: x = 5
+Sau: x = 20
+
+===== MENU CON TRO =====
+1. Hien thi con tro
+2. Thay doi gia tri
+3. Swap 2 so
+4. Duyet mang
+5. Cap phat dong
+0. Thoat
+Chon: 3
+Truoc swap: a = 3, b = 7
+Sau swap: a = 7, b = 3
+
+===== MENU CON TRO =====
+1. Hien thi con tro
+2. Thay doi gia tri
+3. Swap 2 so
+4. Duyet mang
+5. Cap phat dong
+0. Thoat
+Chon: 4
+Duyet mang bang con tro: 1 2 3 4 5
+
+===== MENU CON TRO =====
+1. Hien thi con tro
+2. Thay doi gia tri
+3. Swap 2 so
+4. Duyet mang
+5. Cap phat dong
+0. Thoat
+Chon: 5
+Nhap so phan tu: 3
+Nhap arr[0] = 2
+Nhap arr[1] = 3
+Nhap arr[2] = 1
+Mang vua nhap: 2 3 1
+===== MENU CON TRO =====
+1. Hien thi con tro
+2. Thay doi gia tri
+3. Swap 2 so
+4. Duyet mang
+5. Cap phat dong
+0. Thoat
+Chon:
+
