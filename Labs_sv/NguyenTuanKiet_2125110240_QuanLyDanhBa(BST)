@@ -1,0 +1,183 @@
+/*
+Họ tên: Nguyễn Tuấn Kiệt
+MSSV: 2125110240
+Lớp: CCQ2511G
+Đề tài: Quản lý danh bạ bằng cây BST (Lab DSA)
+*/
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <iomanip>
+
+using namespace std;
+
+// 1. Cấu trúc dữ liệu liên hệ
+struct Contact {
+    string name;
+    string phone;
+};
+
+// 2. Cấu trúc nút cây BST
+struct Node {
+    Contact data;
+    Node* left, * right;
+    Node(Contact c) : left(nullptr), right(nullptr) { data = c; }
+};
+
+// --- CÁC HÀM TIỆN ÍCH ---
+
+// Chuyển chuỗi về chữ thường để so sánh không phân biệt hoa thường
+string toLower(string s) {
+    for (int i = 0; i < (int)s.length(); i++) {
+        s[i] = tolower((unsigned char)s[i]);
+    }
+    return s;
+}
+
+// Kiểm tra SDT: Chỉ chấp nhận các chữ số (0-9)
+bool isOnlyNumbers(string s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!isdigit(c)) return false;
+    }
+    return true;
+}
+
+// Kiểm tra tiền tố để phục vụ tìm kiếm gợi ý (Ví dụ: "An" là tiền tố của "Anh")
+bool isPrefix(string sub, string full) {
+    string s = toLower(sub);
+    string f = toLower(full);
+    if (s.length() > f.length()) return false;
+    return f.substr(0, s.length()) == s;
+}
+
+Node* findMin(Node* root) {
+    while (root && root->left != nullptr) root = root->left;
+    return root;
+}
+
+// --- CÁC THAO TÁC TRÊN CÂY ---
+
+// Thêm liên hệ mới (Tự động sắp xếp theo Tên)
+Node* insert(Node* root, Contact c) {
+    if (root == nullptr) return new Node(c);
+    if (toLower(c.name) < toLower(root->data.name))
+        root->left = insert(root->left, c);
+    else
+        root->right = insert(root->right, c);
+    return root;
+}
+
+// Xóa liên hệ
+Node* remove(Node* root, string name) {
+    if (root == nullptr) return root;
+    string target = toLower(name);
+    string current = toLower(root->data.name);
+
+    if (target < current) root->left = remove(root->left, name);
+    else if (target > current) root->right = remove(root->right, name);
+    else {
+        if (root->left == nullptr) {
+            Node* temp = root->right; delete root; return temp;
+        }
+        else if (root->right == nullptr) {
+            Node* temp = root->left; delete root; return temp;
+        }
+        Node* temp = findMin(root->right);
+        root->data = temp->data;
+        root->right = remove(root->right, temp->data.name);
+    }
+    return root;
+}
+
+// Tìm kiếm gợi ý (Prefix Search)
+void searchAutocomplete(Node* root, string prefix, bool& found) {
+    if (!root) return;
+    searchAutocomplete(root->left, prefix, found);
+    if (isPrefix(prefix, root->data.name)) {
+        cout << "  [>] " << left << setw(20) << root->data.name << " | SDT: " << root->data.phone << endl;
+        found = true;
+    }
+    searchAutocomplete(root->right, prefix, found);
+}
+
+// Hiển thị danh bạ theo thứ tự A-Z
+void display(Node* root) {
+    if (root) {
+        display(root->left);
+        cout << "  - " << left << setw(20) << root->data.name << " | " << root->data.phone << endl;
+        display(root->right);
+    }
+}
+
+// Hàm nhập liệu an toàn
+Contact inputContact() {
+    Contact c;
+    cout << "Nhap Ten: "; getline(cin, c.name);
+    while (true) {
+        cout << "Nhap SDT (chi dung chu so): "; getline(cin, c.phone);
+        if (isOnlyNumbers(c.phone)) break;
+        cout << "=> LOI: So dien thoai khong hop le. Vui long nhap lai!\n";
+    }
+    return c;
+}
+
+// --- CHƯƠNG TRÌNH CHÍNH ---
+
+int main() {
+    Node* phonebook = nullptr;
+    int choice;
+
+    // --- DỮ LIỆU DEMO CÓ SẴN ---
+    phonebook = insert(phonebook, { "Anh Tuan", "0901234567" });
+    phonebook = insert(phonebook, { "An Nhien", "0988111222" });
+    phonebook = insert(phonebook, { "Bao Nam", "0911555666" });
+
+    while (true) {
+        cout << "\n================================" << endl;
+        cout << "    QUAN LY DANH BA (BST) - DEMO" << endl;
+        cout << "================================" << endl;
+        cout << "1. Them lien he moi" << endl;
+        cout << "2. Xem danh ba (A-Z)" << endl;
+        cout << "3. Tim kiem" << endl;
+        cout << "4. Xoa lien he" << endl;
+        cout << "0. Thoat" << endl;
+        cout << "Lua chon cua ban: ";
+
+        if (!(cin >> choice)) {
+            cin.clear(); cin.ignore(1000, '\n'); continue;
+        }
+        cin.ignore();
+
+        switch (choice) {
+        case 1:
+            phonebook = insert(phonebook, inputContact());
+            cout << "=> Da luu thanh cong!" << endl;
+            break;
+        case 2:
+            cout << "\nDANH SACH HIEN TAI (Sap xep tu dong):\n";
+            if (!phonebook) cout << "(Trong)" << endl;
+            else display(phonebook);
+            break;
+        case 3: {
+            string p; cout << "Nhap lien he muon tim: "; getline(cin, p);
+            bool found = false;
+            cout << "Ket qua goi y cho '" << p << "':\n";
+            searchAutocomplete(phonebook, p, found);
+            if (!found) cout << "Khong tim thay ket qua nao khop." << endl;
+            break;
+        }
+        case 4: {
+            string dName; cout << "Nhap ten muon xoa: "; getline(cin, dName);
+            phonebook = remove(phonebook, dName);
+            cout << "=> He thong da xu ly lenh xoa." << endl;
+            break;
+        }
+        case 0:
+            return 0;
+        default:
+            cout << "Lua chon khong hop le!" << endl;
+        }
+    }
+    return 0;
+}
