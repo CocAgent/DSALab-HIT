@@ -1,0 +1,258 @@
+#pragma once
+#include <iostream>
+using namespace std;
+typedef struct InforNode
+{
+	int data; //Phần data tổng quát nó phải là kiểu dữ liệu cấu trúc
+	struct InforNode* pNext;
+}Node;
+typedef struct InforList
+{
+	Node* pHead, * pTail;
+}List;
+
+void KhoiTaoDS(List& l);
+void HuyDS(List& l);
+Node* TaoNut(int x);
+void TaoDS(List& l);
+void XuatDS(List l);
+void lietkechan(List l);
+void lietkenguyento(List l);
+void lietkephantulonhondau(List l);
+void lietkechinhphuong(List l);
+int ktratang(List l);
+int ktraDStanggiam(List l);
+
+#include "baitap11.h"
+void KhoiTaoDS(List& l)
+{
+	l.pHead = l.pTail = NULL;
+}
+void HuyDS(List& l)
+{
+	Node* p;
+	while (l.pHead)
+	{
+		p = l.pHead;
+		l.pHead = l.pHead->pNext;
+		p->pNext = NULL;
+		delete (p);
+	}
+}
+Node* TaoNut(int x)
+{
+	Node* p;
+	p = new Node;
+	if (p == NULL)
+	{
+		cout << "Khong cap phat duoc vung nho, ket thuc";
+		system("pause");
+		exit(1);
+	}
+	p->data = x;
+	p->pNext = NULL;
+	return p;
+}
+void TaoDS(List& l)
+{
+	int x;
+	Node* p;
+	do {
+		cout << "\n Nhap gia tri vao DS(Nhap 0 ket thuc) : ";
+		cin >> x;
+		if (x == 0)
+			break;
+		p = TaoNut(x);
+		if (l.pHead == NULL)
+			l.pHead = l.pTail = p;
+		else {
+			l.pTail->pNext = p;
+			l.pTail = p;
+		}
+	} while (1); //số một (1)
+}
+void XuatDS(List l)
+{
+	Node* p = l.pHead;
+	while (p)
+	{
+		cout << p->data << "->";
+		p = p->pNext;
+	}
+	cout << "NULL";
+}
+void lietkechan(List l)
+{
+	Node* p = l.pHead;
+	while (p != NULL) 
+	{
+		if (p->data % 2 == 0)
+			cout << p->data << "->";
+		p = p->pNext;
+	}
+	cout << "NULL";
+}
+bool ktnt(int x)
+{
+	if (x < 2)
+		return false;
+	for (int i = 2;i <= sqrt(x);i++)
+		if (x % i == 0)
+			return false;
+	return true;
+}
+void lietkenguyento(List l)
+{
+	Node* p = l.pHead;
+	while (p != NULL)
+	{
+		if (ktnt(p->data) == true)
+			cout << p->data << "->";
+		p = p->pNext;
+	}
+	cout << "NULL";
+}
+void lietkephantulonhondau(List l)
+{
+	Node* p = l.pHead;
+	Node* q = l.pHead->pNext;
+	while (q != NULL)
+	{
+		if((q->data%2==0)&&( q->data >p->data))
+			cout << q->data << "->";
+		q = q->pNext;
+	}
+	cout << "NULL";
+}
+bool ktcp(int x)
+{
+	if (x < 0)
+		return false;
+	int kq = sqrt(x);
+	if (kq * kq == x)
+		return true;
+	else
+		return false;
+}
+void lietkechinhphuong(List l)
+{
+	Node* p = l.pHead;
+	while (p != NULL)
+	{
+		if(ktcp(p->data)==true)
+			cout << p->data << "->";
+		p = p->pNext;
+	}
+	cout << "NULL";
+}
+int ktratang(List l)
+{
+	Node* p = l.pHead;
+	while (p->pNext != NULL)
+	{
+		if (p->data > p->pNext->data)
+			return -1;
+		p = p->pNext;
+	}
+	return 1;
+}
+int ktraDStanggiam(List l)
+{
+	Node* p = l.pHead;
+	int tang;
+	int giam;
+	while (p->data != NULL)
+	{
+		if (( p->pNext->data>p->data)|| (p->pNext->data<p->data))
+			giam= -1;
+		else
+		    tang= 1;
+		p = p->pNext;
+	}
+	if (giam == -1)
+		return -1;
+	if (tang == 1)
+		return 1;
+	else
+		return 0;
+}
+#include "baitap11.h"
+int Menu()
+{
+	system("cls");
+	int cv, k = 0;
+	cout << "\n CAC THAO TAC TREN DANH SACH LIEN KET" << endl;
+	cout << "\n 1.Tao danh sach lien ket"; k++;
+	cout << "\n 2.Xuat danh sach lien ket"; k++;
+	cout << "\n 3.liet ke chan"; k++;
+	cout << "\n 4.liet ke nguyen to"; k++;
+	cout << "\n 5.liet ke cac so lon hon dau"; k++;
+	cout << "\n 6.liet ke cac so chinh phuong"; k++;
+	cout << "\n 7.ktra tang"; k++;
+	cout << "\n 8.ktra tang,giam"; k++;
+
+	
+	cout << "\n 0.Thoat khoi chuong trinh";
+	do {
+		cout << "\n\nNhap thao tac can thuc hien : ";
+		cin >> cv;
+	} while (cv<0 || cv>k);
+	return cv;
+}
+int main()
+{
+	List l;
+	int cv, x,kq1;
+	Node* kq;
+	KhoiTaoDS(l);
+
+	do {
+		cv = Menu();
+		switch (cv)
+		{
+		case 1: TaoDS(l); break;
+		case 2: XuatDS(l); break;
+		case 3:
+			cout << "cac phan tu chan la:";
+			lietkechan(l); break;
+		case 4:
+			cout << "cac so nguyen to:";
+			lietkenguyento(l); break;
+		case 5:
+			cout << "cac so chan lon hon dau:";
+			lietkephantulonhondau(l); break;
+		case 6:
+			cout << "cac so chinh phuong:";
+	           lietkechinhphuong(l); break;
+		case 7:
+			kq1 = ktratang(l);
+			if (kq1 == -1)
+				cout << "danh sach khong tang";
+			else
+				cout << "danh sach co tang dan";
+			break;
+		case 8:
+			kq1 = ktratang(l);
+			if (kq1 == -1)
+				cout << "danh sach khong tang";
+			else
+				cout << "danh sach co tang dan";
+			break;
+		case 0:
+			cout << "\nTam biet ban, chuong trinh ket thuc!";
+			break;
+
+		}//of switch
+		cout << endl;
+		system("pause");
+	} while (cv);//cv!=0
+	HuyDS(l);
+	return 0;
+}
+
+
+
+
+
+
+
