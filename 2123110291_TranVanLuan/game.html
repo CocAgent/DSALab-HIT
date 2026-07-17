@@ -1,0 +1,635 @@
+/// Logic game chính
+///javascript
+// Cấu trúc dữ liệu//
+///player = { x, y, power, color }
+//fishes = [{ x, y, radius, power, color, vx, vy, isBoss }]
+
+// Cơ chế chính
+<!-- - Power > đối thủ → ăn được (+1/4 power đối thủ)
+- Power < đối thủ → Game Over
+- Power = đối thủ → đẩy nhau -->
+
+<!-- Camera & Zoom:
+javascript
+// Chuyển đổi tọa độ màn hình sang thế giới
+screenToWorld(clientX, clientY) {
+  canvasX = (clientX - rect.left) * (canvasW / rect.width)
+  worldX = (canvasX - canvasW/2) / zoom + cameraX
+} -->
+<!-- Sinh cá BOSS (mỗi 5 giây):
+javascript
+bossTimer += 1
+if (bossTimer >= 300) {  // 300 frame @ 60fps = 5 giây
+  bossPower = player.power * random(5, 9)  // Siêu mạnh
+  spawnBoss()
+} -->
+
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cá lớn nuốt cá bé - Thêm cá siêu nguy hiểm mỗi 5 giây</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0a2f6c 0%, #0a4c8a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Comic Neue', 'Chalkboard SE', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+            border-radius: 48px;
+            background: #1b5e2f;
+            padding: 20px;
+            box-shadow: 0 25px 35px rgba(0,0,0,0.4), inset 0 1px 4px rgba(255,255,255,0.3);
+            display: inline-block;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 28px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.3), inset 0 0 0 3px #ffefb0;
+            cursor: default;
+            background: #1e8bc0;
+            background-image: radial-gradient(circle at 20% 40%, rgba(255,245,180,0.2) 2%, transparent 2.5%),
+                              radial-gradient(circle at 75% 85%, rgba(255,220,140,0.25) 1.8%, transparent 2%);
+            background-size: 55px 55px, 80px 80px;
+            width: 100%;
+            height: auto;
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 20px;
+            background: #fef7cf;
+            padding: 10px 25px;
+            border-radius: 60px;
+            box-shadow: inset 0 1px 6px rgba(98,55,14,0.2), 0 6px 0 #b97f3a;
+            font-weight: bold;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .score-box {
+            background: #2e1b0e;
+            padding: 6px 20px;
+            border-radius: 3rem;
+            color: #ffeecc;
+            text-shadow: 0 2px 0 #7a3e1a;
+            font-size: 1.4rem;
+        }
+        .score-box span {
+            color: #ffd966;
+            font-size: 1.8rem;
+            margin-right: 8px;
+        }
+        button {
+            background: #ffac5c;
+            border: none;
+            font-size: 1.3rem;
+            font-family: inherit;
+            font-weight: bold;
+            padding: 6px 18px;
+            border-radius: 3rem;
+            color: #2c1a0a;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 4px 0 #a15923;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #a15923;
+        }
+        .fun-message {
+            text-align: center;
+            margin-top: 14px;
+            background: #ffecb3;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 6px 22px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #c05a1f;
+            font-size: 1rem;
+        }
+        .zoom-hint {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .gameover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            border-radius: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+            z-index: 20;
+        }
+        .gameover-text {
+            background: #ffdd99;
+            padding: 20px 40px;
+            border-radius: 70px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #a52200;
+            text-align: center;
+            box-shadow: 0 10px 0 #8b3c1c;
+        }
+        .gameover-sub {
+            margin-top: 20px;
+            background: #ffeaa7;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+        .restart-overlay-btn {
+            background: #ffac5c;
+            border: none;
+            font-size: 1.3rem;
+            font-family: inherit;
+            font-weight: bold;
+            padding: 8px 28px;
+            border-radius: 3rem;
+            color: #2c1a0a;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 0 #a15923;
+        }
+        @media (max-width: 800px) {
+            .score-box { font-size: 1rem; padding: 4px 12px; }
+            .score-box span { font-size: 1.3rem; }
+            button { font-size: 1rem; padding: 4px 14px; }
+            .gameover-text { font-size: 1.4rem; padding: 15px 25px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+    <canvas id="gameCanvas" width="1100" height="700"></canvas>
+    <div class="info-panel">
+        <div class="score-box"><span>🐟</span> POWER: <span id="powerValue">200</span></div>
+        <button id="fullscreenBtn">⛶ Full màn hình</button>
+        <button id="restartButton">🍕 CHƠI LẠI 🐠</button>
+    </div>
+    <div class="fun-message" id="funMsg">👉 Di chuột bơi - Mỗi 5 giây có cá SIÊU NGUY HIỂM xuất hiện! Tránh xa 👈</div>
+    <div class="zoom-hint" id="zoomHint">🔍 Zoom: 100%</div>
+</div>
+
+<script>
+    (function() {
+        const W = 1100, H = 700;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('gameContainer');
+        
+        // Fullscreen
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => console.log(err));
+                fullscreenBtn.textContent = '✖ Thoát full';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.textContent = '⛶ Full màn hình';
+            }
+        }
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) fullscreenBtn.textContent = '✖ Thoát full';
+            else fullscreenBtn.textContent = '⛶ Full màn hình';
+        });
+        
+        // Camera zoom
+        let zoom = 1.0;
+        const MIN_ZOOM = 0.3;
+        const MAX_ZOOM = 2.2;
+        let cameraX = W/2, cameraY = H/2;
+        
+        // Người chơi
+        let player = {
+            x: W/2, y: H/2,
+            power: 200,
+            color: '#FFB347'
+        };
+        
+        function getPlayerRadius(power) {
+            return Math.min(90, 15 + Math.floor(power / 16));
+        }
+        
+        function updateUI() {
+            document.getElementById('powerValue').innerText = Math.floor(player.power);
+            document.getElementById('zoomHint').innerHTML = `🔍 Zoom: ${Math.round(zoom*100)}%`;
+        }
+        
+        let fishes = [];
+        let gameActive = true;
+        let spawnCounter = 0;
+        let spawnDelay = 48;
+        const MAX_FISH = 25;
+        
+        // Boss timer: mỗi 5 giây (300 frame ~ 60fps)
+        let bossTimer = 0;
+        const BOSS_INTERVAL_FRAMES = 300; // 5 giây nếu 60fps
+        
+        let mouseWorldX = player.x, mouseWorldY = player.y;
+        
+        function random(min, max) { return min + Math.random() * (max - min); }
+        function isCollide(a, b) { return Math.hypot(a.x - b.x, a.y - b.y) < a.radius + b.radius; }
+        
+        // Sinh cá bình thường
+        function spawnFish() {
+            if (!gameActive) return;
+            if (fishes.length >= MAX_FISH) return;
+            
+            let maxPower = Math.max(100, player.power * 1.35);
+            let minPower = 10;
+            let power = Math.floor(random(minPower, maxPower));
+            if (Math.random() < 0.18 && power < player.power) {
+                power = player.power + random(10, player.power * 0.35);
+            }
+            if (power < 10) power = 10;
+            
+            let radius = Math.min(65, 8 + Math.floor(power / 16));
+            if (radius < 8) radius = 8;
+            
+            let color;
+            if (power < player.power) color = '#58D68D';
+            else if (power > player.power) color = '#E63946';
+            else color = '#F7DC6F';
+            
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            const outer = random(70, 220);
+            if (side === 0) { x = -outer; y = random(0, H); }
+            else if (side === 1) { x = W + outer; y = random(0, H); }
+            else if (side === 2) { x = random(0, W); y = -outer; }
+            else { x = random(0, W); y = H + outer; }
+            
+            let angle = Math.atan2(player.y - y, player.x - x);
+            let speed = random(0.55, 1.0);
+            let vx = Math.cos(angle) * speed;
+            let vy = Math.sin(angle) * speed;
+            
+            fishes.push({ x, y, radius, power, color, vx, vy, isBoss: false });
+        }
+        
+        // Sinh cá BOSS siêu nguy hiểm (mỗi 5 giây)
+        function spawnBoss() {
+            if (!gameActive) return;
+            // Boss power rất lớn: gấp 5 đến 8 lần power của player (không thể ăn)
+            let bossPower = player.power * random(5, 9);
+            bossPower = Math.max(bossPower, 500);
+            let radius = Math.min(100, 20 + Math.floor(bossPower / 12));
+            if (radius < 25) radius = 25;
+            let color = '#2C3E50'; // màu đen xám
+            // Vị trí spawn ở rìa
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            const outer = random(50, 150);
+            if (side === 0) { x = -outer; y = random(0, H); }
+            else if (side === 1) { x = W + outer; y = random(0, H); }
+            else if (side === 2) { x = random(0, W); y = -outer; }
+            else { x = random(0, W); y = H + outer; }
+            
+            let angle = Math.atan2(player.y - y, player.x - x);
+            let speed = random(1.0, 1.8); // bơi nhanh hơn
+            let vx = Math.cos(angle) * speed;
+            let vy = Math.sin(angle) * speed;
+            
+            fishes.push({
+                x, y, radius, power: bossPower, color, vx, vy, isBoss: true
+            });
+            showFunMessage(`⚠️ CÁ SIÊU NGUY HIỂM ${Math.floor(bossPower)} POWER! TRÁNH XA! ⚠️`, '#ff6666');
+        }
+        
+        function updateFishes() {
+            for (let i = 0; i < fishes.length; i++) {
+                const f = fishes[i];
+                f.x += f.vx;
+                f.y += f.vy;
+                if (f.x + f.radius < -600 || f.x - f.radius > W + 600 || f.y + f.radius < -600 || f.y - f.radius > H + 600) {
+                    fishes.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+        
+        function handleCollisions() {
+            if (!gameActive) return;
+            const playerRadius = getPlayerRadius(player.power);
+            for (let i = 0; i < fishes.length; i++) {
+                const f = fishes[i];
+                if (isCollide({x: player.x, y: player.y, radius: playerRadius}, {x: f.x, y: f.y, radius: f.radius})) {
+                    if (f.power > player.power) {
+                        gameActive = false;
+                        showGameOver();
+                        return;
+                    } else if (f.power < player.power) {
+                        let gain = Math.floor(f.power / 4);
+                        if (gain < 1) gain = 1;
+                        player.power += gain;
+                        updateUI();
+                        showFunMessage(`🤤 +${gain} POWER (1/4 của ${f.power}) | Tổng: ${Math.floor(player.power)}`, '#a8e6cf');
+                        fishes.splice(i, 1);
+                        i--;
+                    } else {
+                        const angle = Math.atan2(player.y - f.y, player.x - f.x);
+                        player.x += Math.cos(angle) * 15;
+                        player.y += Math.sin(angle) * 15;
+                        f.x -= Math.cos(angle) * 12;
+                        f.y -= Math.sin(angle) * 12;
+                        const pr = getPlayerRadius(player.power);
+                        player.x = Math.min(Math.max(player.x, pr + 10), W - pr - 10);
+                        player.y = Math.min(Math.max(player.y, pr + 10), H - pr - 10);
+                        showFunMessage(`⚖️ Bằng power! Đẩy nhau`, '#ffe0a3');
+                    }
+                }
+            }
+        }
+        
+        function showGameOver() {
+            const overlay = document.createElement('div');
+            overlay.className = 'gameover-overlay';
+            overlay.id = 'gameoverOverlay';
+            overlay.innerHTML = `
+                <div class="gameover-text">💀 GAME OVER 💀<br>🐟 POWER: ${Math.floor(player.power)}</div>
+                <div class="gameover-sub">👆 Nhấn nút "CHƠI LẠI"</div>
+                <button class="restart-overlay-btn" id="restartOverlayBtn">🎮 CHƠI LẠI NGAY 🎮</button>
+            `;
+            container.appendChild(overlay);
+            document.getElementById('restartOverlayBtn')?.addEventListener('click', () => restartGame());
+            showFunMessage('💀 GAME OVER! Nhấn CHƠI LẠI 💀', '#ff8888');
+        }
+        
+        function removeGameOverlay() { document.getElementById('gameoverOverlay')?.remove(); }
+        
+        let msgTimeout;
+        function showFunMessage(msg, bgColor) {
+            const msgDiv = document.getElementById('funMsg');
+            if (msgTimeout) clearTimeout(msgTimeout);
+            msgDiv.innerHTML = '✨ ' + msg + ' ✨';
+            msgDiv.style.backgroundColor = bgColor;
+            msgTimeout = setTimeout(() => {
+                if (gameActive) msgDiv.innerHTML = '👉 Di chuột bơi - Mỗi 5 giây có cá SIÊU NGUY HIỂM xuất hiện! Tránh xa 👈';
+                else msgDiv.innerHTML = '💀 GAME OVER! Nhấn CHƠI LẠI 💀';
+                msgDiv.style.backgroundColor = '#ffecb3';
+            }, 2500);
+        }
+        
+        function autoSpawn() {
+            if (!gameActive) return;
+            spawnCounter++;
+            let delay = Math.max(38, spawnDelay - Math.floor(player.power / 700));
+            if (spawnCounter >= delay) {
+                spawnCounter = 0;
+                if (fishes.length < MAX_FISH) spawnFish();
+            }
+        }
+        
+        // Cập nhật boss timer
+        function updateBossTimer() {
+            if (!gameActive) return;
+            bossTimer++;
+            if (bossTimer >= BOSS_INTERVAL_FRAMES) {
+                bossTimer = 0;
+                spawnBoss();
+            }
+        }
+        
+        function updatePlayerPosition() {
+            if (!gameActive) return;
+            let tx = mouseWorldX;
+            let ty = mouseWorldY;
+            const pr = getPlayerRadius(player.power);
+            tx = Math.min(Math.max(tx, pr + 10), W - pr - 10);
+            ty = Math.min(Math.max(ty, pr + 10), H - pr - 10);
+            player.x += (tx - player.x) * 0.07;
+            player.y += (ty - player.y) * 0.07;
+            player.x = Math.min(Math.max(player.x, pr + 8), W - pr - 8);
+            player.y = Math.min(Math.max(player.y, pr + 8), H - pr - 8);
+        }
+        
+        function updateCamera() {
+            if (!gameActive) return;
+            cameraX += (player.x - cameraX) * 0.1;
+            cameraY += (player.y - cameraY) * 0.1;
+        }
+        
+        function drawWorld() {
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const canvasW = canvas.width, canvasH = canvas.height;
+            ctx.translate(canvasW/2, canvasH/2);
+            ctx.scale(zoom, zoom);
+            ctx.translate(-cameraX, -cameraY);
+            
+            ctx.fillStyle = '#2c9bcb';
+            ctx.fillRect(0, 0, W, H);
+            for (let i = 0; i < 120; i++) {
+                ctx.beginPath();
+                ctx.arc(random(0, W), random(0, H), random(1, 4), 0, Math.PI*2);
+                ctx.fillStyle = `rgba(255,250,210,${Math.random()*0.5})`;
+                ctx.fill();
+            }
+            
+            for (const f of fishes) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.radius, 0, Math.PI*2);
+                ctx.fillStyle = f.color;
+                ctx.fill();
+                ctx.strokeStyle = '#5d3a1a';
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(f.x - f.radius*0.2, f.y - f.radius*0.1, f.radius*0.18, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(f.x - f.radius*0.28, f.y - f.radius*0.18, f.radius*0.07, 0, Math.PI*2);
+                ctx.fill();
+                // Nếu là boss, vẽ thêm vòng hào quang đỏ
+                if (f.isBoss) {
+                    ctx.beginPath();
+                    ctx.arc(f.x, f.y, f.radius + 5, 0, Math.PI*2);
+                    ctx.strokeStyle = '#FF0000';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.fillStyle = '#FF4500';
+                    ctx.font = `bold ${Math.max(18, Math.floor(f.radius * 0.6))}px "Comic Neue"`;
+                    ctx.fillText('☠️ BOSS ☠️', f.x - f.radius*0.6, f.y - f.radius - 15);
+                }
+                ctx.font = `bold ${Math.max(16, Math.floor(f.radius * 0.7))}px "Comic Neue"`;
+                ctx.fillStyle = '#1e2a1a';
+                ctx.shadowBlur = 3;
+                ctx.shadowColor = 'white';
+                ctx.fillText(`${Math.floor(f.power)}`, f.x - f.radius*0.4, f.y - f.radius - 8);
+                if (f.power < player.power) {
+                    ctx.fillStyle = '#2c6e2c';
+                    ctx.font = 'bold 14px monospace';
+                    ctx.fillText('✅ ĂN ĐƯỢC', f.x - 35, f.y - f.radius - 26);
+                } else if (f.power > player.power) {
+                    ctx.fillStyle = '#cc0000';
+                    ctx.font = 'bold 14px monospace';
+                    ctx.fillText('💀 NGUY HIỂM', f.x - 35, f.y - f.radius - 26);
+                } else {
+                    ctx.fillStyle = '#ff8c42';
+                    ctx.font = 'bold 13px monospace';
+                    ctx.fillText('⚖️ BẰNG', f.x - 28, f.y - f.radius - 26);
+                }
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+            
+            ctx.save();
+            const pr = getPlayerRadius(player.power);
+            const x = player.x;
+            const y = player.y;
+            ctx.beginPath();
+            ctx.arc(x, y, pr, 0, Math.PI*2);
+            ctx.fillStyle = player.color;
+            ctx.fill();
+            ctx.strokeStyle = '#d45a1a';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(x - pr*0.25, y - pr*0.15, pr*0.22, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + pr*0.25, y - pr*0.15, pr*0.22, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#1F2A3A';
+            ctx.beginPath();
+            ctx.arc(x - pr*0.28, y - pr*0.2, pr*0.1, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + pr*0.22, y - pr*0.2, pr*0.1, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + pr*0.5, y - pr*0.5);
+            ctx.lineTo(x + pr*0.9, y - pr*0.85);
+            ctx.lineTo(x + pr*0.4, y - pr*0.9);
+            ctx.fillStyle = '#FF8C42';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x - pr*0.9, y);
+            ctx.lineTo(x - pr*1.3, y - pr*0.5);
+            ctx.lineTo(x - pr*1.3, y + pr*0.5);
+            ctx.fillStyle = '#FF8C42';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + pr*0.1, y + pr*0.15, pr*0.2, 0.05, Math.PI - 0.05);
+            ctx.strokeStyle = '#A04010';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            ctx.font = `bold ${Math.max(18, Math.floor(pr * 0.5))}px "Comic Neue"`;
+            ctx.fillStyle = '#FFFFAA';
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = 'black';
+            ctx.fillText(`${Math.floor(player.power)}`, x - pr*0.5, y - pr - 12);
+            ctx.shadowBlur = 0;
+            ctx.restore();
+            
+            ctx.restore();
+        }
+        
+        function handleWheel(e) {
+            e.preventDefault();
+            let newZoom = zoom + (e.deltaY > 0 ? -0.05 : 0.05);
+            newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, newZoom));
+            if (newZoom !== zoom) { zoom = newZoom; updateUI(); }
+        }
+        
+        function screenToWorld(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const canvasW = canvas.width, canvasH = canvas.height;
+            let canvasX = (clientX - rect.left) * (canvasW / rect.width);
+            let canvasY = (clientY - rect.top) * (canvasH / rect.height);
+            const worldX = (canvasX - canvasW/2) / zoom + cameraX;
+            const worldY = (canvasY - canvasH/2) / zoom + cameraY;
+            return { x: worldX, y: worldY };
+        }
+        
+        function onPointerMove(e) {
+            if (!gameActive) return;
+            e.preventDefault();
+            let clientX, clientY;
+            if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            else { clientX = e.clientX; clientY = e.clientY; }
+            const world = screenToWorld(clientX, clientY);
+            mouseWorldX = world.x; mouseWorldY = world.y;
+        }
+        
+        function attachEvents() {
+            canvas.addEventListener('wheel', handleWheel, { passive: false });
+            canvas.addEventListener('mousemove', onPointerMove);
+            canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+            canvas.addEventListener('touchstart', onPointerMove, { passive: false });
+        }
+        
+        function restartGame() {
+            removeGameOverlay();
+            gameActive = true;
+            player.power = 200;
+            player.x = W/2; player.y = H/2;
+            mouseWorldX = player.x; mouseWorldY = player.y;
+            cameraX = player.x; cameraY = player.y;
+            fishes = [];
+            zoom = 1.0;
+            bossTimer = 0;
+            updateUI();
+            showFunMessage('🎮 CHƠI LẠI! Cứ 5 giây có cá BOSS siêu nguy hiểm, hãy né! 🎮', '#b0e57c');
+            for (let i = 0; i < 9; i++) spawnFish();
+            spawnCounter = 0;
+        }
+        
+        function updateGame() {
+            if (!gameActive) return;
+            updatePlayerPosition();
+            updateFishes();
+            handleCollisions();
+            autoSpawn();
+            updateBossTimer();
+            updateUI();
+            updateCamera();
+        }
+        
+        function animate() { updateGame(); drawWorld(); requestAnimationFrame(animate); }
+        
+        document.getElementById('restartButton').addEventListener('click', () => restartGame());
+        function init() { restartGame(); attachEvents(); animate(); }
+        init();
+    })();
+</script>
+</body>
+</html>
