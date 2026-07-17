@@ -1,0 +1,203 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <stack>
+using namespace std;
+struct Location {
+    int id;
+    string name;
+    string description;
+};
+
+struct BSTNode {
+    Location data;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(Location loc) {
+        data = loc;
+        left = right = NULL;
+    }
+};
+class CampusMap {
+private:
+    BSTNode* root;
+    int numLocations;
+    vector<vector<int>> adjList;
+
+    BSTNode* insertBST(BSTNode* node, Location loc) {
+        if (node == NULL) return new BSTNode(loc);
+        if (loc.id < node->data.id)
+            node->left = insertBST(node->left, loc);
+
+        else if (loc.id > node->data.id) {
+            node->right = insertBST(node->right, loc);
+        }
+        return node;
+    }
+
+    BSTNode* searchBST(BSTNode* node, int id) {
+        if (node == NULL || node->data.id == id) return node;
+        if (node->data.id < id) return searchBST(node->right, id);
+        return searchBST(node->left, id);
+    }
+public:
+    CampusMap(int n) {
+        root = NULL;
+        numLocations = n;
+        adjList.resize(n);
+    }
+
+    void addLocation(int id, string name, string desc) {
+        Location loc = { id, name, desc };
+        root = insertBST(root, loc);
+    }
+
+    void searchAndPrint(int id) {
+        BSTNode* result = searchBST(root, id);
+        if (result != NULL) {
+            cout << "\n[+] Thong tin dia diem:\n";
+            cout << " - Ten: " << result->data.name << "\n";
+            cout << " - Mo ta: " << result->data.description << "\n";
+        }
+        else {
+            cout << "\n[-] Khong tim thay dia diem co ID: " << id << "\n";
+        }
+    }
+
+
+    void addPath(int u, int v) {
+        adjList[u].push_back(v);
+        adjList[v].push_back(u);
+    }
+
+
+    void findShortestPath(int start, int target) {
+        BSTNode* startNode = searchBST(root, start);
+        BSTNode* targetNode = searchBST(root, target);
+
+        if (!startNode || !targetNode) {
+            cout << "\n[-] ID khong hop le!\n";
+            return;
+        }
+
+        vector<bool> visited(numLocations, false);
+        vector<int> parent(numLocations, -1);
+        queue<int> q;
+
+
+        visited[start] = true;
+        q.push(start);
+
+        bool found = false;
+
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+
+            if (u == target) {
+                found = true;
+                break;
+            }
+
+
+            for (int v : adjList[u]) {
+                if (!visited[v]) {
+                    visited[v] = true;
+                    parent[v] = u;
+                    q.push(v);
+                }
+            }
+        }
+
+        if (!found) {
+            cout << "\n[-] Khong co duong di tu " << startNode->data.name << " den " << targetNode->data.name << "\n";
+            return;
+        }
+
+
+        stack<int> path;
+        int curr = target;
+        while (curr != -1) {
+            path.push(curr);
+            curr = parent[curr];
+        }
+
+
+        cout << "\n[+] Duong di ngan nhat tu " << startNode->data.name << " den " << targetNode->data.name << ":\n";
+        cout << " -> ";
+        while (!path.empty()) {
+            int locId = path.top();
+            path.pop();
+            cout << searchBST(root, locId)->data.name;
+            if (!path.empty()) cout << " => ";
+        }
+        cout << "\n";
+    }
+};
+
+
+int main() {
+
+    CampusMap campus(6);
+
+
+    campus.addLocation(0, "Cong Chinh", "Loi vao chinh cua truong");
+    campus.addLocation(1, "Toa A (CNTT)", "Hanh chinh");
+    campus.addLocation(2, "Toa B (Kinh Te)", "Khoa Kinh te & Quan tri");
+    campus.addLocation(3, "Thu Vien", "Thu vien trung tam, mo cua 24/7");
+    campus.addLocation(4, "Canteen", "Khu an uong sinh vien");
+    campus.addLocation(5, "Toa D", "Khoa Cong nghe thong tin");
+
+
+    campus.addPath(0, 1);
+    campus.addPath(0, 2);
+    campus.addPath(1, 3);
+    campus.addPath(2, 3);
+    campus.addPath(3, 4);
+    campus.addPath(4, 5);
+    campus.addPath(1, 5);
+
+    int choice;
+    while (true) {
+        cout << "\n=====================================";
+        cout << "\n   HE THONG TIM KIEM CAMPUS TRUONG   ";
+        cout << "\n=====================================";
+        cout << "\n1. Tra cuu thong tin dia diem";
+        cout << "\n2. Tim duong di ngan nhat";
+        cout << "\n3. Xem danh sach ID dia diem (Goi y)";
+        cout << "\n0. Thoat";
+        cout << "\n=> Nhap lua chon cua ban: ";
+        cin >> choice;
+
+        if (choice == 0) break;
+
+        switch (choice) {
+        case 1: {
+            int id;
+            cout << "Nhap ID dia diem can tra cuu (1-5): ";
+            cin >> id;
+            campus.searchAndPrint(id);
+            break;
+        }
+        case 2: {
+            int start, end;
+            cout << "Nhap ID vi tri hien tai (1-5): ";
+            cin >> start;
+            cout << "Nhap ID vi tri muon den (1-5): ";
+            cin >> end;
+            campus.findShortestPath(start, end);
+            break;
+        }
+        case 3: {
+            cout << "\n[ Danh sach ID ]:\n0: Cong Chinh\n1: Toa A\n2: Toa B\n3: Thu Vien\n4: Canteen\n5: Toa D\n";
+            break;
+        }
+        default:
+            cout << "Lua chon khong hop le!\n";
+        }
+    }
+
+    cout << "\nCam on ban da su dung ung dung!\n";
+    return 0;
+}
