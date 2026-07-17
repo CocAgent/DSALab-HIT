@@ -1,0 +1,155 @@
+#include <iostream>
+using namespace std;
+
+void swapNum(int& a, int& b) {
+    int t = a; a = b; b = t;
+}
+
+void print(int a[], int n) {
+    for (int i = 0;i < n;i++) cout << a[i] << " ";
+    cout << endl;
+}
+
+void wait() {
+    cout << "Nhan Enter de tiep...\n";
+    cin.get();
+}
+
+// ================= SELECTION =================
+void selectionSort(int a[], int n) {
+    for (int i = 0;i < n - 1;i++) {
+        int min = i;
+        for (int j = i + 1;j < n;j++)
+            if (a[j] < a[min]) min = j;
+
+        swapNum(a[i], a[min]);
+
+        cout << "Vong " << i + 1 << ": ";
+        print(a, n);
+        wait();
+    }
+}
+
+// ================= INSERTION =================
+void insertionSort(int a[], int n) {
+    for (int i = 1;i < n;i++) {
+        int x = a[i], j = i - 1;
+        while (j >= 0 && a[j] > x) {
+            a[j + 1] = a[j];
+            j--;
+        }
+        a[j + 1] = x;
+
+        cout << "Vong " << i << ": ";
+        print(a, n);
+        wait();
+    }
+}
+
+// ================= BUBBLE =================
+void bubbleSort(int a[], int n) {
+    for (int i = 0;i < n - 1;i++) {
+        for (int j = 0;j < n - i - 1;j++)
+            if (a[j] > a[j + 1])
+                swapNum(a[j], a[j + 1]);
+
+        cout << "Vong " << i + 1 << ": ";
+        print(a, n);
+        wait();
+    }
+}
+
+// ================= QUICK =================
+int partition(int a[], int l, int r) {
+    int pivot = a[r], i = l - 1;
+    for (int j = l;j < r;j++)
+        if (a[j] < pivot)
+            swapNum(a[++i], a[j]);
+    swapNum(a[i + 1], a[r]);
+    return i + 1;
+}
+
+void quickSort(int a[], int l, int r, int n, int& step) {
+    if (l < r) {
+        int p = partition(a, l, r);
+
+        cout << "Buoc " << step++ << " (pivot=" << a[p] << "): ";
+        print(a, n);
+        wait();
+
+        quickSort(a, l, p - 1, n, step);
+        quickSort(a, p + 1, r, n, step);
+    }
+}
+
+// ================= HEAP =================
+void heapify(int a[], int n, int i) {
+    int max = i, l = 2 * i + 1, r = 2 * i + 2;
+    if (l<n && a[l]>a[max]) max = l;
+    if (r<n && a[r]>a[max]) max = r;
+
+    if (max != i) {
+        swapNum(a[i], a[max]);
+        heapify(a, n, max);
+    }
+}
+
+void heapSort(int a[], int n) {
+    for (int i = n / 2 - 1;i >= 0;i--)
+        heapify(a, n, i);
+
+    cout << "Sau khi tao heap: ";
+    print(a, n);
+    wait();
+
+    int step = 1;
+    for (int i = n - 1;i > 0;i--) {
+        swapNum(a[0], a[i]);
+        heapify(a, i, 0);
+
+        cout << "Buoc " << step++ << ": ";
+        print(a, n);
+        wait();
+    }
+}
+
+// ================= MAIN =================
+int main() {
+    int a[] = { 3,-12,14,9,11,-50,-100 };
+    int n = 7, b[7];
+
+    int ch;
+    cout << "===== MENU =====\n";
+    cout << "1. Selection Sort\n";
+    cout << "2. Insertion Sort\n";
+    cout << "3. Bubble Sort\n";
+    cout << "4. Quick Sort\n";
+    cout << "5. Heap Sort\n";
+    cout << "Chon: ";
+    cin >> ch;
+
+    for (int i = 0;i < n;i++) b[i] = a[i];
+
+    cout << "\nBan dau: ";
+    print(b, n);
+
+    cin.ignore(); // xử lý Enter
+
+    switch (ch) {
+    case 1: selectionSort(b, n); break;
+    case 2: insertionSort(b, n); break;
+    case 3: bubbleSort(b, n); break;
+    case 4: {
+        int step = 1;
+        quickSort(b, 0, n - 1, n, step);
+        break;
+    }
+    case 5: heapSort(b, n); break;
+    default: cout << "Chon sai!";
+    }
+
+    cout << "\nKet qua: ";
+    print(b, n);
+
+    return 0;
+}
