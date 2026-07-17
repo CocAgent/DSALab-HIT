@@ -1,0 +1,208 @@
+// -1Them vao dau
+void ThemDau(List &L, int x) {
+    Node *p = TaoNode(x);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    } else {
+        p->next = L.head;
+        L.head = p;
+    }
+}
+
+// 2-Them vao cuoi
+void ThemCuoi(List &L, int x) {
+    Node *p = TaoNode(x);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    } else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+}
+
+// 3-Them sau node q
+void ThemSau(List &L, Node *q, int x) {
+    if (q == nullptr) return;
+    Node *p = TaoNode(x);
+    p->next = q->next;
+    q->next = p;
+    if (q == L.tail) L.tail = p;
+}
+
+// 4-Them truoc node q
+void ThemTruoc(List &L, Node *q, int x) {
+    if (q == nullptr) return;
+    if (q == L.head) { ThemDau(L, x); return; }
+    Node *p = TaoNode(x);
+    Node *cur = L.head;
+    while (cur->next != q) cur = cur->next;
+    p->next = q;
+    cur->next = p;
+}
+
+// ============================================================
+//  XOA PHAN TU
+// ============================================================
+
+// 5-Xoa dau
+void XoaDau(List &L) {
+    if (DanhSachRong(L)) return;
+    Node *p = L.head;
+    L.head = L.head->next;
+    if (L.head == nullptr) L.tail = nullptr;
+    delete p;
+}
+
+// 6-Xoa cuoi
+void XoaCuoi(List &L) {
+    if (DanhSachRong(L)) return;
+    if (L.head == L.tail) { delete L.head; L.head = L.tail = nullptr; return; }
+    Node *cur = L.head;
+    while (cur->next != L.tail) cur = cur->next;
+    delete L.tail;
+    L.tail = cur;
+    L.tail->next = nullptr;
+}
+
+// 7-Xoa node co gia tri x
+bool XoaGiaTri(List &L, int x) {
+    if (DanhSachRong(L)) return false;
+    Node *cur = L.head, *prev = nullptr;
+    while (cur != nullptr && cur->data != x) {
+        prev = cur; cur = cur->next;
+    }
+    if (cur == nullptr) return false;
+    if (prev == nullptr) XoaDau(L);
+    else {
+        prev->next = cur->next;
+        if (cur == L.tail) L.tail = prev;
+        delete cur;
+    }
+    return true;
+}
+
+// Giai phong bo nho
+void XoaDanhSach(List &L) {
+    while (!DanhSachRong(L)) XoaDau(L);
+}
+
+// ============================================================
+//  8-DUYET DANH SACH
+// ============================================================
+void InDanhSach(const List &L) {
+    if (DanhSachRong(L)) { cout << "  [Danh sach rong]\n"; return; }
+    cout << "  HEAD -> ";
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        cout << cur->data;
+        if (cur->next) cout << " -> ";
+        cur = cur->next;
+    }
+    cout << " -> NULL\n";
+}
+
+//9- Tim phan tu lon nhat
+int TimMax(const List &L) {
+    if (DanhSachRong(L)) return -1;
+    int mx = L.head->data;
+    Node *cur = L.head->next;
+    while (cur != nullptr) {
+        if (cur->data > mx) mx = cur->data;
+        cur = cur->next;
+    }
+    return mx;
+}
+
+//10- Tim phan tu x
+Node* TimX(const List &L, int x) {
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data == x) return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}
+
+// 11-Tim chan dau
+int TimChanDau(const List &L) {
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data % 2 == 0) return cur->data;
+        cur = cur->next;
+    }
+    return -1;
+}
+
+// 12-Tim chan cuoi
+int TimChanCuoi(const List &L) {
+    int kq = -1;
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data % 2 == 0) kq = cur->data;
+        cur = cur->next;
+    }
+    return kq;
+}
+
+//13- Liet ke phan tu am
+void LietKeAm(const List &L) {
+    cout << "  Cac phan tu am: ";
+    Node *cur = L.head;
+    bool co = false;
+    while (cur != nullptr) {
+        if (cur->data < 0) { cout << cur->data << " "; co = true; }
+        cur = cur->next;
+    }
+    if (!co) cout << "(khong co)";
+    cout << "\n";
+}
+
+// 14-Tinh tong phan tu duong
+long long TongDuong(const List &L) {
+    long long s = 0;
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data > 0) s += cur->data;
+        cur = cur->next;
+    }
+    return s;
+}
+
+// 15-Dem phan tu am
+int DemAm(const List &L) {
+    int dem = 0;
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data < 0) dem++;
+        cur = cur->next;
+    }
+    return dem;
+}
+
+// 16-Kiem tra so chinh phuong
+bool LaChinhPhuong(int n) {
+    if (n < 0) return false;
+    int s = (int)sqrt((double)n);
+    return s * s == n;
+}
+
+bool CoSoChinhPhuong(const List &L) {
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (LaChinhPhuong(cur->data)) return true;
+        cur = cur->next;
+    }
+    return false;
+}
+
+// 17-Dem phan tu cuc dai (lon nhat)
+int DemCucDai(const List &L) {
+    if (DanhSachRong(L)) return 0;
+    int mx = TimMax(L), dem = 0;
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data == mx) dem++;
+        cur = cur->next;
+    }
+    return dem;
+}
