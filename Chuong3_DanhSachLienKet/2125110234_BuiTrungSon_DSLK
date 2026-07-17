@@ -1,0 +1,303 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ============================================================
+//  CAU TRUC SINH VIEN
+// ============================================================
+struct SinhVien {
+    string maSV;
+    string hoTen;
+    float diem;
+};
+
+// ============================================================
+//  NODE + LIST
+// ============================================================
+struct Node {
+    SinhVien data;
+    Node *next;
+};
+
+struct List {
+    Node *head;
+    Node *tail;
+};
+
+// ============================================================
+//  KHOI TAO
+// ============================================================
+void KhoiTaoDSLK(List &L) {
+    L.head = L.tail = nullptr;
+}
+
+bool DanhSachRong(const List &L) {
+    return L.head == nullptr;
+}
+
+Node* TaoNode(SinhVien sv) {
+    Node *p = new Node;
+    p->data = sv;
+    p->next = nullptr;
+    return p;
+}
+
+// ============================================================
+//  THEM
+// ============================================================
+void ThemCuoi(List &L, SinhVien sv) {
+    Node *p = TaoNode(sv);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    } else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+}
+
+// ============================================================
+//  NHAP
+// ============================================================
+SinhVien NhapSV() {
+    SinhVien sv;
+    cout << "Ma SV: "; cin >> sv.maSV;
+    cin.ignore();
+    cout << "Ho ten: "; getline(cin, sv.hoTen);
+    cout << "Diem: "; cin >> sv.diem;
+    return sv;
+}
+
+void NhapDanhSach(List &L, int n) {
+    for (int i = 0; i < n; i++) {
+        cout << "\nNhap SV thu " << i + 1 << ":\n";
+        SinhVien sv = NhapSV();
+        ThemCuoi(L, sv);
+    }
+}
+
+// ============================================================
+//  XUAT
+// ============================================================
+void InDanhSach(const List &L) {
+    if (DanhSachRong(L)) {
+        cout << "Danh sach rong!\n";
+        return;
+    }
+
+    cout << "\n===== DANH SACH SINH VIEN =====\n";
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        cout << "Ma: " << cur->data.maSV
+             << " | Ten: " << cur->data.hoTen
+             << " | Diem: " << cur->data.diem << endl;
+        cur = cur->next;
+    }
+}
+
+// ============================================================
+//  TIM KIEM
+// ============================================================
+
+// Tim theo ma
+Node* TimMaSV(const List &L, string ma) {
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data.maSV == ma)
+            return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}
+
+// Tim diem cao nhat
+SinhVien TimMax(const List &L) {
+    Node *cur = L.head;
+    SinhVien maxSV = cur->data;
+
+    while (cur != nullptr) {
+        if (cur->data.diem > maxSV.diem)
+            maxSV = cur->data;
+        cur = cur->next;
+    }
+    return maxSV;
+}
+
+// ============================================================
+//  XOA
+// ============================================================
+void XoaDau(List &L) {
+    if (DanhSachRong(L)) return;
+
+    Node *p = L.head;
+    L.head = L.head->next;
+
+    if (L.head == nullptr)
+        L.tail = nullptr;
+
+    delete p;
+}
+
+// Xoa theo ma SV
+bool XoaMaSV(List &L, string ma) {
+    if (DanhSachRong(L)) return false;
+
+    Node *cur = L.head;
+    Node *prev = nullptr;
+
+    while (cur != nullptr && cur->data.maSV != ma) {
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if (cur == nullptr) return false;
+
+    if (prev == nullptr) {
+        XoaDau(L);
+    } else {
+        prev->next = cur->next;
+        if (cur == L.tail)
+            L.tail = prev;
+        delete cur;
+    }
+
+    return true;
+}
+
+// ============================================================
+//  SAP XEP (theo diem tang)
+// ============================================================
+void SapXepTheoDiem(List &L) {
+    for (Node *i = L.head; i != nullptr; i = i->next) {
+        for (Node *j = i->next; j != nullptr; j = j->next) {
+            if (i->data.diem > j->data.diem) {
+                swap(i->data, j->data);
+            }
+        }
+    }
+}
+
+// ============================================================
+//  TACH DANH SACH (DAU / ROT)
+// ============================================================
+void TachDauRot(List &L, List &dau, List &rot) {
+    KhoiTaoDSLK(dau);
+    KhoiTaoDSLK(rot);
+
+    Node *cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data.diem >= 5)
+            ThemCuoi(dau, cur->data);
+        else
+            ThemCuoi(rot, cur->data);
+
+        cur = cur->next;
+    }
+}
+
+// ============================================================
+//  GIAI PHONG
+// ============================================================
+void XoaDanhSach(List &L) {
+    while (!DanhSachRong(L)) {
+        XoaDau(L);
+    }
+}
+
+// ============================================================
+//  MENU
+// ============================================================
+void Menu() {
+    List L;
+    KhoiTaoDSLK(L);
+
+    int choice;
+    do {
+        cout << "\n=========== MENU ===========\n";
+        cout << "1. Nhap danh sach SV\n";
+        cout << "2. Xuat danh sach\n";
+        cout << "3. Tim SV theo ma\n";
+        cout << "4. SV diem cao nhat\n";
+        cout << "5. Xoa SV theo ma\n";
+        cout << "6. Sap xep theo diem\n";
+        cout << "7. Tach dau / rot\n";
+        cout << "0. Thoat\n";
+        cout << "============================\n";
+        cout << "Chon: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: {
+            int n;
+            cout << "Nhap so luong: ";
+            cin >> n;
+            NhapDanhSach(L, n);
+            break;
+        }
+        case 2:
+            InDanhSach(L);
+            break;
+
+        case 3: {
+            string ma;
+            cout << "Nhap ma SV: ";
+            cin >> ma;
+            Node *p = TimMaSV(L, ma);
+            if (p)
+                cout << "Tim thay: " << p->data.hoTen << endl;
+            else
+                cout << "Khong tim thay!\n";
+            break;
+        }
+
+        case 4: {
+            if (!DanhSachRong(L)) {
+                SinhVien sv = TimMax(L);
+                cout << "Max: " << sv.hoTen << " - " << sv.diem << endl;
+            }
+            break;
+        }
+
+        case 5: {
+            string ma;
+            cout << "Nhap ma can xoa: ";
+            cin >> ma;
+            if (XoaMaSV(L, ma))
+                cout << "Da xoa!\n";
+            else
+                cout << "Khong tim thay!\n";
+            break;
+        }
+
+        case 6:
+            SapXepTheoDiem(L);
+            cout << "Da sap xep!\n";
+            break;
+
+        case 7: {
+            List dau, rot;
+            TachDauRot(L, dau, rot);
+
+            cout << "\nSV Dau:\n";
+            InDanhSach(dau);
+
+            cout << "\nSV Rot:\n";
+            InDanhSach(rot);
+
+            XoaDanhSach(dau);
+            XoaDanhSach(rot);
+            break;
+        }
+        }
+
+    } while (choice != 0);
+
+    XoaDanhSach(L);
+}
+
+// ============================================================
+//  MAIN
+// ============================================================
+int main() {
+    Menu();
+    return 0;
+}
