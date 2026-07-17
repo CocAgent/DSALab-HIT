@@ -1,0 +1,161 @@
+/*
+ * Mo_phong_sap_xep.cpp — Chuong 2: CTDL & GT
+ * Compile: g++ -o mo_phong Mo_phong_sap_xep.cpp
+ * Run:     ./mo_phong
+ */
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+#define GRN "\033[32m"  // xanh = da sap
+#define YLW "\033[33m"  // vang = dang xet
+#define RST "\033[0m"
+
+int n;
+long long sc, sg;
+
+void hv(int& a, int& b) { int t = a; a = b; b = t; sg += 3; }
+
+void xuat(const int a[], int hl = -1, int hr = -1, int sorted = -1) {
+    cout << "  [";
+    for (int i = 0; i < n; i++) {
+        if (i >= sorted && sorted >= 0)       cout << GRN;
+        else if (i == hl || i == hr)          cout << YLW;
+        cout << setw(3) << a[i] << RST;
+        if (i < n - 1) cout << " |";
+    }
+    cout << " ]\n";
+}
+
+void title(const char* s) {
+    cout << "\n=== " << s << " ===\n";
+}
+
+void stats() {
+    cout << "So sanh: " << sc << "  |  Hoan vi: " << sg / 3 << "\n";
+}
+
+// ---- NHAP ----
+void nhap(int a[]) {
+    cout << "So phan tu (2-20): "; cin >> n;
+    if (n < 2) n = 2; if (n > 20) n = 20;
+    cout << "1-Nhap tay  2-Ngau nhien: ";
+    int c; cin >> c;
+    if (c == 1) { for (int i = 0;i < n;i++) cin >> a[i]; }
+    else { srand(time(0)); for (int i = 0;i < n;i++) a[i] = rand() % 90 + 10; }
+    cout << "Mang: "; xuat(a);
+}
+
+void saochep(const int s[], int d[]) { for (int i = 0;i < n;i++) d[i] = s[i]; }
+
+// ---- SELECTION SORT ----
+void selectionSort(int a[]) {
+    title("SELECTION SORT — chon truc tiep");
+    sc = sg = 0;
+    for (int i = 0;i < n - 1;i++) {
+        int vt = i;
+        for (int j = i + 1;j < n;j++) { sc++; if (a[j] < a[vt]) vt = j; }
+        if (vt != i) hv(a[i], a[vt]);
+        cout << "Luot " << i + 1 << ": "; xuat(a, -1, -1, i + 1);
+    }
+    stats();
+}
+
+// ---- INSERTION SORT ----
+void insertionSort(int a[]) {
+    title("INSERTION SORT — chen truc tiep");
+    sc = sg = 0;
+    for (int i = 1;i < n;i++) {
+        int pos = i, x = a[i]; sg++;
+        while (pos > 0 && (sc++, a[pos - 1] > x)) { a[pos] = a[pos - 1]; sg++; pos--; }
+        sc++; a[pos] = x; sg++;
+        cout << "Chen a[" << i << "]=" << x << " vao [" << pos << "]: ";
+        xuat(a, -1, -1, i + 1);
+    }
+    stats();
+}
+
+// ---- BUBBLE SORT ----
+void bubbleSort(int a[]) {
+    title("BUBBLE SORT — noi bot");
+    sc = sg = 0;
+    for (int i = 0;i < n - 1;i++) {
+        bool ok = true;
+        for (int j = n - 1;j > i;j--) { sc++; if (a[j] < a[j - 1]) { hv(a[j], a[j - 1]); ok = false; } }
+        cout << "Luot " << i + 1 << ": "; xuat(a, -1, -1, n - 1 - i);
+        if (ok) { cout << "(Dung som)\n"; break; }
+    }
+    stats();
+}
+
+// ---- QUICK SORT ----
+void qs(int a[], int l, int r) {
+    if (l >= r) return;
+    int i = l, j = r, x = a[(l + r) / 2];
+    do {
+        while ((sc++, a[i] < x)) i++;
+        while ((sc++, a[j] > x)) j--;
+        if (i <= j) { if (i != j) hv(a[i], a[j]); i++; j--; }
+    } while (i <= j);
+    cout << "Partition [" << l << ".." << r << "]: "; xuat(a, l, r);
+    qs(a, l, j); qs(a, i, r);
+}
+void quickSort(int a[]) {
+    title("QUICK SORT — sap xep nhanh");
+    sc = sg = 0; qs(a, 0, n - 1);
+    cout << "Ket qua: "; xuat(a, -1, -1, 0);
+    stats();
+}
+
+// ---- HEAP SORT ----
+void shift(int a[], int l, int r) {
+    int i = l, j = 2 * i + 1, x = a[i]; sg++;
+    while (j <= r) {
+        if (j < r) { sc++; if (a[j] < a[j + 1]) j++; }
+        sc++; if (x >= a[j]) break;
+        a[i] = a[j]; sg++; i = j; j = 2 * i + 1;
+    }
+    a[i] = x; sg++;
+}
+void heapSort(int a[]) {
+    title("HEAP SORT — vun dong");
+    sc = sg = 0;
+    for (int k = n / 2 - 1;k >= 0;k--) shift(a, k, n - 1);
+    cout << "Heap: "; xuat(a);
+    for (int r = n - 1;r > 0;r--) {
+        hv(a[0], a[r]); shift(a, 0, r - 1);
+        cout << "Lay a[0]: "; xuat(a, -1, -1, r);
+    }
+    stats();
+}
+
+// ---- MAIN ----
+int main() {
+    int goc[20], a[20];
+    nhap(goc);
+
+    int c;
+    do {
+        cout << "\n1-Selection  2-Insertion  3-Bubble  4-Quick  5-Heap  6-Tat ca  0-Thoat\nChon: ";
+        cin >> c;
+        saochep(goc, a);
+        switch (c) {
+        case 1: selectionSort(a); break;
+        case 2: insertionSort(a); break;
+        case 3: bubbleSort(a);    break;
+        case 4: quickSort(a);     break;
+        case 5: heapSort(a);      break;
+        case 6:
+            saochep(goc, a); selectionSort(a);
+            saochep(goc, a); insertionSort(a);
+            saochep(goc, a); bubbleSort(a);
+            saochep(goc, a); quickSort(a);
+            saochep(goc, a); heapSort(a);
+            break;
+        }
+    } while (c != 0);
+
+    return 0;
+}
