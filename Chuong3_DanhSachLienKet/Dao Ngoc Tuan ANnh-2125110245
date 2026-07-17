@@ -1,0 +1,203 @@
+//#include <iostream>
+//#include <vector>
+//#include <fstream>
+//#include <sstream>
+//#include <cmath>
+//using namespace std;
+//
+//struct DanhGia {
+//    double diem;
+//    string nhanXet;
+//    string hanhVi;
+//};
+//
+//struct KhachHang {
+//    string ten;
+//    int soLanDi;
+//    vector<DanhGia> lichSu;
+//};
+//
+//vector<KhachHang> ds;
+//
+//// ================== TÌM KHÁCH ==================
+//int timKhach(string ten) {
+//    for (int i = 0; i < ds.size(); i++) {
+//        if (ds[i].ten == ten)
+//            return i;
+//    }
+//    return -1;
+//}
+//
+//// ================== TÍNH ĐIỂM ==================
+//double tinhDiemTB(const KhachHang& k) {
+//    if (k.lichSu.empty()) return 0;
+//    double sum = 0;
+//    for (auto& dg : k.lichSu)
+//        sum += dg.diem;
+//    return sum / k.lichSu.size();
+//}
+//
+//// ================== GỢI Ý ==================
+//string goiY(const KhachHang& k) {
+//    double diem = tinhDiemTB(k);
+//
+//    if (diem >= 4.5)
+//        return "Thoai mai, co the tro chuyen";
+//    else if (diem >= 3)
+//        return "Binh thuong, giu thai do lich su";
+//    else
+//        return "Can than: xac nhan thong tin, tranh tranh luan";
+//}
+//
+//// ================== HIỂN THỊ ==================
+//void hienThiKhach(const KhachHang& k) {
+//    cout << "\n===== THONG TIN KHACH =====\n";
+//    cout << "Ten: " << k.ten << endl;
+//    cout << "So lan di: " << k.soLanDi << endl;
+//    cout << "Diem TB: " << tinhDiemTB(k) << " ⭐\n";
+//
+//    cout << "\nHanh vi gan day:\n";
+//    for (int i = max(0, (int)k.lichSu.size() - 3); i < k.lichSu.size(); i++) {
+//        cout << "- " << k.lichSu[i].hanhVi << " | "
+//            << k.lichSu[i].nhanXet << endl;
+//    }
+//
+//    cout << "\n⚠️ Goi y: " << goiY(k) << endl;
+//}
+//
+//// ================== THÊM ĐÁNH GIÁ ==================
+//void themDanhGia() {
+//    string ten;
+//    cout << "Nhap ten khach: ";
+//    cin.ignore();
+//    getline(cin, ten);
+//
+//    int idx = timKhach(ten);
+//
+//    DanhGia dg;
+//    cout << "Nhap diem (1-5): ";
+//    cin >> dg.diem;
+//    cin.ignore();
+//
+//    cout << "Nhap hanh vi (vi du: tre gio, lich su...): ";
+//    getline(cin, dg.hanhVi);
+//
+//    cout << "Nhap nhan xet: ";
+//    getline(cin, dg.nhanXet);
+//
+//    if (idx == -1) {
+//        KhachHang k;
+//        k.ten = ten;
+//        k.soLanDi = 1;
+//        k.lichSu.push_back(dg);
+//        ds.push_back(k);
+//    }
+//    else {
+//        ds[idx].soLanDi++;
+//        ds[idx].lichSu.push_back(dg);
+//    }
+//
+//    cout << "✅ Da them danh gia!\n";
+//}
+//
+//// ================== TRA CỨU ==================
+//void traCuu() {
+//    string ten;
+//    cout << "Nhap ten khach can tra: ";
+//    cin.ignore();
+//    getline(cin, ten);
+//
+//    int idx = timKhach(ten);
+//
+//    if (idx == -1) {
+//        cout << "❌ Khong tim thay!\n";
+//    }
+//    else {
+//        hienThiKhach(ds[idx]);
+//    }
+//}
+//
+//// ================== LƯU FILE ==================
+//void luuFile() {
+//    ofstream file("data.txt");
+//
+//    for (auto& k : ds) {
+//        file << k.ten << "|" << k.soLanDi << "|" << k.lichSu.size() << "\n";
+//        for (auto& dg : k.lichSu) {
+//            file << dg.diem << "|" << dg.hanhVi << "|" << dg.nhanXet << "\n";
+//        }
+//    }
+//
+//    file.close();
+//}
+//
+//// ================== ĐỌC FILE ==================
+//void docFile() {
+//    ifstream file("data.txt");
+//    if (!file.is_open()) return;
+//
+//    ds.clear();
+//
+//    string line;
+//    while (getline(file, line)) {
+//        stringstream ss(line);
+//
+//        KhachHang k;
+//        string temp;
+//        int soDG;
+//
+//        getline(ss, k.ten, '|');
+//        getline(ss, temp, '|'); k.soLanDi = stoi(temp);
+//        getline(ss, temp); soDG = stoi(temp);
+//
+//        for (int i = 0; i < soDG; i++) {
+//            getline(file, line);
+//            stringstream ss2(line);
+//
+//            DanhGia dg;
+//
+//            getline(ss2, temp, '|'); dg.diem = stod(temp);
+//            getline(ss2, dg.hanhVi, '|');
+//            getline(ss2, dg.nhanXet);
+//
+//            k.lichSu.push_back(dg);
+//        }
+//
+//        ds.push_back(k);
+//    }
+//
+//    file.close();
+//}
+//
+//// ================== MENU ==================
+//void menu() {
+//    int chon;
+//
+//    do {
+//        cout << "\n===== HE THONG TAI XE =====\n";
+//        cout << "1. Them danh gia khach\n";
+//        cout << "2. Tra cuu khach\n";
+//        cout << "3. Thoat\n";
+//        cout << "Chon: ";
+//        cin >> chon;
+//
+//        switch (chon) {
+//        case 1: themDanhGia(); break;
+//        case 2: traCuu(); break;
+//        case 3:
+//            luuFile();
+//            cout << "Da luu du lieu!\n"; 
+//            break;
+//        default:
+//            cout << "Lua chon khong hop le!\n";
+//        }
+//
+//    } while (chon != 3);
+//}
+//
+//// ================== MAIN ==================
+//int main() {
+//    docFile();
+//    menu();
+//    return 0;
+//}
