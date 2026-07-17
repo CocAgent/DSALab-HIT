@@ -1,0 +1,455 @@
+// ============================================================
+//  DanhSachSinhVien.cpp
+//  Noi dung: Quan ly danh sach sinh vien bang DSLK don
+//  Chuc nang: Them / Xoa / Sua / Sap xep theo diem & ten
+//  Dua tren: Chuong3_DanhSachLienKet.cpp
+// ============================================================
+#include <iostream>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+// ============================================================
+//  CAU TRUC SINH VIEN
+// ============================================================
+struct SinhVien {
+    string maSV;
+    string hoTen;
+    float  diemTB;
+};
+
+// ============================================================
+//  CAU TRUC NUT
+// ============================================================
+struct Node {
+    SinhVien data;
+    Node* next;
+};
+
+// ============================================================
+//  CAU TRUC DANH SACH
+// ============================================================
+struct List {
+    Node* head;
+    Node* tail;
+};
+
+// ============================================================
+//  KHOI TAO & TIEN ICH
+// ============================================================
+void KhoiTao(List& L) {
+    L.head = L.tail = nullptr;
+}
+
+bool DanhSachRong(const List& L) {
+    return L.head == nullptr;
+}
+
+Node* TaoNode(SinhVien sv) {
+    Node* p = new Node;
+    p->data = sv;
+    p->next = nullptr;
+    return p;
+}
+
+// Xep loai hoc luc
+string XepLoai(float diem) {
+    if (diem >= 9.0f) return "Xuat sac";
+    if (diem >= 8.0f) return "Gioi";
+    if (diem >= 6.5f) return "Kha";
+    if (diem >= 5.0f) return "Trung binh";
+    return "Yeu";
+}
+
+// ============================================================
+//  THEM PHAN TU
+// ============================================================
+void ThemCuoi(List& L, SinhVien sv) {
+    Node* p = TaoNode(sv);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    }
+    else {
+        L.tail->next = p;
+        L.tail = p;
+    }
+}
+
+void ThemDau(List& L, SinhVien sv) {
+    Node* p = TaoNode(sv);
+    if (DanhSachRong(L)) {
+        L.head = L.tail = p;
+    }
+    else {
+        p->next = L.head;
+        L.head = p;
+    }
+}
+
+// ============================================================
+//  XOA PHAN TU
+// ============================================================
+bool XoaTheoMa(List& L, const string& maSV) {
+    if (DanhSachRong(L)) return false;
+    Node* cur = L.head, * prev = nullptr;
+    while (cur != nullptr && cur->data.maSV != maSV) {
+        prev = cur;
+        cur = cur->next;
+    }
+    if (cur == nullptr) return false; // Khong tim thay
+
+    if (prev == nullptr) {
+        // Xoa dau
+        L.head = cur->next;
+        if (L.head == nullptr) L.tail = nullptr;
+    }
+    else {
+        prev->next = cur->next;
+        if (cur == L.tail) L.tail = prev;
+    }
+    delete cur;
+    return true;
+}
+
+// Giai phong bo nho
+void XoaDanhSach(List& L) {
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        Node* tmp = cur->next;
+        delete cur;
+        cur = tmp;
+    }
+    L.head = L.tail = nullptr;
+}
+
+// ============================================================
+//  SUA THONG TIN
+// ============================================================
+bool SuaTheoMa(List& L, const string& maSV,
+    const string& hoTenMoi, float diemMoi) {
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data.maSV == maSV) {
+            cur->data.hoTen = hoTenMoi;
+            cur->data.diemTB = diemMoi;
+            return true;
+        }
+        cur = cur->next;
+    }
+    return false;
+}
+
+// ============================================================
+//  TIM KIEM
+// ============================================================
+Node* TimTheoMa(const List& L, const string& maSV) {
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data.maSV == maSV) return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}
+
+Node* TimTheoTen(const List& L, const string& hoTen) {
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data.hoTen == hoTen) return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}
+
+// ============================================================
+//  IN DANH SACH
+// ============================================================
+void InDanhSach(const List& L) {
+    if (DanhSachRong(L)) {
+        cout << "  [Danh sach rong]\n";
+        return;
+    }
+    cout << "\n  " << string(65, '-') << "\n";
+    cout << "  " << left
+        << setw(10) << "Ma SV"
+        << setw(25) << "Ho Ten"
+        << setw(10) << "Diem TB"
+        << setw(15) << "Xep loai"
+        << "\n";
+    cout << "  " << string(65, '-') << "\n";
+
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        cout << "  "
+            << setw(10) << cur->data.maSV
+            << setw(25) << cur->data.hoTen
+            << setw(10) << fixed << setprecision(2) << cur->data.diemTB
+            << setw(15) << XepLoai(cur->data.diemTB)
+            << "\n";
+        cur = cur->next;
+    }
+    cout << "  " << string(65, '-') << "\n";
+}
+
+// ============================================================
+//  SAP XEP
+// ============================================================
+
+// Sap xep theo diem trung binh (giam dan - gioi nhat len dau)
+void SapXepTheoDiem(List& L) {
+    if (DanhSachRong(L)) return;
+    for (Node* i = L.head; i != nullptr && i->next != nullptr; i = i->next)
+        for (Node* j = i->next; j != nullptr; j = j->next)
+            if (i->data.diemTB < j->data.diemTB) {
+                SinhVien tmp = i->data;
+                i->data = j->data;
+                j->data = tmp;
+            }
+}
+
+// Sap xep theo ten (A-Z, so sanh chuoi)
+void SapXepTheoTen(List& L) {
+    if (DanhSachRong(L)) return;
+    for (Node* i = L.head; i != nullptr && i->next != nullptr; i = i->next)
+        for (Node* j = i->next; j != nullptr; j = j->next)
+            if (i->data.hoTen > j->data.hoTen) {
+                SinhVien tmp = i->data;
+                i->data = j->data;
+                j->data = tmp;
+            }
+}
+
+// ============================================================
+//  THONG KE
+// ============================================================
+void ThongKe(const List& L) {
+    if (DanhSachRong(L)) return;
+
+    int tong = 0, dau = 0, rot = 0;
+    int xuatSac = 0, gioi = 0, kha = 0, tb = 0, yeu = 0;
+    float tongDiem = 0;
+    float diemMax = L.head->data.diemTB;
+    float diemMin = L.head->data.diemTB;
+    string svMax = L.head->data.hoTen;
+    string svMin = L.head->data.hoTen;
+
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        tong++;
+        float d = cur->data.diemTB;
+        tongDiem += d;
+
+        if (d >= 5.0f) dau++; else rot++;
+
+        if (d >= 9.0f) xuatSac++;
+        else if (d >= 8.0f) gioi++;
+        else if (d >= 6.5f) kha++;
+        else if (d >= 5.0f) tb++;
+        else                yeu++;
+
+        if (d > diemMax) { diemMax = d; svMax = cur->data.hoTen; }
+        if (d < diemMin) { diemMin = d; svMin = cur->data.hoTen; }
+
+        cur = cur->next;
+    }
+
+    cout << "\n  === THONG KE ===\n";
+    cout << "  Tong so sinh vien : " << tong << "\n";
+    cout << "  Diem trung binh lop: " << fixed << setprecision(2) << (tongDiem / tong) << "\n";
+    cout << "  Sinh vien dat      : " << dau << " (" << (dau * 100 / tong) << "%)\n";
+    cout << "  Sinh vien rot      : " << rot << " (" << (rot * 100 / tong) << "%)\n";
+    cout << "\n  Phan loai hoc luc:\n";
+    cout << "    Xuat sac : " << xuatSac << "\n";
+    cout << "    Gioi     : " << gioi << "\n";
+    cout << "    Kha      : " << kha << "\n";
+    cout << "    Trung binh: " << tb << "\n";
+    cout << "    Yeu      : " << yeu << "\n";
+    cout << "\n  Diem cao nhat: " << diemMax << " - " << svMax << "\n";
+    cout << "  Diem thap nhat: " << diemMin << " - " << svMin << "\n";
+}
+
+// ============================================================
+//  TACH DANH SACH DAU / ROT
+// ============================================================
+void TachDauRot(const List& L, List& L_dau, List& L_rot) {
+    KhoiTao(L_dau);
+    KhoiTao(L_rot);
+    Node* cur = L.head;
+    while (cur != nullptr) {
+        if (cur->data.diemTB >= 5.0f) ThemCuoi(L_dau, cur->data);
+        else                           ThemCuoi(L_rot, cur->data);
+        cur = cur->next;
+    }
+}
+
+// ============================================================
+//  NHAP DU LIEU TU NGUOI DUNG
+// ============================================================
+SinhVien NhapSinhVien() {
+    SinhVien sv;
+    cout << "  Ma SV   : "; cin >> sv.maSV;
+    cin.ignore();
+    cout << "  Ho Ten  : "; getline(cin, sv.hoTen);
+    cout << "  Diem TB : "; cin >> sv.diemTB;
+    while (sv.diemTB < 0 || sv.diemTB > 10) {
+        cout << "  [Loi] Diem phai tu 0 den 10. Nhap lai: ";
+        cin >> sv.diemTB;
+    }
+    return sv;
+}
+
+// ============================================================
+//  MENU CHINH
+// ============================================================
+void HienThiMenu() {
+    cout << "\n  ==============================\n";
+    cout << "   QUAN LY DANH SACH SINH VIEN  \n";
+    cout << "  ==============================\n";
+    cout << "  1. Them sinh vien (vao cuoi)\n";
+    cout << "  2. Them sinh vien (vao dau)\n";
+    cout << "  3. Xoa sinh vien theo ma\n";
+    cout << "  4. Sua thong tin sinh vien\n";
+    cout << "  5. Tim kiem theo ma SV\n";
+    cout << "  6. Tim kiem theo ho ten\n";
+    cout << "  7. In danh sach\n";
+    cout << "  8. Sap xep theo diem (giam dan)\n";
+    cout << "  9. Sap xep theo ten (A-Z)\n";
+    cout << "  10. Thong ke hoc luc\n";
+    cout << "  11. Tach danh sach dat / rot\n";
+    cout << "  0. Thoat\n";
+    cout << "  Chon: ";
+}
+
+// ============================================================
+//  MAIN
+// ============================================================
+int main() {
+    List L; KhoiTao(L);
+
+    // Du lieu mau
+    SinhVien mau[] = {
+        {"SV001", "Nguyen Van An",   8.5f},
+        {"SV002", "Tran Thi Bich",   6.0f},
+        {"SV003", "Le Van Cuong",    9.2f},
+        {"SV004", "Pham Thi Dung",   4.5f},
+        {"SV005", "Hoang Van Em",    7.3f},
+        {"SV006", "Vo Thi Phuong",   5.8f},
+        {"SV007", "Dang Van Quang",  3.9f},
+        {"SV008", "Bui Thi Huong",   8.0f},
+    };
+    for (auto& sv : mau) ThemCuoi(L, sv);
+
+    cout << "  [Khoi tao voi " << 8 << " sinh vien mau]\n";
+
+    int lua_chon;
+    do {
+        HienThiMenu();
+        cin >> lua_chon;
+
+        switch (lua_chon) {
+        case 1: {
+            cout << "  --- Them vao cuoi ---\n";
+            SinhVien sv = NhapSinhVien();
+            ThemCuoi(L, sv);
+            cout << "  => Da them thanh cong!\n";
+            break;
+        }
+        case 2: {
+            cout << "  --- Them vao dau ---\n";
+            SinhVien sv = NhapSinhVien();
+            ThemDau(L, sv);
+            cout << "  => Da them thanh cong!\n";
+            break;
+        }
+        case 3: {
+            string ma;
+            cout << "  Nhap ma SV can xoa: "; cin >> ma;
+            if (XoaTheoMa(L, ma))
+                cout << "  => Da xoa sinh vien " << ma << "\n";
+            else
+                cout << "  => Khong tim thay ma " << ma << "\n";
+            break;
+        }
+        case 4: {
+            string ma, tenMoi;
+            float diemMoi;
+            cout << "  Nhap ma SV can sua: "; cin >> ma;
+            cin.ignore();
+            cout << "  Ho ten moi       : "; getline(cin, tenMoi);
+            cout << "  Diem TB moi      : "; cin >> diemMoi;
+            if (SuaTheoMa(L, ma, tenMoi, diemMoi))
+                cout << "  => Da cap nhat!\n";
+            else
+                cout << "  => Khong tim thay ma " << ma << "\n";
+            break;
+        }
+        case 5: {
+            string ma;
+            cout << "  Nhap ma SV can tim: "; cin >> ma;
+            Node* p = TimTheoMa(L, ma);
+            if (p) {
+                cout << "  => Tim thay: "
+                    << p->data.maSV << " | "
+                    << p->data.hoTen << " | "
+                    << fixed << setprecision(2) << p->data.diemTB << " ("
+                    << XepLoai(p->data.diemTB) << ")\n";
+            }
+            else {
+                cout << "  => Khong tim thay!\n";
+            }
+            break;
+        }
+        case 6: {
+            string ten;
+            cin.ignore();
+            cout << "  Nhap ho ten can tim: "; getline(cin, ten);
+            Node* p = TimTheoTen(L, ten);
+            if (p) {
+                cout << "  => Tim thay: "
+                    << p->data.maSV << " | "
+                    << p->data.hoTen << " | "
+                    << fixed << setprecision(2) << p->data.diemTB << " ("
+                    << XepLoai(p->data.diemTB) << ")\n";
+            }
+            else {
+                cout << "  => Khong tim thay!\n";
+            }
+            break;
+        }
+        case 7:
+            InDanhSach(L);
+            break;
+        case 8:
+            SapXepTheoDiem(L);
+            cout << "  => Da sap xep theo diem (giam dan)!\n";
+            InDanhSach(L);
+            break;
+        case 9:
+            SapXepTheoTen(L);
+            cout << "  => Da sap xep theo ten (A-Z)!\n";
+            InDanhSach(L);
+            break;
+        case 10:
+            ThongKe(L);
+            break;
+        case 11: {
+            List Ldau, Lrot;
+            TachDauRot(L, Ldau, Lrot);
+            cout << "\n  --- Danh sach sinh vien DAT (diem >= 5) ---";
+            InDanhSach(Ldau);
+            cout << "\n  --- Danh sach sinh vien ROT (diem < 5) ---";
+            InDanhSach(Lrot);
+            XoaDanhSach(Ldau);
+            XoaDanhSach(Lrot);
+            break;
+        }
+        case 0:
+            cout << "  Tam biet!\n";
+            break;
+        default:
+            cout << "  [Loi] Lua chon khong hop le!\n";
+        }
+    } while (lua_chon != 0);
+
+    XoaDanhSach(L);
+    return 0;
+}
