@@ -1,0 +1,199 @@
+#include <iostream>
+using namespace std;
+
+int n;
+
+// ===== Hoán vị =====
+void swapInt(int& a, int& b) {
+    int t = a; a = b; b = t;
+}
+
+// ===== In mảng =====
+void printArray(int a[]) {
+    for (int i = 0; i < n; i++) cout << a[i] << " ";
+    cout << endl;
+}
+
+// ===== Copy mảng =====
+void copyArray(int a[], int b[]) {
+    for (int i = 0; i < n; i++) b[i] = a[i];
+}
+
+// ================= SELECTION SORT =================
+void selectionSort(int a[]) {
+    cout << "\n=== SELECTION SORT ===\n";
+    for (int i = 0; i < n - 1; i++) {
+        int min = i;
+        for (int j = i + 1; j < n; j++)
+            if (a[j] < a[min]) min = j;
+
+        swapInt(a[i], a[min]);
+
+        cout << "Buoc " << i + 1 << ": ";
+        printArray(a);
+    }
+}
+
+// ================= INSERTION SORT =================
+void insertionSort(int a[]) {
+    cout << "\n=== INSERTION SORT ===\n";
+    for (int i = 1; i < n; i++) {
+        int x = a[i];
+        int pos = i;
+
+        while (pos > 0 && a[pos - 1] > x) {
+            a[pos] = a[pos - 1];
+            pos--;
+        }
+        a[pos] = x;
+
+        cout << "Chen " << x << ": ";
+        printArray(a);
+    }
+}
+
+// ================= BUBBLE SORT =================
+void bubbleSort(int a[]) {
+    cout << "\n=== BUBBLE SORT ===\n";
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+
+        for (int j = n - 1; j > i; j--) {
+            if (a[j] < a[j - 1]) {
+                swapInt(a[j], a[j - 1]);
+                swapped = true;
+            }
+        }
+
+        cout << "Luot " << i + 1 << ": ";
+        printArray(a);
+
+        if (!swapped) break;
+    }
+}
+
+// ================= QUICK SORT =================
+void quickSortStep(int a[], int l, int r) {
+    if (l >= r) return;
+
+    int i = l, j = r;
+    int pivot = a[(l + r) / 2];
+
+    while (i <= j) {
+        while (a[i] < pivot) i++;
+        while (a[j] > pivot) j--;
+
+        if (i <= j) {
+            swapInt(a[i], a[j]);
+            i++; j--;
+        }
+    }
+
+    cout << "Partition [" << l << "," << r << "]: ";
+    printArray(a);
+
+    quickSortStep(a, l, j);
+    quickSortStep(a, i, r);
+}
+
+void quickSort(int a[]) {
+    cout << "\n=== QUICK SORT ===\n";
+    quickSortStep(a, 0, n - 1);
+    cout << "Ket qua: ";
+    printArray(a);
+}
+
+// ================= HEAP SORT =================
+void heapify(int a[], int n, int i) {
+    int largest = i;
+    int l = 2 * i + 1;
+    int r = 2 * i + 2;
+
+    if (l < n && a[l] > a[largest]) largest = l;
+    if (r < n && a[r] > a[largest]) largest = r;
+
+    if (largest != i) {
+        swapInt(a[i], a[largest]);
+        heapify(a, n, largest);
+    }
+}
+
+void heapSort(int a[]) {
+    cout << "\n=== HEAP SORT ===\n";
+
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(a, n, i);
+
+    cout << "Heap: ";
+    printArray(a);
+
+    for (int i = n - 1; i > 0; i--) {
+        swapInt(a[0], a[i]);
+        heapify(a, i, 0);
+
+        cout << "Lay max: ";
+        printArray(a);
+    }
+}
+
+// ================= MENU =================
+void menu(int a[]) {
+    cout << "\n===== MENU =====\n";
+
+    cout << "Mang ban dau: ";
+    for (int i = 0; i < n; i++) cout << a[i] << " ";
+    cout << endl;
+
+    cout << "1. Selection Sort\n";
+    cout << "2. Insertion Sort\n";
+    cout << "3. Bubble Sort\n";
+    cout << "4. Quick Sort\n";
+    cout << "5. Heap Sort\n";
+    cout << "0. Thoat\n";
+    cout << "Chon: ";
+}
+
+// ================= MAIN =================
+int main() {
+    int a[] = { 3, -12, 14, 9, 11, -50, -100 };
+    n = sizeof(a) / sizeof(a[0]);
+
+    int b[100];
+    int choice;
+
+    do {
+        menu(a);
+        cin >> choice;
+
+        cout << "\nMang ban dau: ";
+        printArray(a);
+
+        copyArray(a, b);
+
+        switch (choice) {
+        case 1:
+            selectionSort(b);
+            break;
+        case 2:
+            insertionSort(b);
+            break;
+        case 3:
+            bubbleSort(b);
+            break;
+        case 4:
+            quickSort(b);
+            break;
+        case 5:
+            heapSort(b);
+            break;
+        case 0:
+            cout << "Thoat chuong trinh!\n";
+            break;
+        default:
+            cout << "Chon sai!\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
