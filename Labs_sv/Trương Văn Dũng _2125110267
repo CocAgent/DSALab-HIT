@@ -1,0 +1,93 @@
+tìm đường thoát khỏi mê cung
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <conio.h> // Thư viện để nhận phím bấm ngay lập tức (Windows)
+
+using namespace std;
+
+typedef pair<int, int> pii;
+
+const int R = 7, C = 10;
+int maze[R][C] = {
+    {0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+    {0, 1, 0, 1, 0, 1, 1, 1, 1, 0},
+    {0, 1, 0, 0, 0, 0, 0, 0, 1, 0},
+    {0, 1, 1, 1, 1, 1, 1, 0, 1, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {1, 1, 1, 0, 1, 0, 1, 1, 1, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+pii player = {0, 0};
+pii exit_door = {6, 9};
+
+// Thuật toán BFS để gợi ý đường đi
+void showHint() {
+    queue<pii> q;
+    q.push(player);
+    pii p[R][C];
+    for(int i=0; i<R; i++) for(int j=0; j<C; j++) p[i][j] = {-1, -1};
+    
+    bool visited[R][C] = {false};
+    visited[player.first][player.second] = true;
+    int dx[] = {-1, 1, 0, 0}, dy[] = {0, 0, -1, 1};
+
+    while(!q.empty()){
+        pii curr = q.front(); q.pop();
+        if(curr == exit_door) break;
+        for(int i=0; i<4; i++){
+            int nx = curr.first + dx[i], ny = curr.second + dy[i];
+            if(nx>=0 && nx<R && ny>=0 && ny<C && maze[nx][ny] == 0 && !visited[nx][ny]){
+                visited[nx][ny] = true;
+                p[nx][ny] = curr;
+                q.push({nx, ny});
+            }
+        }
+    }
+    
+    // Đánh dấu đường đi gợi ý bằng số 8
+    pii temp = exit_door;
+    while(temp.first != -1){
+        if(maze[temp.first][temp.second] == 0) maze[temp.first][temp.second] = 8;
+        temp = p[temp.first][temp.second];
+    }
+}
+
+void draw() {
+    system("cls"); // Xóa màn hình (Windows)
+    cout << "--- MAZE GAME (w:len, s:xuong, a:trai, d:phai, h:goi y) ---\n";
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            if (i == player.first && j == player.second) cout << "P ";
+            else if (i == exit_door.first && j == exit_door.second) cout << "E ";
+            else if (maze[i][j] == 1) cout << "##";
+            else if (maze[i][j] == 8) cout << ". "; // Gợi ý
+            else cout << "  ";
+        }
+        cout << endl;
+    }
+}
+
+int main() {
+    char input;
+    while (true) {
+        draw();
+        if (player == exit_door) {
+            cout << "\nCHUC MUNG! BAN DA THOAT KHOI ME CUNG!\n";
+            break;
+        }
+        input = _getch(); // Lấy phím bấm
+        int nx = player.first, ny = player.second;
+        if (input == 'w') nx--;
+        if (input == 's') nx++;
+        if (input == 'a') ny--;
+        if (input == 'd') ny++;
+        if (input == 'h') showHint();
+
+        if (nx >= 0 && nx < R && ny >= 0 && ny < C && maze[nx][ny] != 1) {
+            player = {nx, ny};
+        }
+    }
+    return 0;
+}
