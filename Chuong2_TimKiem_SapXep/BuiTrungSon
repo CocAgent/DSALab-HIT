@@ -1,0 +1,136 @@
+#include <iostream>
+#include <windows.h> // cho Sleep()
+using namespace std;
+
+void swap(int &a,int &b){ int t=a;a=b;b=t; }
+
+void print(int a[], int n){
+    for(int i=0;i<n;i++) cout<<a[i]<<" ";
+    cout<<endl;
+    Sleep(500); // delay 0.5s
+}
+
+// ===== BUBBLE SORT =====
+void bubbleSort(int a[], int n){
+    cout<<"\n=== BUBBLE SORT ===\n";
+    for(int i=0;i<n-1;i++){
+        cout<<"\nVong "<<i+1<<":\n";
+        for(int j=n-1;j>i;j--){
+            cout<<"So sanh "<<a[j-1]<<" va "<<a[j]<<" -> ";
+            if(a[j]<a[j-1]){
+                cout<<"doi\n";
+                swap(a[j],a[j-1]);
+            } else cout<<"giu nguyen\n";
+            print(a,n);
+        }
+    }
+}
+
+// ===== SELECTION SORT =====
+void selectionSort(int a[], int n){
+    cout<<"\n=== SELECTION SORT ===\n";
+    for(int i=0;i<n-1;i++){
+        int min=i;
+        cout<<"\nTim min trong doan tu "<<i<<" den "<<n-1<<endl;
+        for(int j=i+1;j<n;j++){
+            cout<<"So sanh "<<a[j]<<" voi "<<a[min];
+            if(a[j]<a[min]){
+                min=j;
+                cout<<" -> cap nhat min\n";
+            } else cout<<" -> khong doi\n";
+            Sleep(500);
+        }
+        cout<<"Doi "<<a[i]<<" va "<<a[min]<<endl;
+        swap(a[i],a[min]);
+        print(a,n);
+    }
+}
+
+// ===== INSERTION SORT =====
+void insertionSort(int a[], int n){
+    cout<<"\n=== INSERTION SORT ===\n";
+    for(int i=1;i<n;i++){
+        int key=a[i], j=i-1;
+        cout<<"\nChen "<<key<<" vao day da sap xep\n";
+        while(j>=0 && a[j]>key){
+            cout<<a[j]<<" > "<<key<<" -> dich sang phai\n";
+            a[j+1]=a[j];
+            j--;
+            print(a,n);
+        }
+        a[j+1]=key;
+        cout<<"Dat "<<key<<" vao vi tri "<<j+1<<endl;
+        print(a,n);
+    }
+}
+
+// ===== QUICK SORT =====
+void quickSort(int a[], int l, int r, int n){
+    int i=l,j=r;
+    int pivot=a[(l+r)/2];
+    cout<<"Pivot = "<<pivot<<" (doan "<<l<<"-"<<r<<")\n"; Sleep(500);
+
+    while(i<=j){
+        while(a[i]<pivot) i++;
+        while(a[j]>pivot) j--;
+        if(i<=j){
+            cout<<"Doi "<<a[i]<<" va "<<a[j]<<endl;
+            swap(a[i],a[j]);
+            print(a,n);
+            i++; j--;
+        }
+    }
+    if(l<j) quickSort(a,l,j,n);
+    if(i<r) quickSort(a,i,r,n);
+}
+
+// ===== HEAP SORT =====
+void heapify(int a[], int n, int i){
+    int max=i,l=2*i+1,r=2*i+2;
+    if(l<n && a[l]>a[max]) max=l;
+    if(r<n && a[r]>a[max]) max=r;
+    if(max!=i){
+        cout<<"Doi "<<a[i]<<" va "<<a[max]<<endl;
+        swap(a[i],a[max]);
+        print(a,n);
+        heapify(a,n,max);
+    }
+}
+
+void heapSort(int a[], int n){
+    cout<<"\n=== HEAP SORT ===\n";
+
+    cout<<"\nXay dung heap:\n";
+    for(int i=n/2-1;i>=0;i--) heapify(a,n,i);
+
+    cout<<"Heap: "; print(a,n); Sleep(500);
+
+    for(int i=n-1;i>0;i--){
+        cout<<"Dua max "<<a[0]<<" ve cuoi\n";
+        swap(a[0],a[i]);
+        print(a,n);
+        heapify(a,i,0);
+    }
+}
+
+// ===== MAIN =====
+int main(){
+    int a[]={3,-12,14,9,11,-50,-100};
+    int n=7,b[7];
+
+    cout<<"Chon thuat toan: 1.Bubble 2.Selection 3.Insertion 4.Quick 5.Heap\n";
+    int c; cin>>c;
+
+    for(int i=0;i<n;i++) b[i]=a[i];
+
+    switch(c){
+        case 1: bubbleSort(b,n); break;
+        case 2: selectionSort(b,n); break;
+        case 3: insertionSort(b,n); break;
+        case 4: quickSort(b,0,n-1,n); break;
+        case 5: heapSort(b,n); break;
+    }
+
+    cout<<"\nKet qua: "; 
+    print(b,n);
+}
