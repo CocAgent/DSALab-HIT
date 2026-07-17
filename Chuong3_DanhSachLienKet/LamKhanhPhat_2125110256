@@ -1,0 +1,160 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+// ===== NODE =====
+struct Node {
+    int data;
+    Node* next;
+};
+
+Node* TaoNode(int x) {
+    return new Node{ x, NULL };
+}
+
+// ===== LIST =====
+struct List {
+    Node* head = NULL, * tail = NULL;
+};
+
+bool Rong(const List& L) { return L.head == NULL; }
+
+void ThemDau(List& L, int x) {
+    Node* p = TaoNode(x);
+    if (Rong(L)) L.head = L.tail = p;
+    else { p->next = L.head; L.head = p; }
+}
+
+void ThemCuoi(List& L, int x) {
+    Node* p = TaoNode(x);
+    if (Rong(L)) L.head = L.tail = p;
+    else { L.tail->next = p; L.tail = p; }
+}
+
+void XoaDau(List& L) {
+    if (Rong(L)) return;
+    Node* p = L.head;
+    L.head = L.head->next;
+    if (!L.head) L.tail = NULL;
+    delete p;
+}
+
+void XoaCuoi(List& L) {
+    if (Rong(L)) return;
+    if (L.head == L.tail) {
+        delete L.head;
+        L.head = L.tail = NULL;
+        return;
+    }
+    Node* p = L.head;
+    while (p->next != L.tail) p = p->next;
+    delete L.tail;
+    L.tail = p;
+    p->next = NULL;
+}
+
+void InDS(const List& L) {
+    for (Node* p = L.head; p; p = p->next)
+        cout << p->data << " -> ";
+    cout << "NULL\n";
+}
+
+// ===== XU LY =====
+int TimMax(const List& L) {
+    if (Rong(L)) return -1;
+    int mx = L.head->data;
+    for (Node* p = L.head; p; p = p->next)
+        if (p->data > mx) mx = p->data;
+    return mx;
+}
+
+int TongDuong(const List& L) {
+    int s = 0;
+    for (Node* p = L.head; p; p = p->next)
+        if (p->data > 0) s += p->data;
+    return s;
+}
+
+bool LaCP(int n) {
+    if (n < 0) return false;
+    int t = sqrt(n);
+    return t * t == n;
+}
+
+bool CoCP(const List& L) {
+    for (Node* p = L.head; p; p = p->next)
+        if (LaCP(p->data)) return true;
+    return false;
+}
+
+// ===== STACK =====
+struct Stack { Node* top = NULL; };
+
+void Push(Stack& S, int x) {
+    Node* p = TaoNode(x);
+    p->next = S.top;
+    S.top = p;
+}
+
+bool Pop(Stack& S, int& x) {
+    if (!S.top) return false;
+    Node* p = S.top;
+    x = p->data;
+    S.top = p->next;
+    delete p;
+    return true;
+}
+
+// ===== QUEUE =====
+struct Queue { Node* front = NULL, * rear = NULL; };
+
+void Enqueue(Queue& Q, int x) {
+    Node* p = TaoNode(x);
+    if (!Q.front) Q.front = Q.rear = p;
+    else { Q.rear->next = p; Q.rear = p; }
+}
+
+bool Dequeue(Queue& Q, int& x) {
+    if (!Q.front) return false;
+    Node* p = Q.front;
+    x = p->data;
+    Q.front = p->next;
+    if (!Q.front) Q.rear = NULL;
+    delete p;
+    return true;
+}
+
+// ===== GIAI PHONG =====
+void GiaiPhong(List& L) {
+    while (!Rong(L)) XoaDau(L);
+}
+
+// ===== MAIN =====
+int main() {
+    List L;
+
+    for (int x : {10, -5, 20, 16, 3}) ThemCuoi(L, x);
+    cout << "DS: "; InDS(L);
+
+    cout << "Max: " << TimMax(L) << endl;
+    cout << "Tong duong: " << TongDuong(L) << endl;
+    cout << "Co so chinh phuong? " << (CoCP(L) ? "Co" : "Khong") << endl;
+
+    XoaDau(L);
+    XoaCuoi(L);
+    cout << "Sau xoa: "; InDS(L);
+
+    // Stack
+    Stack S;
+    Push(S, 1); Push(S, 2);
+    int x;
+    if (Pop(S, x)) cout << "Pop: " << x << endl;
+
+    // Queue
+    Queue Q;
+    Enqueue(Q, 5); Enqueue(Q, 6);
+    if (Dequeue(Q, x)) cout << "Dequeue: " << x << endl;
+
+    GiaiPhong(L);
+    return 0;
+}
